@@ -1,0 +1,23 @@
+package com.hp.kalexa.model
+
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.hp.kalexa.model.json.LocalDateTimeDeserializer
+import java.time.LocalDateTime
+
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type")
+@JsonSubTypes(
+        JsonSubTypes.Type(value = SessionStartedRequest::class, name = "SessionStartedRequest"),
+        JsonSubTypes.Type(value = SessionEndedRequest::class, name = "SessionEndedRequest"),
+        JsonSubTypes.Type(value = LinkResultRequest::class, name = "Links.LinkResult"),
+        JsonSubTypes.Type(value = IntentRequest::class, name = "IntentRequest"),
+        JsonSubTypes.Type(value = ElementSelectedRequest::class, name = "Display.ElementSelected"),
+        JsonSubTypes.Type(value = LaunchRequest::class, name = "LaunchRequest"))
+abstract class Request(val requestId: String,
+                       val locale: String,
+                       @JsonDeserialize(using = LocalDateTimeDeserializer::class)
+                       val timestamp: LocalDateTime)
