@@ -29,7 +29,7 @@ class DefaultSpeechHandlerTest : Spek({
 
         on("Start") {
             objectMockk(Util).mock()
-            every { Util.getIntentPackage() } returns "com.hp.kalexa.model"
+            every { Util.getIntentPackage() } returns "com.hp.kalexa.core.model"
         }
 
         on("handleSessionStartedRequest method") {
@@ -51,7 +51,7 @@ class DefaultSpeechHandlerTest : Spek({
             on("Intent with Launcher annotation") {
                 it("should return a call onLaunchIntent method from the intent annotated with launcher") {
                     objectMockk(Util).mock()
-                    every { Util.getIntentPackage() } returns "com.hp.kotlinlambda.model"
+                    every { Util.getIntentPackage() } returns "com.hp.kalexa.core.model"
                     val session = mockk<Session>()
                     val context = mockk<Context>()
                     val request = mockk<LaunchRequest>()
