@@ -4,10 +4,10 @@ import com.hp.kalexa.core.annotation.Helper
 import com.hp.kalexa.core.annotation.Launcher
 import com.hp.kalexa.core.intent.BuiltInIntent
 import com.hp.kalexa.core.intent.IntentExecutor
-import com.hp.kalexa.model.AlexaResponse
-import com.hp.kalexa.model.IntentRequest
-import com.hp.kalexa.model.LaunchRequest
-import com.hp.kalexa.model.alexaResponse
+import com.hp.kalexa.model.response.AlexaResponse
+import com.hp.kalexa.model.request.IntentRequest
+import com.hp.kalexa.model.request.LaunchRequest
+import com.hp.kalexa.model.response.alexaResponse
 
 class IntentFake : IntentExecutor() {
     @Launcher

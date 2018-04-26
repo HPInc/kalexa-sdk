@@ -1,8 +1,7 @@
-package com.hp.kalexa.model
+package com.hp.kalexa.model.directive
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.hp.kalexa.model.directive.*
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type", visible = true)
 @JsonSubTypes(
@@ -15,6 +14,8 @@ import com.hp.kalexa.model.directive.*
         JsonSubTypes.Type(value = ClearQueueDirective::class, name = "AudioPlayer.ClearQueue"),
         JsonSubTypes.Type(value = DelegateDirective::class, name = "Dialog.Delegate"),
         JsonSubTypes.Type(value = HintDirective::class, name = "Hint"),
+        JsonSubTypes.Type(value = FollowLinkWithResultDirective::class, name = "Links.FollowLinkWithResult"),
+        JsonSubTypes.Type(value = ReturnFromLinkDirective::class, name = "Links.ReturnFromLink"),
         JsonSubTypes.Type(value = ConfirmIntentDirective::class, name = "Dialog.ConfirmIntent"))
 abstract class Directive
 

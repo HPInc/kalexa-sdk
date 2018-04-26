@@ -6,6 +6,9 @@ import com.hp.kalexa.core.util.IntentUtil
 import com.hp.kalexa.core.util.Util
 import com.hp.kalexa.model.*
 import com.hp.kalexa.model.request.AlexaRequestEnvelope
+import com.hp.kalexa.model.request.LaunchRequest
+import com.hp.kalexa.model.request.SessionStartedRequest
+import com.hp.kalexa.model.response.AlexaResponse
 import com.sun.xml.internal.txw2.IllegalAnnotationException
 import io.mockk.every
 import io.mockk.mockk
@@ -62,7 +65,7 @@ class DefaultSpeechHandlerTest : Spek({
                     every { customLaunchRequestEnvelope.request } returns request
                     every { session.attributes } returns mutableMapOf()
                     val alexaResponse = defaultSpeechHandler.handleLaunchRequest(customLaunchRequestEnvelope)
-                    val response = alexaResponse {
+                    val response = com.hp.kalexa.model.response.alexaResponse {
                         response {
                             speech { "This is a hello from IntentFake@onCustomLaucnher" }
                         }

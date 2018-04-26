@@ -9,6 +9,11 @@ import com.hp.kalexa.core.util.IntentUtil.goodbye
 import com.hp.kalexa.core.util.IntentUtil.helpIntent
 import com.hp.kalexa.core.util.IntentUtil.retryIntent
 import com.hp.kalexa.core.util.Util
+import com.hp.kalexa.model.request.ElementSelectedRequest
+import com.hp.kalexa.model.request.IntentRequest
+import com.hp.kalexa.model.request.LaunchRequest
+import com.hp.kalexa.model.request.ConnectionsResponseRequest
+import com.hp.kalexa.model.response.AlexaResponse
 
 abstract class IntentExecutor {
 
@@ -35,7 +40,7 @@ abstract class IntentExecutor {
     /**
      * Handles Link Result Request coming from Alexa. This is the result from the skill when using skill to skill
      */
-    open fun onLinkResult(request: LinkResultRequest): AlexaResponse = AlexaResponse.emptyResponse()
+    open fun onConnectionsResponse(request: ConnectionsResponseRequest): AlexaResponse = AlexaResponse.emptyResponse()
 
     /**
      * Handles The Built In Intents coming from Alexa.

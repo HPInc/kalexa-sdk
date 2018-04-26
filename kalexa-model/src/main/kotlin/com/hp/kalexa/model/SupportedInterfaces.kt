@@ -1,6 +1,9 @@
 package com.hp.kalexa.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.hp.kalexa.model.interfaces.audioplayer.AudioPlayer
+import com.hp.kalexa.model.interfaces.display.Display
+import com.hp.kalexa.model.interfaces.video.VideoApp
 
 data class SupportedInterfaces(
         @JsonProperty("AudioPlayer")

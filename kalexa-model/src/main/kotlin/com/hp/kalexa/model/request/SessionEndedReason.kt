@@ -1,4 +1,4 @@
-package com.hp.kalexa.model
+package com.hp.kalexa.model.request
 
 import com.fasterxml.jackson.annotation.JsonCreator
 

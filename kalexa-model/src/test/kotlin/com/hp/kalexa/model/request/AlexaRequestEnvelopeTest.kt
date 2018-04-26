@@ -1,9 +1,5 @@
 package com.hp.kalexa.model.request
 
-import com.hp.kalexa.model.ElementSelectedRequest
-import com.hp.kalexa.model.IntentRequest
-import com.hp.kalexa.model.LaunchRequest
-import com.hp.kalexa.model.LinkResultRequest
 import com.hp.kalexa.model.extension.attribute
 import com.hp.kalexa.model.payload.EmptyPayload
 import com.hp.kalexa.model.payload.print.Print
@@ -51,12 +47,12 @@ class AlexaRequestEnvelopeTest : Spek({
                 assertEquals("Internacional Jersey", jersey?.name)
             }
         }
-        on("a Link Result request") {
+        on("a Connections.Response request") {
             val envelope = AlexaRequestEnvelope.fromJson(WEB_PAGE_LINK_RESULT)
-            it("should be CustomLinkResultRequest type") {
-                assert(envelope.request is LinkResultRequest)
+            it("should be ConnectionsResponseRequest type") {
+                assert(envelope.request is ConnectionsResponseRequest)
             }
-            val customLinkResultRequest = envelope.request as LinkResultRequest
+            val customLinkResultRequest = envelope.request as ConnectionsResponseRequest
             it("should have a webpage payload type") {
                 assert(customLinkResultRequest.payload is Print<*>)
                 println(customLinkResultRequest.payload)
@@ -68,32 +64,30 @@ class AlexaRequestEnvelopeTest : Spek({
                 assertEquals("This is a nice rich mac and cheese. Serve with a salad for a great meatless dinner. Hope you enjoy it", webPage.description)
                 assertEquals("http://allrecipes.com/recipe/11679/homemade-mac-and-cheese/", webPage.url)
             }
-            it("should have a success status") {
-                assertEquals("SUCCESS", customLinkResultRequest.status)
-                assertEquals("200", customLinkResultRequest.linkStatus?.code)
-                assertEquals("OK", customLinkResultRequest.linkStatus?.message)
+            it("should have a success connectionsStatus") {
+                assertEquals("200", customLinkResultRequest.status.code)
+                assertEquals("OK", customLinkResultRequest.status.message)
             }
-            it("should have target URI") {
-                assertEquals("conn://amzn1.ask.skill.5a8a2654-2e1e-444b-98b3-6a4a617ef9b0/Print", customLinkResultRequest.targetURI)
+            it("should have Print Name") {
+//                assertEquals("Print", customLinkResultRequest.name)
             }
         }
         on("a error link result request") {
             val envelope = AlexaRequestEnvelope.fromJson(ERROR_LINK_RESULT)
             it("should be CustomLinkResultRequest type") {
-                assert(envelope.request is LinkResultRequest)
+                assert(envelope.request is ConnectionsResponseRequest)
             }
-            val customLinkResultRequest = envelope.request as LinkResultRequest
+            val customLinkResultRequest = envelope.request as ConnectionsResponseRequest
             it("should have an empty payload type") {
                 assert(customLinkResultRequest.payload is Print)
                 assert(customLinkResultRequest.payload?.getType() is EmptyPayload)
             }
-            it("should have an Error status") {
-                assertEquals("INTERNAL_ERROR", customLinkResultRequest.status)
-                assertEquals("500", customLinkResultRequest.linkStatus?.code)
-                assertEquals("INTERNAL ERROR", customLinkResultRequest.linkStatus?.message)
+            it("should have an Error connectionsStatus") {
+                assertEquals("500", customLinkResultRequest.status.code)
+                assertEquals("INTERNAL ERROR", customLinkResultRequest.status.message)
             }
             it("should have target URI") {
-                assertEquals("conn://amzn1.ask.skill.5a8a2654-2e1e-444b-98b3-6a4a617ef9b0/Print", customLinkResultRequest.targetURI)
+                assertEquals("Print", customLinkResultRequest.name)
             }
         }
         on("a display element element request") {

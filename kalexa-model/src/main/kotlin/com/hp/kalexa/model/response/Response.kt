@@ -1,6 +1,6 @@
 package com.hp.kalexa.model.response
 
-import com.hp.kalexa.model.Directive
+import com.hp.kalexa.model.directive.Directive
 import com.hp.kalexa.model.ui.Card
 import com.hp.kalexa.model.ui.OutputSpeech
 import com.hp.kalexa.model.ui.Reprompt

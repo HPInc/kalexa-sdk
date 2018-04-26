@@ -3,7 +3,7 @@ package com.hp.kalexa.model.payload.print
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.hp.kalexa.model.payload.Payload
 
-class Print<out T : Print.PrintType>(private val printType: T) : Payload<T> {
+data class Print<out T : Print.PrintType>(private val printType: T) : Payload<T> {
 
     override fun getTypeName() = printType.getTypeName()
 

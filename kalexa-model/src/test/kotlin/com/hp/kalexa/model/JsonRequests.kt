@@ -165,20 +165,13 @@ object JsonRequests {
                         }
                     },
                     "request": {
-                        "type": "Links.LinkResult",
+                        "type": "Connections.Response",
                         "requestId": "amzn1.echo-api.request.2c940401-13f2-4224-82a7-c7b2276c1523",
                         "timestamp": "2018-02-22T15:00:37Z",
                         "locale": "en-US",
                         "target": {
                             "path": "Print",
                             "address": "amzn1.ask.skill.5a8a2654-2e1e-444b-98b3-6a4a617ef9b0"
-                        },
-                        "body": {
-                            "WebPage": {
-                                "description": "This is a nice rich mac and cheese. Serve with a salad for a great meatless dinner. Hope you enjoy it",
-                                "title": "Mac & Cheese",
-                                "url": "http://allrecipes.com/recipe/11679/homemade-mac-and-cheese/"
-                            }
                         },
                         "payload": {
                             "WebPage": {
@@ -187,13 +180,12 @@ object JsonRequests {
                                 "url": "http://allrecipes.com/recipe/11679/homemade-mac-and-cheese/"
                             }
                         },
-                        "status": "SUCCESS",
-                        "linkStatus": {
+                        "status": {
                             "code": "200",
                             "message": "OK"
                         },
                         "token": "none",
-                        "targetURI": "conn://amzn1.ask.skill.5a8a2654-2e1e-444b-98b3-6a4a617ef9b0/Print"
+                        "name": "Print"
                     }
                 }"""
     const val ERROR_LINK_RESULT = """{
@@ -237,23 +229,16 @@ object JsonRequests {
                                         }
                                     },
                                     "request": {
-                                        "type": "Links.LinkResult",
+                                        "type": "Connections.Response",
                                         "requestId": "amzn1.echo-api.request.f8f7d4dc-e6ca-41f9-840f-0bd7ab1b88af",
                                         "timestamp": "2018-02-23T19:13:10Z",
                                         "locale": "en-US",
-                                        "target": {
-                                            "path": "Print",
-                                            "address": "amzn1.ask.skill.5a8a2654-2e1e-444b-98b3-6a4a617ef9b0"
-                                        },
-                                        "body": {},
-                                        "payload": {},
-                                        "status": "INTERNAL_ERROR",
-                                        "linkStatus": {
+                                        "status": {
                                             "code": "500",
                                             "message": "INTERNAL ERROR"
                                         },
                                         "token": "DayRecipeIntent",
-                                        "targetURI": "conn://amzn1.ask.skill.5a8a2654-2e1e-444b-98b3-6a4a617ef9b0/Print"
+                                        "name": "Print"
                                     }
                                 }"""
     const val DISPLAY_SELECTED_REQUEST = """{

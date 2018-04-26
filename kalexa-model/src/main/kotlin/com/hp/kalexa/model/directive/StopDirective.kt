@@ -1,4 +1,4 @@
-package com.hp.kalexa.model
+package com.hp.kalexa.model.directive
 
 import com.fasterxml.jackson.annotation.JsonTypeName
 

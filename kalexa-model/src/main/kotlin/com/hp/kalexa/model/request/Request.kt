@@ -1,4 +1,4 @@
-package com.hp.kalexa.model
+package com.hp.kalexa.model.request
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
@@ -13,7 +13,7 @@ import java.time.LocalDateTime
 @JsonSubTypes(
         JsonSubTypes.Type(value = SessionStartedRequest::class, name = "SessionStartedRequest"),
         JsonSubTypes.Type(value = SessionEndedRequest::class, name = "SessionEndedRequest"),
-        JsonSubTypes.Type(value = LinkResultRequest::class, name = "Links.LinkResult"),
+        JsonSubTypes.Type(value = ConnectionsResponseRequest::class, name = "Connections.Response"),
         JsonSubTypes.Type(value = IntentRequest::class, name = "IntentRequest"),
         JsonSubTypes.Type(value = ElementSelectedRequest::class, name = "Display.ElementSelected"),
         JsonSubTypes.Type(value = LaunchRequest::class, name = "LaunchRequest"))

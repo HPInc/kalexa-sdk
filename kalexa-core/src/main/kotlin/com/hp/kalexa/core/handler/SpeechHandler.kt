@@ -1,7 +1,7 @@
 package com.hp.kalexa.core.handler
 
-import com.hp.kalexa.model.*
-import com.hp.kalexa.model.request.AlexaRequestEnvelope
+import com.hp.kalexa.model.request.*
+import com.hp.kalexa.model.response.AlexaResponse
 
 interface SpeechHandler {
 
@@ -15,7 +15,7 @@ interface SpeechHandler {
 
     fun handleSessionEndedRequest(envelope: AlexaRequestEnvelope<SessionEndedRequest>): AlexaResponse
 
-    fun handleLinkResultRequest(envelope: AlexaRequestEnvelope<LinkResultRequest>): AlexaResponse
+    fun handleConnectionsResponseRequest(envelope: AlexaRequestEnvelope<ConnectionsResponseRequest>): AlexaResponse
 
 
     companion object {

@@ -3,7 +3,6 @@ package com.hp.kalexa.model.request
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.hp.kalexa.model.Context
-import com.hp.kalexa.model.Request
 import com.hp.kalexa.model.Session
 
 

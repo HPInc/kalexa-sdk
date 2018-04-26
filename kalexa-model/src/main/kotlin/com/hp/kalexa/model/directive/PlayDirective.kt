@@ -1,6 +1,7 @@
-package com.hp.kalexa.model
+package com.hp.kalexa.model.directive
 
 import com.fasterxml.jackson.annotation.JsonTypeName
+import com.hp.kalexa.model.directive.Directive
 import com.hp.kalexa.model.interfaces.audioplayer.AudioItem
 import com.hp.kalexa.model.interfaces.audioplayer.PlayBehavior
 

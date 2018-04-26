@@ -1,8 +1,6 @@
 package com.hp.kalexa.core.handler
 
 import com.google.common.reflect.ClassPath
-import com.hp.kalexa.model.*
-import com.hp.kalexa.model.request.AlexaRequestEnvelope
 import com.hp.kalexa.core.annotation.Helper
 import com.hp.kalexa.core.annotation.Launcher
 import com.hp.kalexa.core.handler.SpeechHandler.Companion.INTENT_CONTEXT
@@ -15,6 +13,9 @@ import com.hp.kalexa.core.util.IntentUtil.unsupportedIntent
 import com.hp.kalexa.core.util.Util.findAnnotatedMethod
 import com.hp.kalexa.core.util.Util.getIntentPackage
 import com.hp.kalexa.model.extension.attribute
+import com.hp.kalexa.model.request.*
+import com.hp.kalexa.model.response.AlexaResponse
+import com.hp.kalexa.model.response.alexaResponse
 import com.sun.xml.internal.txw2.IllegalAnnotationException
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
@@ -105,10 +106,10 @@ open class DefaultSpeechHandler : SpeechHandler {
         }
     }
 
-    override fun handleLinkResultRequest(envelope: AlexaRequestEnvelope<LinkResultRequest>): AlexaResponse {
-        println("=========================== Links.LinkResult =========================")
+    override fun handleConnectionsResponseRequest(envelope: AlexaRequestEnvelope<ConnectionsResponseRequest>): AlexaResponse {
+        println("=========================== Connections.Response =========================")
         val intent = envelope.request.token.split("\\|").first()
-        return getIntentExecutorOf(intent, envelope)?.onLinkResult(envelope.request)
+        return getIntentExecutorOf(intent, envelope)?.onConnectionsResponse(envelope.request)
                 ?: unsupportedIntent()
     }
 

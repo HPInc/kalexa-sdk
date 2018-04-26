@@ -2,12 +2,12 @@ package com.hp.kalexa.core.util
 
 import com.hp.kalexa.core.intent.BuiltInIntent
 import com.hp.kalexa.core.util.Util.getSkillName
-import com.hp.kalexa.model.AlexaResponse
 import com.hp.kalexa.model.Context
 import com.hp.kalexa.model.Slot
-import com.hp.kalexa.model.alexaResponse
 import com.hp.kalexa.model.entitiyresolution.StatusCode
 import com.hp.kalexa.model.extension.getAttr
+import com.hp.kalexa.model.response.AlexaResponse
+import com.hp.kalexa.model.response.alexaResponse
 
 object IntentUtil {
 
@@ -119,6 +119,11 @@ object IntentUtil {
                 display?.markupVersion.equals("1.0")
     }
 
+    /**
+     * Read a given slot and returns the value only if ER matches successfully
+     * @param Slot to be read
+     * @return value from the given slot
+     */
     fun readSlot(slot: Slot?): String? {
         val resolution = slot?.resolutions?.resolutionsPerAuthority?.first()
         return resolution?.status?.code?.let {

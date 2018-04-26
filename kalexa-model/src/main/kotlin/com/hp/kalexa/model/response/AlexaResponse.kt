@@ -1,16 +1,18 @@
-package com.hp.kalexa.model
+package com.hp.kalexa.model.response
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.hp.kalexa.model.*
 import com.hp.kalexa.model.directive.*
 import com.hp.kalexa.model.interfaces.display.*
 import com.hp.kalexa.model.interfaces.display.Image
+import com.hp.kalexa.model.interfaces.video.Metadata
+import com.hp.kalexa.model.interfaces.video.VideoItem
 import com.hp.kalexa.model.payload.Payload
 import com.hp.kalexa.model.payload.log.Log
 import com.hp.kalexa.model.payload.log.PhysicalActivity
 import com.hp.kalexa.model.payload.print.*
-import com.hp.kalexa.model.response.Response
 import com.hp.kalexa.model.ui.*
 import java.time.LocalDateTime
 import kotlin.reflect.full.primaryConstructor
@@ -25,7 +27,7 @@ fun richText(block: (RichText.() -> String)) = RichText().apply { text = block()
 @DslMarker
 annotation class AlexaResponseDsl
 
-class AlexaResponse private constructor(
+data class AlexaResponse private constructor(
         val response: Response = Response(),
         val sessionAttributes: Map<String, Any?> = emptyMap(),
         val version: String = "1.0") {
@@ -238,7 +240,7 @@ class AlexaResponse private constructor(
         }
 
         fun metadata(block: Metadata.() -> Unit) {
-            metadata = com.hp.kalexa.model.Metadata().apply { block() }
+            metadata = Metadata().apply { block() }
         }
 
         fun videoDirective(block: VideoItem.() -> Unit) {
@@ -318,23 +320,22 @@ class AlexaResponse private constructor(
 
         @AlexaResponseDsl
         class ReturnFromLinkDirectiveBuilder {
-            lateinit var status: String
-            lateinit var linkStatus: LinkStatus
+            lateinit var status: ConnectionsStatus
             lateinit var payload: Payload<*>
 
-            fun linkStatus(block: LinkStatusBuilder.() -> Unit) {
-                linkStatus = LinkStatusBuilder().apply { block() }.build()
+            fun status(block: ConnectionsStatusBuilder.() -> Unit) {
+                status = ConnectionsStatusBuilder().apply { block() }.build()
             }
 
             fun payload(block: ReturnFromLinkDirectiveBuilder.() -> Payload<*>) {
                 apply { payload = block() }
             }
 
-            fun print(block: AlexaResponse.PrintBuilder.() -> Unit): Print<*> = AlexaResponse.PrintBuilder().apply { block() }.build()
+            fun print(block: PrintBuilder.() -> Unit): Print<*> = PrintBuilder().apply { block() }.build()
 
-            fun log(block: AlexaResponse.LogBuilder.() -> Unit): Log<*> = AlexaResponse.LogBuilder().apply { block() }.build()
+            fun log(block: LogBuilder.() -> Unit): Log<*> = LogBuilder().apply { block() }.build()
 
-            fun build(): ReturnFromLinkDirective = ReturnFromLinkDirective(status, linkStatus, payload)
+            fun build(): ReturnFromLinkDirective = ReturnFromLinkDirective(status, payload)
         }
 
 
@@ -344,9 +345,9 @@ class AlexaResponse private constructor(
             lateinit var payload: Payload<*>
             var token: String = "none"
 
-            fun print(block: AlexaResponse.PrintBuilder.() -> Unit): Print<*> = AlexaResponse.PrintBuilder().apply { block() }.build()
+            fun print(block: PrintBuilder.() -> Unit): Print<*> = PrintBuilder().apply { block() }.build()
 
-            fun log(block: AlexaResponse.LogBuilder.() -> Unit): Log<*> = AlexaResponse.LogBuilder().apply { block() }.build()
+            fun log(block: LogBuilder.() -> Unit): Log<*> = LogBuilder().apply { block() }.build()
 
             fun payload(block: FollowLinkWithResultDirectiveBuilder.() -> Payload<*>) {
                 apply { payload = block() }
@@ -357,10 +358,10 @@ class AlexaResponse private constructor(
     }
 
     @AlexaResponseDsl
-    class LinkStatusBuilder {
+    class ConnectionsStatusBuilder {
         var code: String = ""
         var message: String = ""
-        fun build() = LinkStatus(code, message)
+        fun build() = ConnectionsStatus(code, message)
     }
 
     @AlexaResponseDsl
@@ -418,8 +419,9 @@ class AlexaResponse private constructor(
 }
 
 fun main(args: Array<String>) {
+    val webPage = WebPage(title = "Wikipedia", description = "Wikipedia Article about Longest", url = "https://en.wikipedia.org/wiki/Main_Page/")
     val alexaResponse = alexaResponse {
-        sessionAttributes { mapOf( "Name" to "Marcelo")}
+        sessionAttributes { mapOf("Name" to "Marcelo") }
         version = "1.0"
         response {
             speech { "Marcelo" }
@@ -441,8 +443,7 @@ fun main(args: Array<String>) {
                 }
 
                 returnFromLinkDirectiveDirective {
-                    status = "OK"
-                    linkStatus {
+                    status {
                         code = "200"
                         message = "All done"
                     }
@@ -490,6 +491,12 @@ fun main(args: Array<String>) {
                     hintDirective.hint = hint
                     hintDirective
                 }
+                followLinkWithResultDirective {
+                    targetURI = TargetURI.PRINT
+                    payload {
+                        Print(webPage)
+                    }
+                }
             }
         }
     }
@@ -502,4 +509,35 @@ fun main(args: Array<String>) {
     }
     println(list.textContent)
     println(alexaResponse.toJson())
+
+    val followLinkWithResultDirective = FollowLinkWithResultDirective(
+            targetURI = TargetURI.PRINT,
+            payload = Print(webPage),
+            token = "PrintWebPage")
+    val response = alexaResponse {
+        response {
+            speech { "Okay, I'm sending a WebPage to your printer" }
+            simpleCard {
+                title = "OI"
+                content = "Okay, I'm sending a WebPage to your printer"
+            }
+            directives {
+                directive {
+                    followLinkWithResultDirective
+                }
+            }
+        }
+    }
+    println(response.toJson())
+
+    println(alexaResponse {
+        response {
+            shouldEndSession = false
+            directives {
+                directive {
+                    DelegateDirective()
+                }
+            }
+        }
+    }.toJson())
 }
