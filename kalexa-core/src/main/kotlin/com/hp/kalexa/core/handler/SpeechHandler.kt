@@ -19,7 +19,7 @@ interface SpeechHandler {
 
 
     companion object {
-        const val INTENT_CONTEXT = "com.hp.kotlinalexasdk.intentContext"
+        const val INTENT_CONTEXT = "com.hp.kalexa.intentContext"
         const val SESSION_ID = "sessionId"
     }
 
