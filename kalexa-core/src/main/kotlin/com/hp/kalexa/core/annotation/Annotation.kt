@@ -5,3 +5,6 @@ annotation class Launcher
 
 @Target(AnnotationTarget.FUNCTION)
 annotation class Helper
+
+@Target(AnnotationTarget.FUNCTION)
+annotation class Intents(vararg val intentNames: String)

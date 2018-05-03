@@ -19,4 +19,9 @@ object Util {
             } != null
         }
     }
+
+    fun <T : Annotation> getMethodAnnotation(clazz: KClass<out Any>, methodName: String, annotation: KClass<T>): Annotation? {
+        val kFunction = clazz.declaredFunctions.find { it.name == methodName }
+        return kFunction?.findAnnotation(annotation)
+    }
 }

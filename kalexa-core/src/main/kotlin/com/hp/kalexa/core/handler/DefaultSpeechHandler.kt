@@ -2,6 +2,7 @@ package com.hp.kalexa.core.handler
 
 import com.google.common.reflect.ClassPath
 import com.hp.kalexa.core.annotation.Helper
+import com.hp.kalexa.core.annotation.Intents
 import com.hp.kalexa.core.annotation.Launcher
 import com.hp.kalexa.core.handler.SpeechHandler.Companion.INTENT_CONTEXT
 import com.hp.kalexa.core.intent.BuiltInIntent
@@ -12,6 +13,7 @@ import com.hp.kalexa.core.util.IntentUtil.retryIntent
 import com.hp.kalexa.core.util.IntentUtil.unsupportedIntent
 import com.hp.kalexa.core.util.Util.findAnnotatedMethod
 import com.hp.kalexa.core.util.Util.getIntentPackage
+import com.hp.kalexa.core.util.Util.getMethodAnnotation
 import com.hp.kalexa.model.extension.attribute
 import com.hp.kalexa.model.request.*
 import com.hp.kalexa.model.response.AlexaResponse
@@ -20,6 +22,7 @@ import com.sun.xml.internal.txw2.IllegalAnnotationException
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.superclasses
+
 
 open class DefaultSpeechHandler : SpeechHandler {
 
@@ -32,10 +35,11 @@ open class DefaultSpeechHandler : SpeechHandler {
         println("=========================== LaunchRequest =========================")
         println("Looking for Launcher intents in ${getIntentPackage()}")
         val launcherClasses = findAnnotatedMethod(intentClasses, Launcher::class, "onLaunchIntent")
-        println("Detected ${launcherClasses.size} intent classes with Launcher annotation.")
+        val uniqueValues = launcherClasses.values.toHashSet()
+        println("Detected ${uniqueValues.size} intent classes with Launcher annotation.")
         return when {
-            launcherClasses.isEmpty() -> defaultGreetings()
-            launcherClasses.size > 1 -> illegalAnnotationArgument("Launcher")
+            uniqueValues.isEmpty() -> defaultGreetings()
+            uniqueValues.size > 1 -> illegalAnnotationArgument("Launcher")
             else -> {
                 val entry = launcherClasses.entries.first()
                 println("Class with Launcher annotation: ${entry.value}")
@@ -57,15 +61,19 @@ open class DefaultSpeechHandler : SpeechHandler {
     }
 
     private fun customIntent(intentName: String, envelope: AlexaRequestEnvelope<IntentRequest>): AlexaResponse {
-        return getIntentExecutorOf(intentName, envelope)?.onIntentRequest(envelope.request)
-                ?: unknownIntentException(intentName)
+        val intentExecutor = getIntentExecutorOf(intentName, envelope)
+        return intentExecutor?.let { executor ->
+            val alexaResponse = executor.onIntentRequest(envelope.request)
+            generateResponse(executor, alexaResponse)
+        } ?: unknownIntentException(intentName)
     }
 
     private fun unknownIntent(builtInIntent: BuiltInIntent, envelope: AlexaRequestEnvelope<IntentRequest>): AlexaResponse {
         val helperClasses = findAnnotatedMethod(intentClasses, Helper::class, "onUnknownIntent")
+        val uniqueHelpers = helperClasses.values.toHashSet()
         return when {
-            helperClasses.isEmpty() -> IntentUtil.defaultBuiltInResponse(builtInIntent, envelope.session.attributes)
-            helperClasses.size > 1 -> illegalAnnotationArgument("Helper")
+            uniqueHelpers.isEmpty() -> IntentUtil.defaultBuiltInResponse(builtInIntent, envelope.session.attributes)
+            uniqueHelpers.size > 1 -> illegalAnnotationArgument("Helper")
             else -> {
                 val entry = helperClasses.entries.first()
                 println("Class with Helper annotation: ${entry.value}")
@@ -74,16 +82,24 @@ open class DefaultSpeechHandler : SpeechHandler {
         }
     }
 
-    private fun builtInIntent(intentName: String, builtInIntent: BuiltInIntent, envelope: AlexaRequestEnvelope<IntentRequest>) =
-            getIntentExecutorOf(intentName, envelope)?.onBuiltInIntent(builtInIntent, envelope.request)
-                    ?: unknownIntentException(intentName)
+    private fun builtInIntent(intentName: String, builtInIntent: BuiltInIntent, envelope: AlexaRequestEnvelope<IntentRequest>): AlexaResponse {
+        val intentExecutor = getIntentExecutorOf(intentName, envelope)
+        return intentExecutor?.let { executor ->
+            val alexaResponse = executor.onBuiltInIntent(builtInIntent, envelope.request)
+            generateResponse(executor, alexaResponse)
+        } ?: unknownIntentException(intentName)
+    }
+
 
     override fun handleElementSelectedRequest(envelope: AlexaRequestEnvelope<ElementSelectedRequest>): AlexaResponse {
         println("=========================== ElementSelectedRequest =========================")
         val intentName = envelope.session.attribute<String>(INTENT_CONTEXT)
         return intentName?.let {
-            getIntentExecutorOf(intentName, envelope)?.onElementSelected(envelope.request)
-                    ?: retryIntent(envelope.session.attributes)
+            val intentExecutor = getIntentExecutorOf(intentName, envelope)
+            intentExecutor?.let {
+                val alexaResponse = it.onElementSelected(envelope.request)
+                generateResponse(it, alexaResponse)
+            } ?: retryIntent(envelope.session.attributes)
         } ?: unsupportedIntent()
     }
 
@@ -109,8 +125,19 @@ open class DefaultSpeechHandler : SpeechHandler {
     override fun handleConnectionsResponseRequest(envelope: AlexaRequestEnvelope<ConnectionsResponseRequest>): AlexaResponse {
         println("=========================== Connections.Response =========================")
         val intent = envelope.request.token.split("\\|").first()
-        return getIntentExecutorOf(intent, envelope)?.onConnectionsResponse(envelope.request)
-                ?: unsupportedIntent()
+        val intentExecutor = getIntentExecutorOf(intent, envelope)
+        return intentExecutor?.let {
+            val alexaResponse = it.onConnectionsResponse(envelope.request)
+            generateResponse(it, alexaResponse)
+        } ?: unsupportedIntent()
+    }
+
+    private fun generateResponse(executor: IntentExecutor, alexaResponse: AlexaResponse): AlexaResponse {
+        return if (executor.isIntentContextLocked() && alexaResponse.sessionAttributes[INTENT_CONTEXT] == null) {
+            alexaResponse.copy(sessionAttributes = alexaResponse.sessionAttributes + Pair(INTENT_CONTEXT, executor::class.java.simpleName))
+        } else {
+            alexaResponse
+        }
     }
 
     private fun unknownIntentException(intentName: String): AlexaResponse {
@@ -124,14 +151,22 @@ open class DefaultSpeechHandler : SpeechHandler {
 
     @Suppress("unchecked_cast")
     private fun loadIntentClasses(): Map<String, KClass<out IntentExecutor>> {
-        val classes = ClassPath.from(Thread.currentThread().contextClassLoader).getTopLevelClasses(getIntentPackage())
-        return classes.map { it.load().kotlin }
+        val intentClasses = ClassPath.from(Thread.currentThread().contextClassLoader).getTopLevelClasses(getIntentPackage())
+                .map { it.load().kotlin }
                 .filter { it.superclasses.find { it.simpleName == IntentExecutor::class.java.simpleName } != null }
                 .associate { it.simpleName!! to it as KClass<out IntentExecutor> }
+
+        // Search for @Intents annotation. Map intentName from annotation to the class that owns the annotation
+        val intentsAnnotationList = findAnnotatedMethod(intentClasses, Intents::class, "onIntentRequest")
+                .map { (_, value) ->
+                    val intents = getMethodAnnotation(value, "onIntentRequest", Intents::class) as Intents
+                    intents.intentNames.map { it to value }
+                }.flatten()
+        return intentClasses + intentsAnnotationList
     }
 
     /**
-     * Retrieves an instance of a given intentName, if no instance is created, it will create, put into the hash
+     * Retrieves an instance of a given intentName, if no such instance exists, it will be created, put into the hash
      * and return it
      * @param intentName
      * @return an instance of the intentName
@@ -146,5 +181,4 @@ open class DefaultSpeechHandler : SpeechHandler {
             intentExecutor
         }
     }
-
 }

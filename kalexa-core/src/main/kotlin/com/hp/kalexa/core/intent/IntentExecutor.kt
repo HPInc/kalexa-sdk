@@ -1,6 +1,5 @@
 package com.hp.kalexa.core.intent
 
-import com.hp.kalexa.model.*
 import com.hp.kalexa.core.handler.SpeechHandler.Companion.INTENT_CONTEXT
 import com.hp.kalexa.core.util.IntentUtil
 import com.hp.kalexa.core.util.IntentUtil.defaultGreetings
@@ -9,10 +8,12 @@ import com.hp.kalexa.core.util.IntentUtil.goodbye
 import com.hp.kalexa.core.util.IntentUtil.helpIntent
 import com.hp.kalexa.core.util.IntentUtil.retryIntent
 import com.hp.kalexa.core.util.Util
+import com.hp.kalexa.model.Context
+import com.hp.kalexa.model.Session
+import com.hp.kalexa.model.request.ConnectionsResponseRequest
 import com.hp.kalexa.model.request.ElementSelectedRequest
 import com.hp.kalexa.model.request.IntentRequest
 import com.hp.kalexa.model.request.LaunchRequest
-import com.hp.kalexa.model.request.ConnectionsResponseRequest
 import com.hp.kalexa.model.response.AlexaResponse
 
 abstract class IntentExecutor {
@@ -123,6 +124,9 @@ abstract class IntentExecutor {
     fun unlockIntentContext() {
         sessionAttributes[INTENT_CONTEXT] = null
     }
+
+    fun isIntentContextLocked() = sessionAttributes[INTENT_CONTEXT] != null
+
 
     fun hasDisplay() = IntentUtil.hasDisplay(context)
 

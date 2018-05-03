@@ -27,7 +27,7 @@ fun richText(block: (RichText.() -> String)) = RichText().apply { text = block()
 @DslMarker
 annotation class AlexaResponseDsl
 
-data class AlexaResponse private constructor(
+data class AlexaResponse (
         val response: Response = Response(),
         val sessionAttributes: Map<String, Any?> = emptyMap(),
         val version: String = "1.0") {
@@ -379,7 +379,7 @@ data class AlexaResponse private constructor(
             printType = PrintTypeBuilder().apply(block).build<ImagePNG>()
         }
 
-        fun ImageJPEG(block: PrintTypeBuilder.() -> Unit) {
+        fun imageJPEG(block: PrintTypeBuilder.() -> Unit) {
             printType = PrintTypeBuilder().apply(block).build<ImageJPEG>()
         }
 
@@ -540,4 +540,8 @@ fun main(args: Array<String>) {
             }
         }
     }.toJson())
+
+    println(textContent {
+        tertiaryText = plainText { "oi" }
+    })
 }
