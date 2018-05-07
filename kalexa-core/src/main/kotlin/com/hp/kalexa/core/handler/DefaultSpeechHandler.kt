@@ -151,18 +151,28 @@ open class DefaultSpeechHandler : SpeechHandler {
 
     @Suppress("unchecked_cast")
     private fun loadIntentClasses(): Map<String, KClass<out IntentExecutor>> {
-        val intentClasses = ClassPath.from(Thread.currentThread().contextClassLoader).getTopLevelClasses(getIntentPackage())
+        val intentClasses = ClassPath.from(Thread.currentThread().contextClassLoader)
+                .getTopLevelClasses(getIntentPackage())
                 .map { it.load().kotlin }
                 .filter { it.superclasses.find { it.simpleName == IntentExecutor::class.java.simpleName } != null }
                 .associate { it.simpleName!! to it as KClass<out IntentExecutor> }
 
-        // Search for @Intents annotation. Map intentName from annotation to the class that owns the annotation
-        val intentsAnnotationList = findAnnotatedMethod(intentClasses, Intents::class, "onIntentRequest")
+        val intentNamesList = lookupIntentNamesFromIntentsAnnotation(intentClasses)
+        return intentClasses + intentNamesList
+    }
+
+    /**
+     * Look @Intents annotation up
+     * @param intentClasses to look intent names up
+     * @return List of Pair objects with IntentName as key and class that owns the annotation as value.
+     */
+    private fun lookupIntentNamesFromIntentsAnnotation(intentClasses: Map<String, KClass<out IntentExecutor>>):
+            List<Pair<String, KClass<out IntentExecutor>>> {
+        return findAnnotatedMethod(intentClasses, Intents::class, "onIntentRequest")
                 .map { (_, value) ->
                     val intents = getMethodAnnotation(value, "onIntentRequest", Intents::class) as Intents
                     intents.intentNames.map { it to value }
                 }.flatten()
-        return intentClasses + intentsAnnotationList
     }
 
     /**
