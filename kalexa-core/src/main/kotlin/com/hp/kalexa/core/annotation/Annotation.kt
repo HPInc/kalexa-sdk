@@ -4,7 +4,10 @@ package com.hp.kalexa.core.annotation
 annotation class Launcher
 
 @Target(AnnotationTarget.FUNCTION)
-annotation class Helper
+annotation class RecoverIntentContext
+
+@Target(AnnotationTarget.FUNCTION)
+annotation class Fallback
 
 @Target(AnnotationTarget.FUNCTION)
 annotation class Intents(vararg val intentNames: String)

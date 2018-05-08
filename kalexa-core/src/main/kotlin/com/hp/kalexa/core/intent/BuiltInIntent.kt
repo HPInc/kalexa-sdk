@@ -17,6 +17,7 @@ enum class BuiltInIntent(val rawValue: String) {
     STOP_INTENT("AMAZON.StopIntent"),
     YES_INTENT("AMAZON.YesIntent"),
     NO_INTENT("AMAZON.NoIntent"),
+    FALLBACK_INTENT("AMAZON.FallbackIntent"),
     NAVIGATE_HOME_INTENT("AMAZON.NavigateHomeIntent");
 
     override fun toString(): String {

@@ -15,6 +15,7 @@ object IntentUtil {
         return when (builtInIntent) {
             BuiltInIntent.CANCEL_INTENT -> finish()
             BuiltInIntent.STOP_INTENT -> finish()
+            BuiltInIntent.FALLBACK_INTENT -> finish()
             else -> retryIntent(attributes)
         }
     }

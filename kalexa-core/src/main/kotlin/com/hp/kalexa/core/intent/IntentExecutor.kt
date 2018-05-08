@@ -7,6 +7,7 @@ import com.hp.kalexa.core.util.IntentUtil.finish
 import com.hp.kalexa.core.util.IntentUtil.goodbye
 import com.hp.kalexa.core.util.IntentUtil.helpIntent
 import com.hp.kalexa.core.util.IntentUtil.retryIntent
+import com.hp.kalexa.core.util.IntentUtil.unsupportedIntent
 import com.hp.kalexa.core.util.Util
 import com.hp.kalexa.model.Context
 import com.hp.kalexa.model.Session
@@ -65,7 +66,7 @@ abstract class IntentExecutor {
     /**
      * Handles Built in Intent that has no INTENT_CONTEXT or Intent name attached to the context
      */
-    open fun onUnknownIntent(builtInIntent: BuiltInIntent): AlexaResponse {
+    open fun onUnknownIntentContext(builtInIntent: BuiltInIntent): AlexaResponse {
         return AlexaResponse.emptyResponse()
     }
 
@@ -103,6 +104,14 @@ abstract class IntentExecutor {
     open fun onHelpIntent(request: IntentRequest): AlexaResponse {
         return helpIntent()
     }
+
+    /**
+     * Handles Fallback Built In Intent coming from Alexa.
+     */
+    open fun onFallbackIntent(request: IntentRequest): AlexaResponse {
+        return unsupportedIntent()
+    }
+
 
     /**
      * Handles other Built In Intents coming from Alexa.

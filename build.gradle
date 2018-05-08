@@ -41,7 +41,7 @@ subprojects {
         testCompile 'org.jetbrains.spek:spek-api:1.1.5'
         testCompile 'org.jetbrains.spek:spek-junit-platform-engine:1.1.5'
         testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
-        testCompile "io.mockk:mockk:1.7.15"
+        testCompile "io.mockk:mockk:1.7.16"
 
         compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
         compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"

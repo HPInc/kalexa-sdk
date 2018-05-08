@@ -1,9 +1,9 @@
 package com.hp.kalexa.core.handler
 
-import com.google.common.reflect.ClassPath
-import com.hp.kalexa.core.annotation.Helper
+import com.hp.kalexa.core.annotation.Fallback
 import com.hp.kalexa.core.annotation.Intents
 import com.hp.kalexa.core.annotation.Launcher
+import com.hp.kalexa.core.annotation.RecoverIntentContext
 import com.hp.kalexa.core.handler.SpeechHandler.Companion.INTENT_CONTEXT
 import com.hp.kalexa.core.intent.BuiltInIntent
 import com.hp.kalexa.core.intent.IntentExecutor
@@ -14,6 +14,7 @@ import com.hp.kalexa.core.util.IntentUtil.unsupportedIntent
 import com.hp.kalexa.core.util.Util.findAnnotatedMethod
 import com.hp.kalexa.core.util.Util.getIntentPackage
 import com.hp.kalexa.core.util.Util.getMethodAnnotation
+import com.hp.kalexa.core.util.Util.loadIntentClassesFromPackage
 import com.hp.kalexa.model.extension.attribute
 import com.hp.kalexa.model.request.*
 import com.hp.kalexa.model.response.AlexaResponse
@@ -55,8 +56,24 @@ open class DefaultSpeechHandler : SpeechHandler {
         println("Intent name: $intentName - Built in Intent: $builtInIntent")
         return when {
             builtInIntent == null -> customIntent(intentName, envelope)
-            intentName == builtInIntent.rawValue -> unknownIntent(builtInIntent, envelope)
+            intentName == BuiltInIntent.FALLBACK_INTENT.rawValue -> fallbackIntent(envelope)
+            intentName == builtInIntent.rawValue -> unknownIntentContext(builtInIntent, envelope)
             else -> builtInIntent(intentName, builtInIntent, envelope)
+        }
+    }
+
+    private fun fallbackIntent(envelope: AlexaRequestEnvelope<IntentRequest>): AlexaResponse {
+        val fallbackClasses = findAnnotatedMethod(intentClasses, Fallback::class, "onFallbackIntent")
+        val uniqueValues = fallbackClasses.values.toHashSet()
+        println("Detected ${uniqueValues.size} intent classes with Fallback annotation.")
+        return when {
+            uniqueValues.isEmpty() -> unsupportedIntent()
+            uniqueValues.size > 1 -> illegalAnnotationArgument("Fallback")
+            else -> {
+                val entry = fallbackClasses.entries.first()
+                println("Class with Fallback annotation: ${entry.value}")
+                getIntentExecutorOf(entry.key, envelope)!!.onFallbackIntent(envelope.request)
+            }
         }
     }
 
@@ -68,16 +85,16 @@ open class DefaultSpeechHandler : SpeechHandler {
         } ?: unknownIntentException(intentName)
     }
 
-    private fun unknownIntent(builtInIntent: BuiltInIntent, envelope: AlexaRequestEnvelope<IntentRequest>): AlexaResponse {
-        val helperClasses = findAnnotatedMethod(intentClasses, Helper::class, "onUnknownIntent")
-        val uniqueHelpers = helperClasses.values.toHashSet()
+    private fun unknownIntentContext(builtInIntent: BuiltInIntent, envelope: AlexaRequestEnvelope<IntentRequest>): AlexaResponse {
+        val recoverIntentContextClasses = findAnnotatedMethod(intentClasses, RecoverIntentContext::class, "onUnknownIntentContext")
+        val uniqueClasses = recoverIntentContextClasses.values.toHashSet()
         return when {
-            uniqueHelpers.isEmpty() -> IntentUtil.defaultBuiltInResponse(builtInIntent, envelope.session.attributes)
-            uniqueHelpers.size > 1 -> illegalAnnotationArgument("Helper")
+            uniqueClasses.isEmpty() -> IntentUtil.defaultBuiltInResponse(builtInIntent, envelope.session.attributes)
+            uniqueClasses.size > 1 -> illegalAnnotationArgument("RecoverIntentContext")
             else -> {
-                val entry = helperClasses.entries.first()
-                println("Class with Helper annotation: ${entry.value}")
-                getIntentExecutorOf(entry.key, envelope)!!.onUnknownIntent(builtInIntent)
+                val entry = recoverIntentContextClasses.entries.first()
+                println("Class with RecoverIntentContext annotation: ${entry.value}")
+                getIntentExecutorOf(entry.key, envelope)!!.onUnknownIntentContext(builtInIntent)
             }
         }
     }
@@ -151,9 +168,7 @@ open class DefaultSpeechHandler : SpeechHandler {
 
     @Suppress("unchecked_cast")
     private fun loadIntentClasses(): Map<String, KClass<out IntentExecutor>> {
-        val intentClasses = ClassPath.from(Thread.currentThread().contextClassLoader)
-                .getTopLevelClasses(getIntentPackage())
-                .map { it.load().kotlin }
+        val intentClasses = loadIntentClassesFromPackage()
                 .filter { it.superclasses.find { it.simpleName == IntentExecutor::class.java.simpleName } != null }
                 .associate { it.simpleName!! to it as KClass<out IntentExecutor> }
 
