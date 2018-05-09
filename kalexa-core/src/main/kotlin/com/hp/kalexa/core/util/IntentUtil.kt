@@ -78,7 +78,7 @@ object IntentUtil {
     fun retryIntent(attributes: MutableMap<String, Any?> = mutableMapOf(),
                     message: String = "I'm sorry, I couldn't understand what you have said. Could you say it again?"): AlexaResponse {
         val attempts = attributes.getAttr<Int>("retry")
-        if (attempts != null && attempts > 1) {
+        if (attempts != null) {
             return alexaResponse {
                 response {
                     shouldEndSession = true
@@ -88,7 +88,7 @@ object IntentUtil {
                 }
             }
         }
-        attributes["retry"] = if (attempts != null) attempts + 1 else 1
+        attributes["retry"] = 1
         return alexaResponse {
             response {
                 speech {

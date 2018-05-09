@@ -2,23 +2,25 @@ package com.hp.kalexa.core.handler
 
 import com.hp.kalexa.core.annotation.Fallback
 import com.hp.kalexa.core.annotation.Launcher
+import com.hp.kalexa.core.annotation.RecoverIntentContext
+import com.hp.kalexa.core.intent.BuiltInIntent
 import com.hp.kalexa.core.intent.IntentExecutor
 import com.hp.kalexa.core.model.FakeIntent
 import com.hp.kalexa.core.util.IntentUtil
 import com.hp.kalexa.core.util.Util
 import com.hp.kalexa.model.Context
 import com.hp.kalexa.model.Session
-import com.hp.kalexa.model.request.AlexaRequestEnvelope
-import com.hp.kalexa.model.request.IntentRequest
-import com.hp.kalexa.model.request.LaunchRequest
-import com.hp.kalexa.model.request.SessionStartedRequest
+import com.hp.kalexa.model.request.*
 import com.hp.kalexa.model.response.AlexaResponse
 import com.sun.xml.internal.txw2.IllegalAnnotationException
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.objectMockk
 import org.jetbrains.spek.api.Spek
-import org.jetbrains.spek.api.dsl.*
+import org.jetbrains.spek.api.dsl.context
+import org.jetbrains.spek.api.dsl.describe
+import org.jetbrains.spek.api.dsl.it
+import org.jetbrains.spek.api.dsl.on
 import kotlin.reflect.KClass
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -82,15 +84,20 @@ object DefaultSpeechHandlerTest : Spek({
         describe("When handleIntentRequest method is called") {
             val intentRequestEnvelope = mockk<AlexaRequestEnvelope<IntentRequest>>()
             lateinit var fakeIntent: IntentExecutor
-            beforeGroup {
+            lateinit var context: Context
+            lateinit var request: IntentRequest
+            lateinit var session: Session
+            val attributesSession = mutableMapOf<String, Any?>()
+            beforeEachTest {
                 fakeIntent = mockk<FakeIntent>()
+                attributesSession.clear()
                 every { Util.loadIntentClassesFromPackage() } returns listOf(fakeIntent::class)
                 every { Util.getIntentPackage() } returns "package.with.intent"
-                val session = mockk<Session> {
-                    every { attributes } returns mutableMapOf()
+                session = mockk {
+                    every { attributes } returns attributesSession
                 }
-                val context = mockk<Context>()
-                val request = mockk<IntentRequest>()
+                context = mockk()
+                request = mockk()
                 every { intentRequestEnvelope.session } returns session
                 every { intentRequestEnvelope.request } returns request
                 every { intentRequestEnvelope.context } returns context
@@ -145,6 +152,142 @@ object DefaultSpeechHandlerTest : Spek({
                         assertFailsWith(exceptionClass = IllegalAnnotationException::class) {
                             defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                         }
+                    }
+                }
+            }
+            context("On Built In Intent") {
+                on("Yes Built in Intent with intent context locked") {
+                    every { intentRequestEnvelope.request.intent.name } returns BuiltInIntent.YES_INTENT.rawValue
+                    attributesSession[SpeechHandler.INTENT_CONTEXT] = "FakeIntent"
+                    it("should call onBuiltInIntent method") {
+                        val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                        assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"I'm sorry, I couldn't understand what you have said. Could you say it again?"},"directives":[],"shouldEndSession":false},"sessionAttributes":{"com.hp.kalexa.intentContext":"FakeIntent","retry":1},"version":"1.0"}""",
+                                response.toJson())
+                    }
+                }
+                on("Unknown Intent Context locked to Yes Built in intent") {
+                    attributesSession[SpeechHandler.INTENT_CONTEXT] = "UnknownIntent"
+                    every { intentRequestEnvelope.request.intent.name } returns BuiltInIntent.YES_INTENT.rawValue
+                    it("should throw IllegalArgumentException") {
+                        assertFailsWith(exceptionClass = IllegalArgumentException::class) {
+                            defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                        }
+                    }
+                }
+                context("Yes Built in Intent without context locked") {
+                    on("Intent with @RecoverIntentContext annotation") {
+                        every { intentRequestEnvelope.request.intent.name } returns BuiltInIntent.YES_INTENT.rawValue
+                        it("should should call unknownIntentContext") {
+                            val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                            assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a unknown intent context response"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""",
+                                    response.toJson())
+                        }
+                    }
+                    on("Intent without @RecoverIntentContext annotation") {
+                        every { intentRequestEnvelope.request.intent.name } returns BuiltInIntent.YES_INTENT.rawValue
+                        every { Util.loadIntentClassesFromPackage() } returns emptyList()
+                        it("should should call default unknownIntentContext response") {
+                            val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                            assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"I'm sorry, I couldn't understand what you have said. Could you say it again?"},"directives":[],"shouldEndSession":false},"sessionAttributes":{"retry":1},"version":"1.0"}""",
+                                    response.toJson())
+                        }
+                    }
+                    on("Intent with more than one @RecoverIntentContext annotation") {
+                        every { intentRequestEnvelope.request.intent.name } returns BuiltInIntent.YES_INTENT.rawValue
+                        every { Util.loadIntentClassesFromPackage() } returns emptyList()
+                        val intentExecutor = mockk<KClass<out IntentExecutor>>()
+                        val intentExecutor2 = mockk<KClass<out IntentExecutor>>()
+                        every { Util.findAnnotatedMethod(any(), RecoverIntentContext::class, any()) } returns mutableMapOf("intent1" to intentExecutor, "intent2" to intentExecutor2)
+                        it("should throw illegal annotation argument") {
+                            assertFailsWith(exceptionClass = IllegalAnnotationException::class) {
+                                defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        describe("When handleElementSelectedRequest method is called") {
+            val elementSelectedRequest = mockk<AlexaRequestEnvelope<ElementSelectedRequest>>()
+            lateinit var fakeIntent: IntentExecutor
+            lateinit var context: Context
+            lateinit var request: ElementSelectedRequest
+            lateinit var session: Session
+            val attributesSession = mutableMapOf<String, Any?>()
+            beforeEachTest {
+                fakeIntent = mockk<FakeIntent>()
+                attributesSession.clear()
+                every { Util.loadIntentClassesFromPackage() } returns listOf(fakeIntent::class)
+                every { Util.getIntentPackage() } returns "package.with.intent"
+                session = mockk {
+                    every { attributes } returns attributesSession
+                }
+                context = mockk()
+                request = mockk {
+                    every { token } returns "FakeIntent"
+                }
+                every { elementSelectedRequest.session } returns session
+                every { elementSelectedRequest.request } returns request
+                every { elementSelectedRequest.context } returns context
+                every { elementSelectedRequest.version } returns "1.0"
+            }
+            on("Element Selected with intent context locked") {
+                attributesSession[SpeechHandler.INTENT_CONTEXT] = "FakeIntent"
+                val response = defaultSpeechHandler.handleElementSelectedRequest(elementSelectedRequest)
+                it("should use value of Intent Context to call FakeIntent.onElementSelected and return an empty response") {
+                    assertEquals("{\"response\":{\"directives\":[]},\"sessionAttributes\":{\"com.hp.kalexa.intentContext\":\"FakeIntent\"},\"version\":\"1.0\"}", response.toJson())
+                }
+            }
+            on("Element Selected with intent context locked and map to an unknown intent") {
+                attributesSession[SpeechHandler.INTENT_CONTEXT] = "UnknownIntent"
+                it("should throw IllegalArgumentException") {
+                    assertFailsWith(exceptionClass = IllegalArgumentException::class) {
+                        defaultSpeechHandler.handleElementSelectedRequest(elementSelectedRequest)
+                    }
+                }
+            }
+            on("Element Selected with intent context UNLOCKED") {
+                val response = defaultSpeechHandler.handleElementSelectedRequest(elementSelectedRequest)
+                it("should use value of token to call FakeIntent.onElementSelected and return an empty response") {
+                    assertEquals("{\"response\":{\"directives\":[]},\"sessionAttributes\":{},\"version\":\"1.0\"}", response.toJson())
+                }
+            }
+        }
+        describe("When handleConnectionsResponseRequest method is called") {
+            val connectionsResponseRequest = mockk<AlexaRequestEnvelope<ConnectionsResponseRequest>>()
+            lateinit var fakeIntent: IntentExecutor
+            lateinit var context: Context
+            lateinit var request: ConnectionsResponseRequest
+            lateinit var session: Session
+            val attributesSession = mutableMapOf<String, Any?>()
+            beforeEachTest {
+                fakeIntent = mockk<FakeIntent>()
+                attributesSession.clear()
+                every { Util.loadIntentClassesFromPackage() } returns listOf(fakeIntent::class)
+                every { Util.getIntentPackage() } returns "package.with.intent"
+                session = mockk {
+                    every { attributes } returns attributesSession
+                }
+                context = mockk()
+                request = mockk {
+                    every { token } returns "FakeIntent"
+                }
+                every { connectionsResponseRequest.session } returns session
+                every { connectionsResponseRequest.request } returns request
+                every { connectionsResponseRequest.context } returns context
+                every { connectionsResponseRequest.version } returns "1.0"
+            }
+            on("Connections Response ") {
+                val response = defaultSpeechHandler.handleConnectionsResponseRequest(connectionsResponseRequest)
+                it("should use value of token to call FakeIntent.onConnectionsResponse and return an empty response") {
+                    assertEquals("{\"response\":{\"directives\":[]},\"sessionAttributes\":{},\"version\":\"1.0\"}", response.toJson())
+                }
+            }
+            on("Connections response is mapped to an unknown intent") {
+                every { request.token } returns "UnknownIntent"
+                it("should throw IllegalArgumentException") {
+                    assertFailsWith(exceptionClass = IllegalArgumentException::class) {
+                        defaultSpeechHandler.handleConnectionsResponseRequest(connectionsResponseRequest)
                     }
                 }
             }

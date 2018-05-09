@@ -6,6 +6,8 @@ import com.hp.kalexa.core.annotation.Launcher
 import com.hp.kalexa.core.annotation.RecoverIntentContext
 import com.hp.kalexa.core.intent.BuiltInIntent
 import com.hp.kalexa.core.intent.IntentExecutor
+import com.hp.kalexa.model.request.ConnectionsResponseRequest
+import com.hp.kalexa.model.request.ElementSelectedRequest
 import com.hp.kalexa.model.request.IntentRequest
 import com.hp.kalexa.model.request.LaunchRequest
 import com.hp.kalexa.model.response.AlexaResponse
@@ -43,9 +45,17 @@ class FakeIntent : IntentExecutor() {
         return alexaResponse { response { speech { "This is a fallback response" } } }
     }
 
+    override fun onElementSelected(request: ElementSelectedRequest): AlexaResponse {
+        return super.onElementSelected(request)
+    }
+
+    override fun onConnectionsResponse(request: ConnectionsResponseRequest): AlexaResponse {
+        return super.onConnectionsResponse(request)
+    }
+
     @RecoverIntentContext
     override fun onUnknownIntentContext(builtInIntent: BuiltInIntent): AlexaResponse {
-        return super.onUnknownIntentContext(builtInIntent)
+        return  alexaResponse { response { speech { "This is a unknown intent context response" } } }
     }
 
 }

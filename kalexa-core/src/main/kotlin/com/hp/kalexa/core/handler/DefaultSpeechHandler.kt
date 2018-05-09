@@ -111,13 +111,12 @@ open class DefaultSpeechHandler : SpeechHandler {
     override fun handleElementSelectedRequest(envelope: AlexaRequestEnvelope<ElementSelectedRequest>): AlexaResponse {
         println("=========================== ElementSelectedRequest =========================")
         val intentName = envelope.session.attribute<String>(INTENT_CONTEXT)
-        return intentName?.let {
-            val intentExecutor = getIntentExecutorOf(intentName, envelope)
-            intentExecutor?.let {
-                val alexaResponse = it.onElementSelected(envelope.request)
-                generateResponse(it, alexaResponse)
-            } ?: retryIntent(envelope.session.attributes)
-        } ?: unsupportedIntent()
+                ?: envelope.request.token.split("\\|").first()
+        val intentExecutor = getIntentExecutorOf(intentName, envelope)
+        return intentExecutor?.let {
+            val alexaResponse = it.onElementSelected(envelope.request)
+            generateResponse(it, alexaResponse)
+        } ?:  unknownIntentException(intentName)
     }
 
     override fun handleSessionEndedRequest(envelope: AlexaRequestEnvelope<SessionEndedRequest>): AlexaResponse {
@@ -146,7 +145,7 @@ open class DefaultSpeechHandler : SpeechHandler {
         return intentExecutor?.let {
             val alexaResponse = it.onConnectionsResponse(envelope.request)
             generateResponse(it, alexaResponse)
-        } ?: unsupportedIntent()
+        } ?: unknownIntentException(intent)
     }
 
     private fun generateResponse(executor: IntentExecutor, alexaResponse: AlexaResponse): AlexaResponse {
