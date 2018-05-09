@@ -18,29 +18,27 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.objectMockk
 import org.jetbrains.spek.api.Spek
-import org.jetbrains.spek.api.dsl.context
-import org.jetbrains.spek.api.dsl.given
-import org.jetbrains.spek.api.dsl.it
-import org.jetbrains.spek.api.dsl.on
+import org.jetbrains.spek.api.dsl.*
 import kotlin.reflect.KClass
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 object DefaultSpeechHandlerTest : Spek({
 
-    given("a Default speech handler class") {
+    describe("a Default speech handler class") {
         val defaultSpeechHandler by memoized { DefaultSpeechHandler() }
         objectMockk(Util).mock()
         every { Util.getIntentPackage() } returns "com.hp.kalexa.core.model"
 
-        on("handleSessionStartedRequest method") {
+        describe("When handleSessionStarted method is called") {
             val envelope = mockk<AlexaRequestEnvelope<SessionStartedRequest>>()
             it("should return an empty response") {
                 val alexaResponse = defaultSpeechHandler.handleSessionStartedRequest(envelope)
                 assertEquals(AlexaResponse.emptyResponse().toJson(), alexaResponse.toJson())
             }
         }
-        context("handleLaunchRequest method") {
+
+        describe("When handleLaunchRequest method is called") {
             val customLaunchRequestEnvelope = mockk<AlexaRequestEnvelope<LaunchRequest>>()
             beforeGroup {
                 val session = mockk<Session>()
@@ -81,13 +79,13 @@ object DefaultSpeechHandlerTest : Spek({
                 }
             }
         }
-        context("handleIntentRequest") {
+        describe("When handleIntentRequest method is called") {
             val intentRequestEnvelope = mockk<AlexaRequestEnvelope<IntentRequest>>()
+            lateinit var fakeIntent: IntentExecutor
             beforeGroup {
-                every { Util.getIntentPackage() } returns "package.with.intent"
-                val fakeIntent = mockk<FakeIntent>()
+                fakeIntent = mockk<FakeIntent>()
                 every { Util.loadIntentClassesFromPackage() } returns listOf(fakeIntent::class)
-                every { Util.findAnnotatedMethod(any(), Fallback::class, any()) } returns mapOf("FakeIntent" to fakeIntent::class)
+                every { Util.getIntentPackage() } returns "package.with.intent"
                 val session = mockk<Session> {
                     every { attributes } returns mutableMapOf()
                 }
@@ -98,30 +96,56 @@ object DefaultSpeechHandlerTest : Spek({
                 every { intentRequestEnvelope.context } returns context
                 every { intentRequestEnvelope.version } returns "1.0"
             }
-            on("Custom Intent") {
-                every { intentRequestEnvelope.request.intent.name } returns "FakeIntent"
-                it("should call onIntentRequest method") {
-                    val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
-                    assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a hello from FakeIntent"},"card":{"type":"Simple","title":"Hello world","content":"This is a content coming from FakeIntent"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}"""
-                            , response.toJson())
+            context("Custom Intent") {
+                on("Existent Custom Intent") {
+                    every { intentRequestEnvelope.request.intent.name } returns "FakeIntent"
+                    it("should call onIntentRequest method") {
+                        val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                        assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a hello from FakeIntent"},"card":{"type":"Simple","title":"Hello world","content":"This is a content coming from FakeIntent"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}"""
+                                , response.toJson())
+                    }
+                }
+                on("Non existent Custom Intent") {
+                    every { intentRequestEnvelope.request.intent.name } returns "UnknownIntent"
+                    it("should throw IllegalArgumentException") {
+                        assertFailsWith(exceptionClass = IllegalArgumentException::class) {
+                            defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                        }
+                    }
                 }
             }
-            on("Fallback Intent with @Fallback annotation") {
-                every { intentRequestEnvelope.request.intent.name } returns "AMAZON.FallbackIntent"
-                it("should call a fallback method") {
-                    val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
-                    assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a fallback response"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""",
-                            response.toJson())
+            context("Amazon Fallback Intent") {
+                beforeGroup {
+                    every { Util.findAnnotatedMethod(any(), Fallback::class, any()) } returns mapOf("FakeIntent" to fakeIntent::class)
                 }
-            }
-            on("Fallback Intent without @Fallback annotation") {
-                every { intentRequestEnvelope.request.intent.name } returns "AMAZON.FallbackIntent"
-                every { Util.loadIntentClassesFromPackage() } returns emptyList()
-                every { Util.findAnnotatedMethod(any(), Fallback::class, any()) } returns mapOf()
-                it("should call a fallback method") {
-                    val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
-                    assertEquals(IntentUtil.unsupportedIntent().toJson(),
-                            response.toJson())
+                on("Fallback Intent with @Fallback annotation") {
+                    every { intentRequestEnvelope.request.intent.name } returns "AMAZON.FallbackIntent"
+                    it("should call FakeIntent fallback method") {
+                        val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                        assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a fallback response"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""",
+                                response.toJson())
+                    }
+                }
+                on("Fallback Intent without @Fallback annotation") {
+                    every { intentRequestEnvelope.request.intent.name } returns "AMAZON.FallbackIntent"
+                    every { Util.loadIntentClassesFromPackage() } returns emptyList()
+                    every { Util.findAnnotatedMethod(any(), Fallback::class, any()) } returns mapOf()
+                    it("should call default fallback method") {
+                        val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                        assertEquals(IntentUtil.unsupportedIntent().toJson(),
+                                response.toJson())
+                    }
+                }
+                on("Fallback Intent with more than one @Fallback annotation") {
+                    every { intentRequestEnvelope.request.intent.name } returns "AMAZON.FallbackIntent"
+                    val intentExecutor = mockk<KClass<out IntentExecutor>>()
+                    val intentExecutor2 = mockk<KClass<out IntentExecutor>>()
+                    every { Util.findAnnotatedMethod(any(), Fallback::class, any()) } returns mutableMapOf("intent1" to intentExecutor, "intent2" to intentExecutor2)
+                    it("should throw illegal annotation argument") {
+                        assertFailsWith(exceptionClass = IllegalAnnotationException::class) {
+                            defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                        }
+                    }
                 }
             }
         }
