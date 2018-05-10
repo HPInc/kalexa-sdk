@@ -45,14 +45,6 @@ class FakeIntent : IntentExecutor() {
         return alexaResponse { response { speech { "This is a fallback response" } } }
     }
 
-    override fun onElementSelected(request: ElementSelectedRequest): AlexaResponse {
-        return super.onElementSelected(request)
-    }
-
-    override fun onConnectionsResponse(request: ConnectionsResponseRequest): AlexaResponse {
-        return super.onConnectionsResponse(request)
-    }
-
     @RecoverIntentContext
     override fun onUnknownIntentContext(builtInIntent: BuiltInIntent): AlexaResponse {
         return  alexaResponse { response { speech { "This is a unknown intent context response" } } }
