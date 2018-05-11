@@ -162,7 +162,6 @@ class IntentExecutorTest : Spek({
             it("should have display interface") {
                 every {display.markupVersion} returns "1.0"
                 every {display.templateVersion} returns "1.0"
-
                 val response = dummyIntent.hasDisplay()
                 assertTrue { response }
             }
