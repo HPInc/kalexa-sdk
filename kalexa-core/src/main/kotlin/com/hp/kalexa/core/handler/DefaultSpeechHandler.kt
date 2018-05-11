@@ -154,7 +154,7 @@ open class DefaultSpeechHandler : SpeechHandler {
             uniqueValues.size > 1 -> illegalAnnotationArgument("Fullfiller")
             else -> {
                 val entry = fullfillerClasses.entries.first()
-                println("Class with Fallback annotation: ${entry.value}")
+                println("Class with Fulfiller annotation: ${entry.value}")
                 getIntentExecutorOf(entry.key, envelope)!!.onConnectionsRequest(envelope.request)
             }
         }
