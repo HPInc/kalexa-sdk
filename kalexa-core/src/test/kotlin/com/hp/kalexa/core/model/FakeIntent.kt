@@ -13,8 +13,11 @@ import com.hp.kalexa.model.request.LaunchRequest
 import com.hp.kalexa.model.response.AlexaResponse
 import com.hp.kalexa.model.response.alexaResponse
 
+@Launcher
+@Intents(intentNames = ["FirstIntent", "SecondIntent", "ThirdIntent"])
+@Fallback
+@RecoverIntentContext
 class FakeIntent : IntentExecutor() {
-    @Launcher
     override fun onLaunchIntent(request: LaunchRequest): AlexaResponse {
         return alexaResponse {
             response {
@@ -25,7 +28,6 @@ class FakeIntent : IntentExecutor() {
         }
     }
 
-    @Intents(intentNames = ["FirstIntent", "SecondIntent", "ThirdIntent"])
     override fun onIntentRequest(request: IntentRequest): AlexaResponse {
         return alexaResponse {
             response {
@@ -40,14 +42,12 @@ class FakeIntent : IntentExecutor() {
         }
     }
 
-    @Fallback
     override fun onFallbackIntent(request: IntentRequest): AlexaResponse {
         return alexaResponse { response { speech { "This is a fallback response" } } }
     }
 
-    @RecoverIntentContext
     override fun onUnknownIntentContext(builtInIntent: BuiltInIntent): AlexaResponse {
-        return  alexaResponse { response { speech { "This is a unknown intent context response" } } }
+        return alexaResponse { response { speech { "This is a unknown intent context response" } } }
     }
 
 }

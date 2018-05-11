@@ -11,10 +11,7 @@ import com.hp.kalexa.core.util.IntentUtil.unsupportedIntent
 import com.hp.kalexa.core.util.Util
 import com.hp.kalexa.model.Context
 import com.hp.kalexa.model.Session
-import com.hp.kalexa.model.request.ConnectionsResponseRequest
-import com.hp.kalexa.model.request.ElementSelectedRequest
-import com.hp.kalexa.model.request.IntentRequest
-import com.hp.kalexa.model.request.LaunchRequest
+import com.hp.kalexa.model.request.*
 import com.hp.kalexa.model.response.AlexaResponse
 
 abstract class IntentExecutor {
@@ -40,9 +37,14 @@ abstract class IntentExecutor {
     open fun onIntentRequest(request: IntentRequest) = AlexaResponse.emptyResponse()
 
     /**
-     * Handles Link Result Request coming from Alexa. This is the result from the skill when using skill to skill
+     * Handles Connections Response Request coming from Alexa. This is the result from the skill when using skill to skill
      */
     open fun onConnectionsResponse(request: ConnectionsResponseRequest): AlexaResponse = AlexaResponse.emptyResponse()
+
+    /**
+     * Handles Connections Request coming from Alexa. This is the request from the skill when using skill to skill
+     */
+    open fun onConnectionsRequest(request: ConnectionsRequest): AlexaResponse = AlexaResponse.emptyResponse()
 
     /**
      * Handles The Built In Intents coming from Alexa.

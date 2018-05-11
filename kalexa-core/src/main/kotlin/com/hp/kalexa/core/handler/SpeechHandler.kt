@@ -17,6 +17,8 @@ interface SpeechHandler {
 
     fun handleConnectionsResponseRequest(envelope: AlexaRequestEnvelope<ConnectionsResponseRequest>): AlexaResponse
 
+    fun handleConnectionsRequest(envelope: AlexaRequestEnvelope<ConnectionsRequest>): AlexaResponse
+
 
     companion object {
         const val INTENT_CONTEXT = "com.hp.kalexa.intentContext"

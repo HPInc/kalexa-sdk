@@ -27,7 +27,7 @@ fun richText(block: (RichText.() -> String)) = RichText().apply { text = block()
 @DslMarker
 annotation class AlexaResponseDsl
 
-data class AlexaResponse (
+data class AlexaResponse(
         val response: Response = Response(),
         val sessionAttributes: Map<String, Any?> = emptyMap(),
         val version: String = "1.0") {
@@ -320,11 +320,11 @@ data class AlexaResponse (
 
         @AlexaResponseDsl
         class ReturnFromLinkDirectiveBuilder {
-            lateinit var status: ConnectionsStatus
+            lateinit var status: ReturnFromLinkDirective.Status
             lateinit var payload: Payload<*>
 
-            fun status(block: ConnectionsStatusBuilder.() -> Unit) {
-                status = ConnectionsStatusBuilder().apply { block() }.build()
+            fun status(block: () -> ReturnFromLinkDirective.Status) {
+                status = block()
             }
 
             fun payload(block: ReturnFromLinkDirectiveBuilder.() -> Payload<*>) {
@@ -444,8 +444,7 @@ fun main(args: Array<String>) {
 
                 returnFromLinkDirectiveDirective {
                     status {
-                        code = "200"
-                        message = "All done"
+                        ReturnFromLinkDirective.Status.SUCCESS
                     }
                     payload {
                         print {

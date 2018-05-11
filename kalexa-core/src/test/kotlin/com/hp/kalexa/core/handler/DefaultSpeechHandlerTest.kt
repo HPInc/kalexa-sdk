@@ -64,7 +64,7 @@ object DefaultSpeechHandlerTest : Spek({
                 every { Util.getIntentPackage() } returns "package.with.intent"
                 val fakeIntent = mockk<FakeIntent>()
                 every { Util.loadIntentClassesFromPackage() } returns listOf(fakeIntent::class)
-                every { Util.findAnnotatedMethod(any(), Launcher::class, any()) } returns mapOf("FakeIntent" to fakeIntent::class)
+                every { Util.findAnnotatedClasses(any(), Launcher::class) } returns mapOf("FakeIntent" to fakeIntent::class)
 
                 it("should return a call onLaunchIntent method from the intent annotated with launcher") {
                     val alexaResponse = defaultSpeechHandler.handleLaunchRequest(customLaunchRequestEnvelope)
@@ -75,7 +75,7 @@ object DefaultSpeechHandlerTest : Spek({
             on("More than one Intent with @Launcher annotation") {
                 val intentExecutor = mockk<KClass<out IntentExecutor>>()
                 val intentExecutor2 = mockk<KClass<out IntentExecutor>>()
-                every { Util.findAnnotatedMethod(any(), Launcher::class, any()) } returns mutableMapOf("intent1" to intentExecutor, "intent2" to intentExecutor2)
+                every { Util.findAnnotatedClasses(any(), Launcher::class) } returns mutableMapOf("intent1" to intentExecutor, "intent2" to intentExecutor2)
                 it("should throw illegal annotation argument") {
                     assertFailsWith(exceptionClass = IllegalAnnotationException::class) { defaultSpeechHandler.handleLaunchRequest(customLaunchRequestEnvelope) }
                 }
@@ -123,7 +123,7 @@ object DefaultSpeechHandlerTest : Spek({
             }
             context("Amazon Fallback Intent") {
                 beforeGroup {
-                    every { Util.findAnnotatedMethod(any(), Fallback::class, any()) } returns mapOf("FakeIntent" to fakeIntent::class)
+                    every { Util.findAnnotatedClasses(any(), Fallback::class) } returns mapOf("FakeIntent" to fakeIntent::class)
                 }
                 on("Fallback Intent with @Fallback annotation") {
                     every { intentRequestEnvelope.request.intent.name } returns "AMAZON.FallbackIntent"
@@ -136,7 +136,7 @@ object DefaultSpeechHandlerTest : Spek({
                 on("Fallback Intent without @Fallback annotation") {
                     every { intentRequestEnvelope.request.intent.name } returns "AMAZON.FallbackIntent"
                     every { Util.loadIntentClassesFromPackage() } returns emptyList()
-                    every { Util.findAnnotatedMethod(any(), Fallback::class, any()) } returns mapOf()
+                    every { Util.findAnnotatedClasses(any(), Fallback::class) } returns mapOf()
                     it("should call default fallback method") {
                         val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                         assertEquals(IntentUtil.unsupportedIntent().toJson(),
@@ -147,7 +147,7 @@ object DefaultSpeechHandlerTest : Spek({
                     every { intentRequestEnvelope.request.intent.name } returns "AMAZON.FallbackIntent"
                     val intentExecutor = mockk<KClass<out IntentExecutor>>()
                     val intentExecutor2 = mockk<KClass<out IntentExecutor>>()
-                    every { Util.findAnnotatedMethod(any(), Fallback::class, any()) } returns mutableMapOf("intent1" to intentExecutor, "intent2" to intentExecutor2)
+                    every { Util.findAnnotatedClasses(any(), Fallback::class) } returns mutableMapOf("intent1" to intentExecutor, "intent2" to intentExecutor2)
                     it("should throw illegal annotation argument") {
                         assertFailsWith(exceptionClass = IllegalAnnotationException::class) {
                             defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
@@ -197,7 +197,7 @@ object DefaultSpeechHandlerTest : Spek({
                         every { Util.loadIntentClassesFromPackage() } returns emptyList()
                         val intentExecutor = mockk<KClass<out IntentExecutor>>()
                         val intentExecutor2 = mockk<KClass<out IntentExecutor>>()
-                        every { Util.findAnnotatedMethod(any(), RecoverIntentContext::class, any()) } returns mutableMapOf("intent1" to intentExecutor, "intent2" to intentExecutor2)
+                        every { Util.findAnnotatedClasses(any(), RecoverIntentContext::class) } returns mutableMapOf("intent1" to intentExecutor, "intent2" to intentExecutor2)
                         it("should throw illegal annotation argument") {
                             assertFailsWith(exceptionClass = IllegalAnnotationException::class) {
                                 defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)

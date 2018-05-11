@@ -32,9 +32,19 @@ object Util {
         }
     }
 
+    fun <T : Annotation> findAnnotatedClasses(intentClasses: Map<String, KClass<out IntentExecutor>>, annotation: KClass<T>): Map<String, KClass<out IntentExecutor>> {
+        return intentClasses.filter {
+            it.value.findAnnotation(annotation) != null
+        }
+    }
+
     fun <T : Annotation> getMethodAnnotation(clazz: KClass<out Any>, methodName: String, annotation: KClass<T>): Annotation? {
         val kFunction = clazz.declaredFunctions.find { it.name == methodName }
         return kFunction?.findAnnotation(annotation)
+    }
+
+    fun getAnnotation(clazz: KClass<out Any>, methodName: String): KFunction<*>? {
+        return clazz.declaredFunctions.find { it.name == methodName }
     }
 
     fun loadIntentClassesFromPackage(): List<KClass<out Any>> {

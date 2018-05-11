@@ -2,7 +2,6 @@ package com.hp.kalexa.core.handler
 
 import com.hp.kalexa.model.request.*
 import com.hp.kalexa.model.response.AlexaResponse
-import java.lang.System
 
 class SpeechRequestHandler(private val speechHandler: SpeechHandler) {
 
@@ -48,6 +47,8 @@ class SpeechRequestHandler(private val speechHandler: SpeechHandler) {
                 speechHandler.handleIntentRequest(alexaRequest as AlexaRequestEnvelope<IntentRequest>)
             is ConnectionsResponseRequest ->
                 speechHandler.handleConnectionsResponseRequest(alexaRequest as AlexaRequestEnvelope<ConnectionsResponseRequest>)
+            is ConnectionsRequest ->
+                speechHandler.handleConnectionsRequest(alexaRequest as AlexaRequestEnvelope<ConnectionsRequest>)
             is SessionEndedRequest ->
                 speechHandler.handleSessionEndedRequest(alexaRequest as AlexaRequestEnvelope<SessionEndedRequest>)
             is ElementSelectedRequest ->

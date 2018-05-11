@@ -8,6 +8,11 @@ import com.hp.kalexa.model.payload.Payload
 
 @JsonTypeName("Links.ReturnFromLink")
 class ReturnFromLinkDirective(
-        val status: ConnectionsStatus,
+        val status: Status,
         @JsonSerialize(using = PayloadSerializer::class)
-        val payload: Payload<*>?) : Directive()
+        val payload: Payload<*>?) : Directive() {
+
+    enum class Status {
+        SUCCESS, FAILURE
+    }
+}
