@@ -148,7 +148,7 @@ open class DefaultSpeechHandler : SpeechHandler {
         println("=========================== ConnectionsRequest =========================")
         val fullfillerClasses = findAnnotatedClasses(intentClasses, Fullfiller::class)
         val uniqueValues = fullfillerClasses.values.toHashSet()
-        println("Detected ${uniqueValues.size} intent classes with Fallback annotation.")
+        println("Detected ${uniqueValues.size} intent classes with Fulfiller annotation.")
         return when {
             uniqueValues.isEmpty() -> unsupportedIntent()
             uniqueValues.size > 1 -> illegalAnnotationArgument("Fullfiller")
