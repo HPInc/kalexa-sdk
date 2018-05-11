@@ -1,15 +1,9 @@
 package com.hp.kalexa.core.model
 
-import com.hp.kalexa.core.annotation.Fallback
-import com.hp.kalexa.core.annotation.Intents
-import com.hp.kalexa.core.annotation.Launcher
-import com.hp.kalexa.core.annotation.RecoverIntentContext
+import com.hp.kalexa.core.annotation.*
 import com.hp.kalexa.core.intent.BuiltInIntent
 import com.hp.kalexa.core.intent.IntentExecutor
-import com.hp.kalexa.model.request.ConnectionsResponseRequest
-import com.hp.kalexa.model.request.ElementSelectedRequest
-import com.hp.kalexa.model.request.IntentRequest
-import com.hp.kalexa.model.request.LaunchRequest
+import com.hp.kalexa.model.request.*
 import com.hp.kalexa.model.response.AlexaResponse
 import com.hp.kalexa.model.response.alexaResponse
 
@@ -17,6 +11,8 @@ import com.hp.kalexa.model.response.alexaResponse
 @Intents(intentNames = ["FirstIntent", "SecondIntent", "ThirdIntent"])
 @Fallback
 @RecoverIntentContext
+@Fullfiller
+@Helper
 class FakeIntent : IntentExecutor() {
     override fun onLaunchIntent(request: LaunchRequest): AlexaResponse {
         return alexaResponse {
@@ -42,12 +38,24 @@ class FakeIntent : IntentExecutor() {
         }
     }
 
+    override fun onHelpIntent(request: IntentRequest): AlexaResponse {
+        return alexaResponse { response { speech { "This is a help response" } } }
+    }
+
     override fun onFallbackIntent(request: IntentRequest): AlexaResponse {
         return alexaResponse { response { speech { "This is a fallback response" } } }
     }
 
     override fun onUnknownIntentContext(builtInIntent: BuiltInIntent): AlexaResponse {
         return alexaResponse { response { speech { "This is a unknown intent context response" } } }
+    }
+
+    override fun onConnectionsRequest(request: ConnectionsRequest): AlexaResponse {
+        return alexaResponse {
+            response {
+                speech { "This is a onConnectionsRequest from FakeIntent" }
+            }
+        }
     }
 
 }

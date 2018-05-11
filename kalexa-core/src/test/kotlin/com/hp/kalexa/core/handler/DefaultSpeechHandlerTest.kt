@@ -1,8 +1,6 @@
 package com.hp.kalexa.core.handler
 
-import com.hp.kalexa.core.annotation.Fallback
-import com.hp.kalexa.core.annotation.Launcher
-import com.hp.kalexa.core.annotation.RecoverIntentContext
+import com.hp.kalexa.core.annotation.*
 import com.hp.kalexa.core.intent.BuiltInIntent
 import com.hp.kalexa.core.intent.IntentExecutor
 import com.hp.kalexa.core.model.FakeIntent
@@ -81,6 +79,7 @@ object DefaultSpeechHandlerTest : Spek({
                 }
             }
         }
+
         describe("When handleIntentRequest method is called") {
             val intentRequestEnvelope = mockk<AlexaRequestEnvelope<IntentRequest>>()
             lateinit var fakeIntent: IntentExecutor
@@ -148,6 +147,40 @@ object DefaultSpeechHandlerTest : Spek({
                     val intentExecutor = mockk<KClass<out IntentExecutor>>()
                     val intentExecutor2 = mockk<KClass<out IntentExecutor>>()
                     every { Util.findAnnotatedClasses(any(), Fallback::class) } returns mutableMapOf("intent1" to intentExecutor, "intent2" to intentExecutor2)
+                    it("should throw illegal annotation argument") {
+                        assertFailsWith(exceptionClass = IllegalAnnotationException::class) {
+                            defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                        }
+                    }
+                }
+            }
+            context("Amazon Help Intent") {
+                beforeGroup {
+                    every { Util.findAnnotatedClasses(any(), Helper::class) } returns mapOf("FakeIntent" to fakeIntent::class)
+                }
+                on("Intent with @Helper annotation") {
+                    every { intentRequestEnvelope.request.intent.name } returns "AMAZON.HelpIntent"
+                    it("should call FakeIntent onHelpIntent method") {
+                        val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                        assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a help response"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""",
+                                response.toJson())
+                    }
+                }
+                on("Intent without @Helper annotation") {
+                    every { intentRequestEnvelope.request.intent.name } returns "AMAZON.HelpIntent"
+                    every { Util.loadIntentClassesFromPackage() } returns emptyList()
+                    every { Util.findAnnotatedClasses(any(), Helper::class) } returns mapOf()
+                    it("should call default helpIntent method") {
+                        val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                        assertEquals(IntentUtil.helpIntent().toJson(),
+                                response.toJson())
+                    }
+                }
+                on("Intents with more than one @Helper annotation") {
+                    every { intentRequestEnvelope.request.intent.name } returns "AMAZON.HelpIntent"
+                    val intentExecutor = mockk<KClass<out IntentExecutor>>()
+                    val intentExecutor2 = mockk<KClass<out IntentExecutor>>()
+                    every { Util.findAnnotatedClasses(any(), Helper::class) } returns mutableMapOf("intent1" to intentExecutor, "intent2" to intentExecutor2)
                     it("should throw illegal annotation argument") {
                         assertFailsWith(exceptionClass = IllegalAnnotationException::class) {
                             defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
@@ -289,6 +322,59 @@ object DefaultSpeechHandlerTest : Spek({
                     assertFailsWith(exceptionClass = IllegalArgumentException::class) {
                         defaultSpeechHandler.handleConnectionsResponseRequest(connectionsResponseRequest)
                     }
+                }
+            }
+        }
+
+        describe("When handleConnectionsRequest method is called") {
+            val connectionsRequest = mockk<AlexaRequestEnvelope<ConnectionsRequest>>()
+            lateinit var fakeIntent: IntentExecutor
+            lateinit var context: Context
+            lateinit var request: ConnectionsRequest
+            lateinit var session: Session
+            val attributesSession = mutableMapOf<String, Any?>()
+            beforeEachTest {
+                fakeIntent = mockk<FakeIntent>()
+                attributesSession.clear()
+                every { Util.loadIntentClassesFromPackage() } returns listOf(fakeIntent::class)
+                every { Util.getIntentPackage() } returns "package.with.intent"
+                session = mockk {
+                    every { attributes } returns attributesSession
+                }
+                context = mockk()
+                request = mockk()
+                every { connectionsRequest.session } returns session
+                every { connectionsRequest.request } returns request
+                every { connectionsRequest.context } returns context
+                every { connectionsRequest.version } returns "1.0"
+                every { Util.findAnnotatedClasses(any(), Fullfiller::class) } returns mapOf("FakeIntent" to fakeIntent::class)
+            }
+
+            on("Intent without Fulfiller annotation") {
+                every { Util.loadIntentClassesFromPackage() } returns emptyList()
+                every { Util.findAnnotatedClasses(any(), Fullfiller::class) } returns mapOf()
+                it("should return a default Fulfiller response") {
+                    every { Util.getIntentPackage() } returns "package.with.no.intent"
+                    val alexaResponse = defaultSpeechHandler.handleConnectionsRequest(connectionsRequest)
+                    assertEquals(IntentUtil.unsupportedIntent().toJson(), alexaResponse.toJson())
+                }
+            }
+            on("Intent with Fulfiller annotation") {
+                every { Util.getIntentPackage() } returns "package.with.intent"
+                every { Util.loadIntentClassesFromPackage() } returns listOf(fakeIntent::class)
+
+                it("should return a call onConnectionsRequest method from the intent annotated with Fulfiller") {
+                    val alexaResponse = defaultSpeechHandler.handleConnectionsRequest(connectionsRequest)
+                    assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a onConnectionsRequest from FakeIntent"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""",
+                            alexaResponse.toJson())
+                }
+            }
+            on("More than one Intent with @Fulfiller annotation") {
+                val intentExecutor = mockk<KClass<out IntentExecutor>>()
+                val intentExecutor2 = mockk<KClass<out IntentExecutor>>()
+                every { Util.findAnnotatedClasses(any(), Fullfiller::class) } returns mutableMapOf("intent1" to intentExecutor, "intent2" to intentExecutor2)
+                it("should throw illegal annotation argument") {
+                    assertFailsWith(exceptionClass = IllegalAnnotationException::class) { defaultSpeechHandler.handleConnectionsRequest(connectionsRequest) }
                 }
             }
         }

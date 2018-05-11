@@ -10,6 +10,9 @@ annotation class RecoverIntentContext
 annotation class Fallback
 
 @Target(AnnotationTarget.CLASS)
+annotation class Helper
+
+@Target(AnnotationTarget.CLASS)
 annotation class Intents(vararg val intentNames: String)
 
 @Target(AnnotationTarget.CLASS)

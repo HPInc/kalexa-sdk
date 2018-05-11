@@ -53,6 +53,7 @@ open class DefaultSpeechHandler : SpeechHandler {
         return when {
             builtInIntent == null -> customIntent(intentName, envelope)
             intentName == BuiltInIntent.FALLBACK_INTENT.rawValue -> fallbackIntent(envelope)
+            intentName == BuiltInIntent.HELP_INTENT.rawValue -> helpIntent(envelope)
             intentName == builtInIntent.rawValue -> unknownIntentContext(builtInIntent, envelope)
             else -> builtInIntent(intentName, builtInIntent, envelope)
         }
@@ -69,6 +70,21 @@ open class DefaultSpeechHandler : SpeechHandler {
                 val entry = fallbackClasses.entries.first()
                 println("Class with Fallback annotation: ${entry.value}")
                 getIntentExecutorOf(entry.key, envelope)!!.onFallbackIntent(envelope.request)
+            }
+        }
+    }
+
+    private fun helpIntent(envelope: AlexaRequestEnvelope<IntentRequest>): AlexaResponse {
+        val helperClasses = findAnnotatedClasses(intentClasses, Helper::class)
+        val uniqueValues = helperClasses.values.toHashSet()
+        println("Detected ${uniqueValues.size} intent classes with Helper annotation.")
+        return when {
+            uniqueValues.isEmpty() -> IntentUtil.helpIntent()
+            uniqueValues.size > 1 -> illegalAnnotationArgument("Helper")
+            else -> {
+                val entry = helperClasses.entries.first()
+                println("Class with Helper annotation: ${entry.value}")
+                getIntentExecutorOf(entry.key, envelope)!!.onHelpIntent(envelope.request)
             }
         }
     }
