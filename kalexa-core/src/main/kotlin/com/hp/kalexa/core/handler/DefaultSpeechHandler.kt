@@ -9,7 +9,6 @@ import com.hp.kalexa.core.intent.BuiltInIntent
 import com.hp.kalexa.core.intent.IntentExecutor
 import com.hp.kalexa.core.util.IntentUtil
 import com.hp.kalexa.core.util.IntentUtil.defaultGreetings
-import com.hp.kalexa.core.util.IntentUtil.retryIntent
 import com.hp.kalexa.core.util.IntentUtil.unsupportedIntent
 import com.hp.kalexa.core.util.Util.findAnnotatedMethod
 import com.hp.kalexa.core.util.Util.getIntentPackage
@@ -116,7 +115,7 @@ open class DefaultSpeechHandler : SpeechHandler {
         return intentExecutor?.let {
             val alexaResponse = it.onElementSelected(envelope.request)
             generateResponse(it, alexaResponse)
-        } ?:  unknownIntentException(intentName)
+        } ?: unknownIntentException(intentName)
     }
 
     override fun handleSessionEndedRequest(envelope: AlexaRequestEnvelope<SessionEndedRequest>): AlexaResponse {

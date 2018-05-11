@@ -9,7 +9,7 @@ class SpeechRequestHandler(private val speechHandler: SpeechHandler) {
     fun process(input: ByteArray): String {
         val requestEnvelope = AlexaRequestEnvelope.fromJson(input)
 
-        if (!validateApplicationId(requestEnvelope)) {
+        if (validateApplicationId(requestEnvelope).not()) {
             throw IllegalArgumentException("Request application ID doesn't match with given Application ID")
         }
 
