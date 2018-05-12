@@ -143,7 +143,7 @@ open class DefaultSpeechHandler : SpeechHandler {
 
     override fun handleConnectionsRequest(envelope: AlexaRequestEnvelope<ConnectionsRequest>): AlexaResponse {
         println("=========================== ConnectionsRequest =========================")
-        return getAnnotatedClasses(envelope, Fullfiller::class) { result ->
+        return getAnnotatedClasses(envelope, Fulfiller::class) { result ->
             when (result) {
                 is Result.Content -> result.intentExecutor.onConnectionsRequest(envelope.request)
                 is Result.None -> unsupportedIntent()

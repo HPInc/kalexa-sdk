@@ -347,12 +347,12 @@ object DefaultSpeechHandlerTest : Spek({
                 every { connectionsRequest.request } returns request
                 every { connectionsRequest.context } returns context
                 every { connectionsRequest.version } returns "1.0"
-                every { Util.findAnnotatedClasses(any(), Fullfiller::class) } returns mapOf("FakeIntent" to fakeIntent::class)
+                every { Util.findAnnotatedClasses(any(), Fulfiller::class) } returns mapOf("FakeIntent" to fakeIntent::class)
             }
 
             on("Intent without Fulfiller annotation") {
                 every { Util.loadIntentClassesFromPackage() } returns emptyList()
-                every { Util.findAnnotatedClasses(any(), Fullfiller::class) } returns mapOf()
+                every { Util.findAnnotatedClasses(any(), Fulfiller::class) } returns mapOf()
                 it("should return a default Fulfiller response") {
                     every { Util.getIntentPackage() } returns "package.with.no.intent"
                     val alexaResponse = defaultSpeechHandler.handleConnectionsRequest(connectionsRequest)
@@ -372,7 +372,7 @@ object DefaultSpeechHandlerTest : Spek({
             on("More than one Intent with @Fulfiller annotation") {
                 val intentExecutor = mockk<KClass<out IntentExecutor>>()
                 val intentExecutor2 = mockk<KClass<out IntentExecutor>>()
-                every { Util.findAnnotatedClasses(any(), Fullfiller::class) } returns mutableMapOf("intent1" to intentExecutor, "intent2" to intentExecutor2)
+                every { Util.findAnnotatedClasses(any(), Fulfiller::class) } returns mutableMapOf("intent1" to intentExecutor, "intent2" to intentExecutor2)
                 it("should throw illegal annotation argument") {
                     assertFailsWith(exceptionClass = IllegalAnnotationException::class) { defaultSpeechHandler.handleConnectionsRequest(connectionsRequest) }
                 }

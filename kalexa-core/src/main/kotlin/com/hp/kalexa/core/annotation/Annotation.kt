@@ -16,4 +16,4 @@ annotation class Helper
 annotation class Intents(vararg val intentNames: String)
 
 @Target(AnnotationTarget.CLASS)
-annotation class Fullfiller
+annotation class Fulfiller

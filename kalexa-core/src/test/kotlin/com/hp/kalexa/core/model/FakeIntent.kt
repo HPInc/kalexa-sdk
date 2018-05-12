@@ -11,7 +11,7 @@ import com.hp.kalexa.model.response.alexaResponse
 @Intents(intentNames = ["FirstIntent", "SecondIntent", "ThirdIntent"])
 @Fallback
 @RecoverIntentContext
-@Fullfiller
+@Fulfiller
 @Helper
 class FakeIntent : IntentExecutor() {
     override fun onLaunchIntent(request: LaunchRequest): AlexaResponse {
