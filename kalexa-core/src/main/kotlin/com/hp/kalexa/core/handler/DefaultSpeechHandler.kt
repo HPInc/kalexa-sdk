@@ -4,8 +4,9 @@ import com.hp.kalexa.core.annotation.*
 import com.hp.kalexa.core.handler.SpeechHandler.Companion.INTENT_CONTEXT
 import com.hp.kalexa.core.intent.BuiltInIntent
 import com.hp.kalexa.core.intent.IntentExecutor
-import com.hp.kalexa.core.util.IntentUtil
+import com.hp.kalexa.core.util.IntentUtil.defaultBuiltInResponse
 import com.hp.kalexa.core.util.IntentUtil.defaultGreetings
+import com.hp.kalexa.core.util.IntentUtil.helpIntent
 import com.hp.kalexa.core.util.IntentUtil.unsupportedIntent
 import com.hp.kalexa.core.util.Util.findAnnotatedClasses
 import com.hp.kalexa.core.util.Util.getIntentPackage
@@ -31,16 +32,11 @@ open class DefaultSpeechHandler : SpeechHandler {
     override fun handleLaunchRequest(envelope: AlexaRequestEnvelope<LaunchRequest>): AlexaResponse {
         println("=========================== LaunchRequest =========================")
         println("Looking for Launcher intents in ${getIntentPackage()}")
-        val launcherClasses = findAnnotatedClasses(intentClasses, Launcher::class)
-        val uniqueValues = launcherClasses.values.toHashSet()
-        println("Detected ${uniqueValues.size} intent classes with Launcher annotation.")
-        return when {
-            uniqueValues.isEmpty() -> defaultGreetings()
-            uniqueValues.size > 1 -> illegalAnnotationArgument("Launcher")
-            else -> {
-                val entry = launcherClasses.entries.first()
-                println("Class with Launcher annotation: ${entry.value}")
-                getIntentExecutorOf(entry.key, envelope)!!.onLaunchIntent(envelope.request)
+        return getAnnotatedClasses(envelope, Launcher::class) { result ->
+            when (result) {
+                is Result.Content -> result.intentExecutor.onLaunchIntent(envelope.request)
+                is Result.None -> defaultGreetings()
+                is Result.Error -> throw result.exception
             }
         }
     }
@@ -59,36 +55,6 @@ open class DefaultSpeechHandler : SpeechHandler {
         }
     }
 
-    private fun fallbackIntent(envelope: AlexaRequestEnvelope<IntentRequest>): AlexaResponse {
-        val fallbackClasses = findAnnotatedClasses(intentClasses, Fallback::class)
-        val uniqueValues = fallbackClasses.values.toHashSet()
-        println("Detected ${uniqueValues.size} intent classes with Fallback annotation.")
-        return when {
-            uniqueValues.isEmpty() -> unsupportedIntent()
-            uniqueValues.size > 1 -> illegalAnnotationArgument("Fallback")
-            else -> {
-                val entry = fallbackClasses.entries.first()
-                println("Class with Fallback annotation: ${entry.value}")
-                getIntentExecutorOf(entry.key, envelope)!!.onFallbackIntent(envelope.request)
-            }
-        }
-    }
-
-    private fun helpIntent(envelope: AlexaRequestEnvelope<IntentRequest>): AlexaResponse {
-        val helperClasses = findAnnotatedClasses(intentClasses, Helper::class)
-        val uniqueValues = helperClasses.values.toHashSet()
-        println("Detected ${uniqueValues.size} intent classes with Helper annotation.")
-        return when {
-            uniqueValues.isEmpty() -> IntentUtil.helpIntent()
-            uniqueValues.size > 1 -> illegalAnnotationArgument("Helper")
-            else -> {
-                val entry = helperClasses.entries.first()
-                println("Class with Helper annotation: ${entry.value}")
-                getIntentExecutorOf(entry.key, envelope)!!.onHelpIntent(envelope.request)
-            }
-        }
-    }
-
     private fun customIntent(intentName: String, envelope: AlexaRequestEnvelope<IntentRequest>): AlexaResponse {
         val intentExecutor = getIntentExecutorOf(intentName, envelope)
         return intentExecutor?.let { executor ->
@@ -97,16 +63,32 @@ open class DefaultSpeechHandler : SpeechHandler {
         } ?: unknownIntentException(intentName)
     }
 
+    private fun fallbackIntent(envelope: AlexaRequestEnvelope<IntentRequest>): AlexaResponse {
+        return getAnnotatedClasses(envelope, Fallback::class) { result ->
+            when (result) {
+                is Result.Content -> result.intentExecutor.onFallbackIntent(envelope.request)
+                is Result.None -> unsupportedIntent()
+                is Result.Error -> throw result.exception
+            }
+        }
+    }
+
+    private fun helpIntent(envelope: AlexaRequestEnvelope<IntentRequest>): AlexaResponse {
+        return getAnnotatedClasses(envelope, Helper::class) { result ->
+            when (result) {
+                is Result.Content -> result.intentExecutor.onHelpIntent(envelope.request)
+                is Result.None -> helpIntent()
+                is Result.Error -> throw result.exception
+            }
+        }
+    }
+
     private fun unknownIntentContext(builtInIntent: BuiltInIntent, envelope: AlexaRequestEnvelope<IntentRequest>): AlexaResponse {
-        val recoverIntentContextClasses = findAnnotatedClasses(intentClasses, RecoverIntentContext::class)
-        val uniqueClasses = recoverIntentContextClasses.values.toHashSet()
-        return when {
-            uniqueClasses.isEmpty() -> IntentUtil.defaultBuiltInResponse(builtInIntent, envelope.session.attributes)
-            uniqueClasses.size > 1 -> illegalAnnotationArgument("RecoverIntentContext")
-            else -> {
-                val entry = recoverIntentContextClasses.entries.first()
-                println("Class with RecoverIntentContext annotation: ${entry.value}")
-                getIntentExecutorOf(entry.key, envelope)!!.onUnknownIntentContext(builtInIntent)
+        return getAnnotatedClasses(envelope, RecoverIntentContext::class) { result ->
+            when (result) {
+                is Result.Content -> result.intentExecutor.onUnknownIntentContext(builtInIntent)
+                is Result.None -> defaultBuiltInResponse(builtInIntent)
+                is Result.Error -> throw result.exception
             }
         }
     }
@@ -118,7 +100,6 @@ open class DefaultSpeechHandler : SpeechHandler {
             generateResponse(executor, alexaResponse)
         } ?: unknownIntentException(intentName)
     }
-
 
     override fun handleElementSelectedRequest(envelope: AlexaRequestEnvelope<ElementSelectedRequest>): AlexaResponse {
         println("=========================== ElementSelectedRequest =========================")
@@ -162,16 +143,29 @@ open class DefaultSpeechHandler : SpeechHandler {
 
     override fun handleConnectionsRequest(envelope: AlexaRequestEnvelope<ConnectionsRequest>): AlexaResponse {
         println("=========================== ConnectionsRequest =========================")
-        val fullfillerClasses = findAnnotatedClasses(intentClasses, Fullfiller::class)
-        val uniqueValues = fullfillerClasses.values.toHashSet()
-        println("Detected ${uniqueValues.size} intent classes with Fulfiller annotation.")
+        return getAnnotatedClasses(envelope, Fullfiller::class) { result ->
+            when (result) {
+                is Result.Content -> result.intentExecutor.onConnectionsRequest(envelope.request)
+                is Result.None -> unsupportedIntent()
+                is Result.Error -> throw result.exception
+            }
+        }
+    }
+
+    private fun <T : Annotation> getAnnotatedClasses(envelope: AlexaRequestEnvelope<*>, annotation: KClass<T>,
+                                                     callback: (Result) -> AlexaResponse): AlexaResponse {
+        val name = annotation::simpleName.name
+        val classes = findAnnotatedClasses(intentClasses, annotation)
+        val uniqueValues = classes.values.toHashSet()
+        println("Detected ${uniqueValues.size} intent classes with $name annotation.")
         return when {
-            uniqueValues.isEmpty() -> unsupportedIntent()
-            uniqueValues.size > 1 -> illegalAnnotationArgument("Fullfiller")
+            uniqueValues.isEmpty() -> callback(Result.None)
+            uniqueValues.size > 1 -> callback(Result.Error(illegalAnnotationArgument(name)))
             else -> {
-                val entry = fullfillerClasses.entries.first()
-                println("Class with Fulfiller annotation: ${entry.value}")
-                getIntentExecutorOf(entry.key, envelope)!!.onConnectionsRequest(envelope.request)
+                val entry = classes.entries.first()
+                println("Class with Fallback annotation: ${entry.value}")
+                val intentExecutor = getIntentExecutorOf(entry.key, envelope) as IntentExecutor
+                callback(Result.Content(intentExecutor))
             }
         }
     }
@@ -189,8 +183,8 @@ open class DefaultSpeechHandler : SpeechHandler {
                 "Please check the name of the intent and package location")
     }
 
-    private fun illegalAnnotationArgument(annotation: String): AlexaResponse {
-        throw IllegalAnnotationException("The skill can only have one @$annotation method.")
+    private fun illegalAnnotationArgument(annotation: String): IllegalAnnotationException {
+        return IllegalAnnotationException("The skill can only have one @$annotation method.")
     }
 
     @Suppress("unchecked_cast")
@@ -232,5 +226,12 @@ open class DefaultSpeechHandler : SpeechHandler {
             intentExecutor.version = envelope.version
             intentExecutor
         }
+    }
+
+    // Sealed
+    sealed class Result {
+        object None : Result()
+        data class Error(val exception: Exception) : Result()
+        data class Content(val intentExecutor: IntentExecutor) : Result()
     }
 }
