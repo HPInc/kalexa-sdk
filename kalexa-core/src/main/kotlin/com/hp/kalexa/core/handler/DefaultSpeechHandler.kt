@@ -1,6 +1,7 @@
 package com.hp.kalexa.core.handler
 
 import com.hp.kalexa.core.annotation.*
+import com.hp.kalexa.core.extension.cast
 import com.hp.kalexa.core.handler.SpeechHandler.Companion.INTENT_CONTEXT
 import com.hp.kalexa.core.intent.BuiltInIntent
 import com.hp.kalexa.core.intent.IntentExecutor
@@ -24,15 +25,16 @@ import kotlin.reflect.full.superclasses
 
 open class DefaultSpeechHandler : SpeechHandler {
 
-    private val intentClasses by lazy { loadIntentClasses() }
-    private val intentInstances = mutableMapOf<String, IntentExecutor>()
+    private val intentExecutorClasses: List<KClass<out IntentExecutor>> by lazy { loadIntentExecutorClasses() }
+    private val intentClasses: Map<KClass<out IntentExecutor>, List<String>> by lazy { loadAnnotatedClasses<Intent>() }
+    private val intentExecutorInstances = mutableMapOf<KClass<out IntentExecutor>, IntentExecutor>()
 
     override fun handleSessionStartedRequest(envelope: AlexaRequestEnvelope<SessionStartedRequest>) = AlexaResponse.emptyResponse()
 
     override fun handleLaunchRequest(envelope: AlexaRequestEnvelope<LaunchRequest>): AlexaResponse {
         println("=========================== LaunchRequest =========================")
-        println("Looking for Launcher intents in ${getIntentPackage()}")
-        return getAnnotatedClasses(envelope, Launcher::class) { result ->
+        println("Looking for LaunchIntent intents in ${getIntentPackage()}")
+        return getAnnotatedClasses<LaunchIntent>(envelope) { result ->
             when (result) {
                 is Result.Content -> result.intentExecutor.onLaunchIntent(envelope.request)
                 is Result.None -> defaultGreetings()
@@ -64,7 +66,7 @@ open class DefaultSpeechHandler : SpeechHandler {
     }
 
     private fun fallbackIntent(envelope: AlexaRequestEnvelope<IntentRequest>): AlexaResponse {
-        return getAnnotatedClasses(envelope, Fallback::class) { result ->
+        return getAnnotatedClasses<FallbackIntent>(envelope) { result ->
             when (result) {
                 is Result.Content -> result.intentExecutor.onFallbackIntent(envelope.request)
                 is Result.None -> unsupportedIntent()
@@ -74,7 +76,7 @@ open class DefaultSpeechHandler : SpeechHandler {
     }
 
     private fun helpIntent(envelope: AlexaRequestEnvelope<IntentRequest>): AlexaResponse {
-        return getAnnotatedClasses(envelope, Helper::class) { result ->
+        return getAnnotatedClasses<HelpIntent>(envelope) { result ->
             when (result) {
                 is Result.Content -> result.intentExecutor.onHelpIntent(envelope.request)
                 is Result.None -> helpIntent()
@@ -84,7 +86,7 @@ open class DefaultSpeechHandler : SpeechHandler {
     }
 
     private fun unknownIntentContext(builtInIntent: BuiltInIntent, envelope: AlexaRequestEnvelope<IntentRequest>): AlexaResponse {
-        return getAnnotatedClasses(envelope, RecoverIntentContext::class) { result ->
+        return getAnnotatedClasses<RecoverIntentContext>(envelope) { result ->
             when (result) {
                 is Result.Content -> result.intentExecutor.onUnknownIntentContext(builtInIntent)
                 is Result.None -> defaultBuiltInResponse(builtInIntent)
@@ -143,7 +145,7 @@ open class DefaultSpeechHandler : SpeechHandler {
 
     override fun handleConnectionsRequest(envelope: AlexaRequestEnvelope<ConnectionsRequest>): AlexaResponse {
         println("=========================== ConnectionsRequest =========================")
-        return getAnnotatedClasses(envelope, Fulfiller::class) { result ->
+        return getAnnotatedClasses<FulfillerIntent>(envelope) { result ->
             when (result) {
                 is Result.Content -> result.intentExecutor.onConnectionsRequest(envelope.request)
                 is Result.None -> unsupportedIntent()
@@ -152,19 +154,18 @@ open class DefaultSpeechHandler : SpeechHandler {
         }
     }
 
-    private fun <T : Annotation> getAnnotatedClasses(envelope: AlexaRequestEnvelope<*>, annotation: KClass<T>,
-                                                     callback: (Result) -> AlexaResponse): AlexaResponse {
-        val name = annotation::simpleName.name
-        val classes = findAnnotatedClasses(intentClasses, annotation)
-        val uniqueValues = classes.values.toHashSet()
-        println("Detected ${uniqueValues.size} intent classes with $name annotation.")
+    private inline fun <reified T : Annotation> getAnnotatedClasses(envelope: AlexaRequestEnvelope<*>,
+                                                                    callback: (Result) -> AlexaResponse): AlexaResponse {
+        val annotationName = T::class.simpleName!!
+        val classes = findAnnotatedClasses(intentExecutorClasses, T::class)
+        println("Detected ${classes.size} intent classes with $annotationName annotation.")
         return when {
-            uniqueValues.isEmpty() -> callback(Result.None)
-            uniqueValues.size > 1 -> callback(Result.Error(illegalAnnotationArgument(name)))
+            classes.isEmpty() -> callback(Result.None)
+            classes.size > 1 -> callback(Result.Error(illegalAnnotationArgument(annotationName)))
             else -> {
-                val entry = classes.entries.first()
-                println("Class with Fallback annotation: ${entry.value}")
-                val intentExecutor = getIntentExecutorOf(entry.key, envelope) as IntentExecutor
+                val kclazz = classes.first()
+                println("Class with FallbackIntent annotation: ${kclazz.simpleName}")
+                val intentExecutor = getIntentExecutorOf(kclazz, envelope) as IntentExecutor
                 callback(Result.Content(intentExecutor))
             }
         }
@@ -188,27 +189,24 @@ open class DefaultSpeechHandler : SpeechHandler {
     }
 
     @Suppress("unchecked_cast")
-    private fun loadIntentClasses(): Map<String, KClass<out IntentExecutor>> {
-        val intentClasses = loadIntentClassesFromPackage()
+    private fun loadIntentExecutorClasses(): List<KClass<out IntentExecutor>> {
+        return loadIntentClassesFromPackage()
                 .filter { it.superclasses.find { it.simpleName == IntentExecutor::class.java.simpleName } != null }
-                .associate { it.simpleName!! to it as KClass<out IntentExecutor> }
-
-        val intentNamesList = lookupIntentNamesFromIntentsAnnotation(intentClasses)
-        return intentClasses + intentNamesList
+                .cast()
     }
 
     /**
-     * Look @Intents annotation up
-     * @param intentClasses to look intent names up
-     * @return List of Pair objects with IntentName as key and class that owns the annotation as value.
+     * Look @Intent annotation up
+     * @return Map of objects with kClass as key and a list of mapTo intents as value.
      */
-    private fun lookupIntentNamesFromIntentsAnnotation(intentClasses: Map<String, KClass<out IntentExecutor>>):
-            List<Pair<String, KClass<out IntentExecutor>>> {
-        return findAnnotatedClasses(intentClasses, Intents::class)
-                .map { (_, value) ->
-                    val intents = value.findAnnotation<Intents>()!!
-                    intents.intentNames.map { it to value }
-                }.flatten()
+    private inline fun <reified T : Annotation> loadAnnotatedClasses():
+            Map<KClass<out IntentExecutor>, List<String>> {
+        return findAnnotatedClasses(intentExecutorClasses, T::class)
+                .map { kclass ->
+                    val intent = kclass.findAnnotation<Intent>()!!
+                    val intents = intent.mapsTo.map { it } + kclass.simpleName!!
+                    kclass to intents
+                }.toMap()
     }
 
     /**
@@ -218,14 +216,20 @@ open class DefaultSpeechHandler : SpeechHandler {
      * @return an instance of the intentName
      */
     private fun getIntentExecutorOf(intentName: String, envelope: AlexaRequestEnvelope<*>): IntentExecutor? {
-        return intentClasses[intentName]?.let {
-            val intentExecutor: IntentExecutor = intentInstances.getOrPut(intentName) { it.createInstance() }
-            intentExecutor.sessionAttributes = envelope.session.attributes
-            intentExecutor.session = envelope.session
-            intentExecutor.context = envelope.context
-            intentExecutor.version = envelope.version
-            intentExecutor
+        return intentClasses.entries.find {
+            it.value.contains(intentName)
+        }?.let {
+            getIntentExecutorOf(it.key, envelope)
         }
+    }
+
+    private fun getIntentExecutorOf(kclazz: KClass<out IntentExecutor>, envelope: AlexaRequestEnvelope<*>): IntentExecutor? {
+        val intentExecutor: IntentExecutor = intentExecutorInstances.getOrPut(kclazz) { kclazz.createInstance() }
+        intentExecutor.sessionAttributes = envelope.session.attributes
+        intentExecutor.session = envelope.session
+        intentExecutor.context = envelope.context
+        intentExecutor.version = envelope.version
+        return intentExecutor
     }
 
     // Sealed

@@ -1,19 +1,19 @@
 package com.hp.kalexa.core.annotation
 
 @Target(AnnotationTarget.CLASS)
-annotation class Launcher
+annotation class LaunchIntent
 
 @Target(AnnotationTarget.CLASS)
 annotation class RecoverIntentContext
 
 @Target(AnnotationTarget.CLASS)
-annotation class Fallback
+annotation class FallbackIntent
 
 @Target(AnnotationTarget.CLASS)
-annotation class Helper
+annotation class HelpIntent
 
 @Target(AnnotationTarget.CLASS)
-annotation class Intents(vararg val intentNames: String)
+annotation class Intent(vararg val mapsTo: String)
 
 @Target(AnnotationTarget.CLASS)
-annotation class Fulfiller
+annotation class FulfillerIntent

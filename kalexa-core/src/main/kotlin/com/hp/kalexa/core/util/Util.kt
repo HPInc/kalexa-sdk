@@ -32,9 +32,9 @@ object Util {
         }
     }
 
-    fun <T : Annotation> findAnnotatedClasses(intentClasses: Map<String, KClass<out IntentExecutor>>, annotation: KClass<T>): Map<String, KClass<out IntentExecutor>> {
+    fun <T : Annotation> findAnnotatedClasses(intentClasses: List<KClass<out IntentExecutor>>, annotation: KClass<T>): List<KClass<out IntentExecutor>> {
         return intentClasses.filter {
-            it.value.findAnnotation(annotation) != null
+            it.findAnnotation(annotation) != null
         }
     }
 

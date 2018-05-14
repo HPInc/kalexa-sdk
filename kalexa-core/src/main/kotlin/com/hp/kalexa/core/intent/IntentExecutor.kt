@@ -108,7 +108,7 @@ abstract class IntentExecutor {
     }
 
     /**
-     * Handles Fallback Built In Intent coming from Alexa.
+     * Handles FallbackIntent Built In Intent coming from Alexa.
      */
     open fun onFallbackIntent(request: IntentRequest): AlexaResponse {
         return unsupportedIntent()
