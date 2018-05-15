@@ -34,7 +34,7 @@ open class DefaultSpeechHandler : SpeechHandler {
     override fun handleLaunchRequest(envelope: AlexaRequestEnvelope<LaunchRequest>): AlexaResponse {
         println("=========================== LaunchRequest =========================")
         println("Looking for LaunchIntent intents in ${getIntentPackage()}")
-        return getAnnotatedClasses<LaunchIntent>(envelope) { result ->
+        return lookupIntentExecutorFromAnnotation<LaunchIntent>(envelope) { result ->
             when (result) {
                 is Result.Content -> result.intentExecutor.onLaunchIntent(envelope.request)
                 is Result.None -> defaultGreetings()
@@ -66,7 +66,7 @@ open class DefaultSpeechHandler : SpeechHandler {
     }
 
     private fun fallbackIntent(envelope: AlexaRequestEnvelope<IntentRequest>): AlexaResponse {
-        return getAnnotatedClasses<FallbackIntent>(envelope) { result ->
+        return lookupIntentExecutorFromAnnotation<FallbackIntent>(envelope) { result ->
             when (result) {
                 is Result.Content -> result.intentExecutor.onFallbackIntent(envelope.request)
                 is Result.None -> unsupportedIntent()
@@ -76,7 +76,7 @@ open class DefaultSpeechHandler : SpeechHandler {
     }
 
     private fun helpIntent(envelope: AlexaRequestEnvelope<IntentRequest>): AlexaResponse {
-        return getAnnotatedClasses<HelpIntent>(envelope) { result ->
+        return lookupIntentExecutorFromAnnotation<HelpIntent>(envelope) { result ->
             when (result) {
                 is Result.Content -> result.intentExecutor.onHelpIntent(envelope.request)
                 is Result.None -> helpIntent()
@@ -86,7 +86,7 @@ open class DefaultSpeechHandler : SpeechHandler {
     }
 
     private fun unknownIntentContext(builtInIntent: BuiltInIntent, envelope: AlexaRequestEnvelope<IntentRequest>): AlexaResponse {
-        return getAnnotatedClasses<RecoverIntentContext>(envelope) { result ->
+        return lookupIntentExecutorFromAnnotation<RecoverIntentContext>(envelope) { result ->
             when (result) {
                 is Result.Content -> result.intentExecutor.onUnknownIntentContext(builtInIntent)
                 is Result.None -> defaultBuiltInResponse(builtInIntent)
@@ -145,7 +145,7 @@ open class DefaultSpeechHandler : SpeechHandler {
 
     override fun handleConnectionsRequest(envelope: AlexaRequestEnvelope<ConnectionsRequest>): AlexaResponse {
         println("=========================== ConnectionsRequest =========================")
-        return getAnnotatedClasses<FulfillerIntent>(envelope) { result ->
+        return lookupIntentExecutorFromAnnotation<FulfillerIntent>(envelope) { result ->
             when (result) {
                 is Result.Content -> result.intentExecutor.onConnectionsRequest(envelope.request)
                 is Result.None -> unsupportedIntent()
@@ -154,8 +154,8 @@ open class DefaultSpeechHandler : SpeechHandler {
         }
     }
 
-    private inline fun <reified T : Annotation> getAnnotatedClasses(envelope: AlexaRequestEnvelope<*>,
-                                                                    callback: (Result) -> AlexaResponse): AlexaResponse {
+    private inline fun <reified T : Annotation> lookupIntentExecutorFromAnnotation(envelope: AlexaRequestEnvelope<*>,
+                                                                                   callback: (Result) -> AlexaResponse): AlexaResponse {
         val annotationName = T::class.simpleName!!
         val classes = findAnnotatedClasses(intentExecutorClasses, T::class)
         println("Detected ${classes.size} intent classes with $annotationName annotation.")
@@ -164,7 +164,7 @@ open class DefaultSpeechHandler : SpeechHandler {
             classes.size > 1 -> callback(Result.Error(illegalAnnotationArgument(annotationName)))
             else -> {
                 val kclazz = classes.first()
-                println("Class with FallbackIntent annotation: ${kclazz.simpleName}")
+                println("Class with $annotationName annotation: ${kclazz.simpleName}")
                 val intentExecutor = getIntentExecutorOf(kclazz, envelope) as IntentExecutor
                 callback(Result.Content(intentExecutor))
             }

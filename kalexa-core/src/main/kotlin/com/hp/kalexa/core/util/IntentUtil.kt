@@ -75,15 +75,17 @@ object IntentUtil {
         }
     }
 
-    fun retryIntent(attributes: MutableMap<String, Any?> = mutableMapOf(),
-                    message: String = "I'm sorry, I couldn't understand what you have said. Could you say it again?"): AlexaResponse {
+    @JvmOverloads
+    fun retryIntent(attributes: MutableMap<String, Any?>,
+                    retryMsg: String = "I'm sorry, I couldn't understand what you have said. Could you say it again?",
+                    endMessage: String = "Thank you for using ${getSkillName()}"): AlexaResponse {
         val attempts = attributes.getAttr<Int>("retry")
         if (attempts != null) {
             return alexaResponse {
                 response {
                     shouldEndSession = true
                     speech {
-                        "Thank you for using ${getSkillName()}"
+                        endMessage
                     }
                 }
             }
@@ -92,7 +94,7 @@ object IntentUtil {
         return alexaResponse {
             response {
                 speech {
-                    message
+                    retryMsg
                 }
                 shouldEndSession = false
             }

@@ -13,7 +13,7 @@ annotation class FallbackIntent
 annotation class HelpIntent
 
 @Target(AnnotationTarget.CLASS)
-annotation class Intent(vararg val mapsTo: String)
+annotation class Intent(val mapsTo: Array<String> = [])
 
 @Target(AnnotationTarget.CLASS)
 annotation class FulfillerIntent
