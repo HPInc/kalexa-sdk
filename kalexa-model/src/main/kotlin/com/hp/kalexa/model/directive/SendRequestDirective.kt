@@ -2,18 +2,17 @@ package com.hp.kalexa.model.directive
 
 import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.hp.kalexa.model.ConnectionsStatus
 import com.hp.kalexa.model.json.PayloadSerializer
 import com.hp.kalexa.model.payload.Payload
 
-@Deprecated("It doesn't work anymore, use SendRequestDirective instead")
-@JsonTypeName("Links.ReturnFromLink")
-class ReturnFromLinkDirective(
-        val status: Status,
+@JsonTypeName("Connections.SendRequest")
+class SendRequestDirective(
+        val name: Name,
         @JsonSerialize(using = PayloadSerializer::class)
-        val payload: Payload<*>?) : Directive() {
+        val payload: Payload<*>,
+        val token: String) : Directive() {
 
-    enum class Status {
-        SUCCESS, FAILURE
+    enum class Name {
+        PRINT, LOG, SCHEDULE
     }
 }

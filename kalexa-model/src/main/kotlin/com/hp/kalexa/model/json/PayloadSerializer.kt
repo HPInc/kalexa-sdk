@@ -7,9 +7,11 @@ import com.hp.kalexa.model.payload.Payload
 
 class PayloadSerializer : JsonSerializer<Payload<*>>() {
     override fun serialize(value: Payload<*>, gen: JsonGenerator, serializers: SerializerProvider?) {
-        val type = value.getType()!!::class.java
+        val type = value.getObject()!!::class.java
         gen.writeStartObject()
-        gen.writeObjectField(type.simpleName, value.getType())
+        gen.writeStringField("type", value.type)
+        gen.writeStringField("version", value.version)
+        gen.writeObjectField(type.simpleName, value.getObject())
         gen.writeEndObject()
     }
 }

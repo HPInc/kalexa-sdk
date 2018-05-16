@@ -181,7 +181,7 @@ open class DefaultSpeechHandler : SpeechHandler {
 
     private fun unknownIntentException(intentName: String): AlexaResponse {
         throw IllegalArgumentException("It was not possible to map intent $intentName to a Class. " +
-                "Please check the name of the intent and package location")
+                "Please make sure that the Intent class is annotated with @Intent or check intent package location")
     }
 
     private fun illegalAnnotationArgument(annotation: String): IllegalAnnotationException {
