@@ -173,9 +173,12 @@ object JsonRequests {
                             "path": "Print",
                             "address": "amzn1.ask.skill.5a8a2654-2e1e-444b-98b3-6a4a617ef9b0"
                         },
-                        "payload": {
-                            "WebPage": {
-                                "description": "This is a nice rich mac and cheese. Serve with a salad for a great meatless dinner. Hope you enjoy it",
+                        "payload":{
+                            "type":"PrintPDFRequest",
+                            "version":"1.0",
+                            "WebPage":{
+                                "type":"WebPage",
+                                 "description": "This is a nice rich mac and cheese. Serve with a salad for a great meatless dinner. Hope you enjoy it",
                                 "title": "Mac & Cheese",
                                 "url": "http://allrecipes.com/recipe/11679/homemade-mac-and-cheese/"
                             }

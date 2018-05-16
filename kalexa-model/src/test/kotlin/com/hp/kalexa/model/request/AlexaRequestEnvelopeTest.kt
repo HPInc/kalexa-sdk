@@ -56,10 +56,10 @@ class AlexaRequestEnvelopeTest : Spek({
             it("should have a webpage payload type") {
                 assert(customLinkResultRequest.payload is Print<*>)
                 println(customLinkResultRequest.payload)
-                assert(customLinkResultRequest.payload?.getType() is WebPage)
+                assert(customLinkResultRequest.payload?.getObject() is WebPage)
             }
             it("should parse title, description and url") {
-                val webPage = customLinkResultRequest.payload?.getType() as WebPage
+                val webPage = customLinkResultRequest.payload?.getObject() as WebPage
                 assertEquals("Mac & Cheese", webPage.title)
                 assertEquals("This is a nice rich mac and cheese. Serve with a salad for a great meatless dinner. Hope you enjoy it", webPage.description)
                 assertEquals("http://allrecipes.com/recipe/11679/homemade-mac-and-cheese/", webPage.url)
@@ -80,7 +80,7 @@ class AlexaRequestEnvelopeTest : Spek({
             val customLinkResultRequest = envelope.request as ConnectionsResponseRequest
             it("should have an empty payload type") {
                 assert(customLinkResultRequest.payload is Print)
-                assert(customLinkResultRequest.payload?.getType() is EmptyPayload)
+                assert(customLinkResultRequest.payload?.getObject() is EmptyPayload)
             }
             it("should have an Error connectionsStatus") {
                 assertEquals("500", customLinkResultRequest.status.code)

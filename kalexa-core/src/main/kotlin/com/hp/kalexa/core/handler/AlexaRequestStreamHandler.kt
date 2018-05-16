@@ -7,7 +7,7 @@ import java.io.InputStream
 import java.io.OutputStream
 
 
-open class MainRequestStreamHandler(private val speechHandler: SpeechHandler = DefaultSpeechHandler()) : RequestStreamHandler {
+open class AlexaRequestStreamHandler(private val speechHandler: SpeechHandler = DefaultSpeechHandler()) : RequestStreamHandler {
 
     override fun handleRequest(input: InputStream, output: OutputStream, context: Context) {
         val inputBytes = IOUtils.toByteArray(input)

@@ -6,6 +6,7 @@ import com.hp.kalexa.model.TargetURI
 import com.hp.kalexa.model.json.PayloadSerializer
 import com.hp.kalexa.model.payload.Payload
 
+@Deprecated("It doesn't work anymore, use SendRequestDirective instead")
 @JsonTypeName("Links.FollowLinkWithResult")
 data class FollowLinkWithResultDirective(
         val targetURI: TargetURI,

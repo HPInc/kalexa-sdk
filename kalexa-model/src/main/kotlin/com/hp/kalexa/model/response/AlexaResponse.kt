@@ -3,7 +3,8 @@ package com.hp.kalexa.model.response
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.hp.kalexa.model.*
+import com.hp.kalexa.model.ConnectionsStatus
+import com.hp.kalexa.model.TargetURI
 import com.hp.kalexa.model.directive.*
 import com.hp.kalexa.model.interfaces.display.*
 import com.hp.kalexa.model.interfaces.display.Image
@@ -258,7 +259,11 @@ data class AlexaResponse(
             add(hintDirective)
         }
 
-        fun returnFromLinkDirectiveDirective(block: ReturnFromLinkDirectiveBuilder.() -> Unit) {
+        fun sendRequestDirective(block: SendRequestDirectiveBuilder.() -> Unit) {
+            add(SendRequestDirectiveBuilder().apply { block() }.build())
+        }
+
+        fun returnFromLinkDirective(block: ReturnFromLinkDirectiveBuilder.() -> Unit) {
             add(ReturnFromLinkDirectiveBuilder().apply { block() }.build())
         }
 
@@ -336,6 +341,43 @@ data class AlexaResponse(
             fun log(block: LogBuilder.() -> Unit): Log<*> = LogBuilder().apply { block() }.build()
 
             fun build(): ReturnFromLinkDirective = ReturnFromLinkDirective(status, payload)
+        }
+
+        @AlexaResponseDsl
+        class SendRequestDirectiveBuilder {
+            lateinit var name: SendRequestDirective.Name
+            private lateinit var payload: Payload<*>
+            var token: String = "none"
+
+            fun webPage(block: PrintTypeBuilder.() -> Unit): Print<WebPage> {
+                return Print(PrintTypeBuilder().apply { block() }.build())
+            }
+
+            fun pdf(block: PrintTypeBuilder.() -> Unit): Print<PDF> {
+                return Print(PrintTypeBuilder().apply { block() }.build())
+            }
+
+            fun imagePNG(block: PrintTypeBuilder.() -> Unit): Print<ImagePNG> {
+                return Print(PrintTypeBuilder().apply(block).build())
+            }
+
+            fun imageJPEG(block: PrintTypeBuilder.() -> Unit): Print<ImageJPEG> {
+                return Print(PrintTypeBuilder().apply(block).build())
+            }
+
+            fun physicalActivity(block: PhysicalActivityBuilder.() -> Unit): Log<PhysicalActivity> {
+                return Log(PhysicalActivityBuilder().apply(block).build())
+            }
+
+            fun print(block: PrintBuilder.() -> Unit): Print<*> = PrintBuilder().apply { block() }.build()
+
+            fun log(block: LogBuilder.() -> Unit): Log<*> = LogBuilder().apply { block() }.build()
+
+            fun payload(block: SendRequestDirectiveBuilder.() -> Payload<*>) {
+                apply { payload = block() }
+            }
+
+            fun build(): SendRequestDirective = SendRequestDirective(name, payload, token)
         }
 
 
@@ -442,7 +484,7 @@ fun main(args: Array<String>) {
                     source = "http://www.oi.com"
                 }
 
-                returnFromLinkDirectiveDirective {
+                returnFromLinkDirective {
                     status {
                         ReturnFromLinkDirective.Status.SUCCESS
                     }
@@ -533,8 +575,15 @@ fun main(args: Array<String>) {
         response {
             shouldEndSession = false
             directives {
-                directive {
-                    DelegateDirective()
+                sendRequestDirective {
+                    payload {
+                        name = SendRequestDirective.Name.PRINT
+                        webPage {
+                            title = ""
+                            description = ""
+                            url = "asdiouasdioas"
+                        }
+                    }
                 }
             }
         }
@@ -543,4 +592,6 @@ fun main(args: Array<String>) {
     println(textContent {
         tertiaryText = plainText { "oi" }
     })
+
+
 }
