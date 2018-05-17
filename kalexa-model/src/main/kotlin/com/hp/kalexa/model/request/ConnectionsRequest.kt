@@ -3,6 +3,7 @@ package com.hp.kalexa.model.request
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.hp.kalexa.model.json.LocalDateTimeDeserializer
 import com.hp.kalexa.model.json.PayloadDeserializer
+import com.hp.kalexa.model.payload.NameType
 import com.hp.kalexa.model.payload.Payload
 import java.time.LocalDateTime
 
@@ -11,6 +12,6 @@ class ConnectionsRequest(
         locale: String,
         @JsonDeserialize(using = LocalDateTimeDeserializer::class)
         timestamp: LocalDateTime,
-        val name: String,
+        val name: NameType,
         @JsonDeserialize(using = PayloadDeserializer::class)
         val payload: Payload<*>) : Request(requestId, locale, timestamp)

@@ -14,8 +14,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
         JsonSubTypes.Type(value = ClearQueueDirective::class, name = "AudioPlayer.ClearQueue"),
         JsonSubTypes.Type(value = DelegateDirective::class, name = "Dialog.Delegate"),
         JsonSubTypes.Type(value = HintDirective::class, name = "Hint"),
-        JsonSubTypes.Type(value = FollowLinkWithResultDirective::class, name = "Links.FollowLinkWithResult"),
-        JsonSubTypes.Type(value = ReturnFromLinkDirective::class, name = "Links.ReturnFromLink"),
+        JsonSubTypes.Type(value = SendRequestDirective::class, name = "Connections.SendRequest"),
         JsonSubTypes.Type(value = ConfirmIntentDirective::class, name = "Dialog.ConfirmIntent"))
 abstract class Directive
 

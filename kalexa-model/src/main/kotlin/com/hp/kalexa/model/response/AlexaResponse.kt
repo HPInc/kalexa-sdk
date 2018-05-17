@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.hp.kalexa.model.ConnectionsStatus
-import com.hp.kalexa.model.TargetURI
 import com.hp.kalexa.model.directive.*
 import com.hp.kalexa.model.interfaces.display.*
 import com.hp.kalexa.model.interfaces.display.Image
 import com.hp.kalexa.model.interfaces.video.Metadata
 import com.hp.kalexa.model.interfaces.video.VideoItem
+import com.hp.kalexa.model.payload.NameType
 import com.hp.kalexa.model.payload.Payload
 import com.hp.kalexa.model.payload.log.Log
 import com.hp.kalexa.model.payload.log.PhysicalActivity
@@ -263,14 +263,6 @@ data class AlexaResponse(
             add(SendRequestDirectiveBuilder().apply { block() }.build())
         }
 
-        fun returnFromLinkDirective(block: ReturnFromLinkDirectiveBuilder.() -> Unit) {
-            add(ReturnFromLinkDirectiveBuilder().apply { block() }.build())
-        }
-
-        fun followLinkWithResultDirective(block: (FollowLinkWithResultDirectiveBuilder.() -> Unit)) {
-            add(FollowLinkWithResultDirectiveBuilder().apply { block() }.build())
-        }
-
         fun delegateDirective(block: (DelegateDirective.() -> Unit)) {
             add(DelegateDirective().apply { block() })
         }
@@ -324,28 +316,8 @@ data class AlexaResponse(
         }
 
         @AlexaResponseDsl
-        class ReturnFromLinkDirectiveBuilder {
-            lateinit var status: ReturnFromLinkDirective.Status
-            lateinit var payload: Payload<*>
-
-            fun status(block: () -> ReturnFromLinkDirective.Status) {
-                status = block()
-            }
-
-            fun payload(block: ReturnFromLinkDirectiveBuilder.() -> Payload<*>) {
-                apply { payload = block() }
-            }
-
-            fun print(block: PrintBuilder.() -> Unit): Print<*> = PrintBuilder().apply { block() }.build()
-
-            fun log(block: LogBuilder.() -> Unit): Log<*> = LogBuilder().apply { block() }.build()
-
-            fun build(): ReturnFromLinkDirective = ReturnFromLinkDirective(status, payload)
-        }
-
-        @AlexaResponseDsl
         class SendRequestDirectiveBuilder {
-            lateinit var name: SendRequestDirective.Name
+            lateinit var name: NameType
             private lateinit var payload: Payload<*>
             var token: String = "none"
 
@@ -382,81 +354,64 @@ data class AlexaResponse(
 
 
         @AlexaResponseDsl
-        class FollowLinkWithResultDirectiveBuilder {
-            lateinit var targetURI: TargetURI
-            lateinit var payload: Payload<*>
-            var token: String = "none"
+        class ConnectionsStatusBuilder {
+            var code: String = ""
+            var message: String = ""
+            fun build() = ConnectionsStatus(code, message)
+        }
 
-            fun print(block: PrintBuilder.() -> Unit): Print<*> = PrintBuilder().apply { block() }.build()
-
-            fun log(block: LogBuilder.() -> Unit): Log<*> = LogBuilder().apply { block() }.build()
-
-            fun payload(block: FollowLinkWithResultDirectiveBuilder.() -> Payload<*>) {
-                apply { payload = block() }
+        @AlexaResponseDsl
+        class PrintBuilder {
+            private lateinit var printType: Print.PrintType
+            fun webPage(block: PrintTypeBuilder.() -> Unit) {
+                printType = PrintTypeBuilder().apply(block).build<WebPage>()
             }
 
-            fun build(): FollowLinkWithResultDirective = FollowLinkWithResultDirective(targetURI, payload, token)
-        }
-    }
+            fun pdf(block: PrintTypeBuilder.() -> Unit) {
+                printType = PrintTypeBuilder().apply(block).build<PDF>()
+            }
 
-    @AlexaResponseDsl
-    class ConnectionsStatusBuilder {
-        var code: String = ""
-        var message: String = ""
-        fun build() = ConnectionsStatus(code, message)
-    }
+            fun imagePNG(block: PrintTypeBuilder.() -> Unit) {
+                printType = PrintTypeBuilder().apply(block).build<ImagePNG>()
+            }
 
-    @AlexaResponseDsl
-    class PrintBuilder {
-        private lateinit var printType: Print.PrintType
-        fun webPage(block: PrintTypeBuilder.() -> Unit) {
-            printType = PrintTypeBuilder().apply(block).build<WebPage>()
+            fun imageJPEG(block: PrintTypeBuilder.() -> Unit) {
+                printType = PrintTypeBuilder().apply(block).build<ImageJPEG>()
+            }
+
+            fun build(): Print<*> = Print(printType)
         }
 
-        fun pdf(block: PrintTypeBuilder.() -> Unit) {
-            printType = PrintTypeBuilder().apply(block).build<PDF>()
+        @AlexaResponseDsl
+        class PrintTypeBuilder {
+            lateinit var title: String
+            lateinit var description: String
+            lateinit var url: String
+
+            inline fun <reified T : Print.PrintType> build(): T {
+                return T::class.primaryConstructor!!.call(title, description, url)
+            }
         }
 
-        fun imagePNG(block: PrintTypeBuilder.() -> Unit) {
-            printType = PrintTypeBuilder().apply(block).build<ImagePNG>()
+        @AlexaResponseDsl
+        class LogBuilder {
+            lateinit var logType: Log.LogType
+
+            fun physicalActivity(block: PhysicalActivityBuilder.() -> Unit) {
+                logType = PhysicalActivityBuilder().apply(block).build()
+            }
+
+            fun build(): Log<*> = Log(logType)
         }
 
-        fun imageJPEG(block: PrintTypeBuilder.() -> Unit) {
-            printType = PrintTypeBuilder().apply(block).build<ImageJPEG>()
+        @AlexaResponseDsl
+        class PhysicalActivityBuilder {
+            var description: String = ""
+            lateinit var startTime: LocalDateTime
+            var duration: Float = 0F
+            var distance: Float = 0f
+            fun build() = PhysicalActivity(description, startTime, duration, distance)
         }
-
-        fun build(): Print<*> = Print(printType)
-    }
-
-    @AlexaResponseDsl
-    class PrintTypeBuilder {
-        lateinit var title: String
-        lateinit var description: String
-        lateinit var url: String
-
-        inline fun <reified T : Print.PrintType> build(): T {
-            return T::class.primaryConstructor!!.call(title, description, url)
-        }
-    }
-
-    @AlexaResponseDsl
-    class LogBuilder {
-        lateinit var logType: Log.LogType
-
-        fun physicalActivity(block: PhysicalActivityBuilder.() -> Unit) {
-            logType = PhysicalActivityBuilder().apply(block).build()
-        }
-
-        fun build(): Log<*> = Log(logType)
-    }
-
-    @AlexaResponseDsl
-    class PhysicalActivityBuilder {
-        var description: String = ""
-        lateinit var startTime: LocalDateTime
-        var duration: Float = 0F
-        var distance: Float = 0f
-        fun build() = PhysicalActivity(description, startTime, duration, distance)
     }
 }
 
@@ -484,59 +439,12 @@ fun main(args: Array<String>) {
                     source = "http://www.oi.com"
                 }
 
-                returnFromLinkDirective {
-                    status {
-                        ReturnFromLinkDirective.Status.SUCCESS
-                    }
-                    payload {
-                        print {
-                            imagePNG {
-                                title = "image"
-                                description = "image description"
-                                url = "http://www.imagembacana.com"
-                            }
-                        }
-                    }
-                }
-                followLinkWithResultDirective {
-                    targetURI = TargetURI.PRINT
-                    payload {
-                        print {
-                            webPage {
-                                title = "Marcelo"
-                                description = "Super bacana"
-                                url = "http://www.marcelorcorrea.com"
-                            }
-                        }
-                    }
-                }
-
-                followLinkWithResultDirective {
-                    targetURI = TargetURI.LOG
-                    payload {
-                        log {
-                            physicalActivity {
-                                description = "OIE"
-                                startTime = LocalDateTime.now()
-                                duration = 10f
-                                distance = 50f
-                            }
-                        }
-                    }
-                }
-
                 directive {
                     val hintDirective = HintDirective()
                     val hint = PlainTextHint()
                     hint.text = "TESTE"
                     hintDirective.hint = hint
                     hintDirective
-                }
-                followLinkWithResultDirective {
-                    targetURI = TargetURI.PRINT
-                    payload {
-                        Print(webPage)
-                    }
                 }
             }
         }
@@ -551,33 +459,13 @@ fun main(args: Array<String>) {
     println(list.textContent)
     println(alexaResponse.toJson())
 
-    val followLinkWithResultDirective = FollowLinkWithResultDirective(
-            targetURI = TargetURI.PRINT,
-            payload = Print(webPage),
-            token = "PrintWebPage")
-    val response = alexaResponse {
-        response {
-            speech { "Okay, I'm sending a WebPage to your printer" }
-            simpleCard {
-                title = "OI"
-                content = "Okay, I'm sending a WebPage to your printer"
-            }
-            directives {
-                directive {
-                    followLinkWithResultDirective
-                }
-            }
-        }
-    }
-    println(response.toJson())
-
     println(alexaResponse {
         response {
             shouldEndSession = false
             directives {
                 sendRequestDirective {
+                    name = NameType.PRINT
                     payload {
-                        name = SendRequestDirective.Name.PRINT
                         webPage {
                             title = ""
                             description = ""
@@ -592,6 +480,4 @@ fun main(args: Array<String>) {
     println(textContent {
         tertiaryText = plainText { "oi" }
     })
-
-
 }
