@@ -39,10 +39,10 @@ add dependency to pom.xml
 
 ## HOW TO USE IT
 
-#####Entry Point:
+##### Entry Point:
 You just need to extend class ``AlexaRequestStreamHandler``and nothing more.
 
-#####Create Intent:
+##### Create Intent:
 
 The only thing you need to do is to extend class `IntentExecutor` and override its callbacks.
 
@@ -78,7 +78,7 @@ Your intent can override the `onBuiltInIntent` method to handle Amazon Built In 
 Or you can just override some basic callbacks that are already implemented and handle as you like.
 These basic methods are: `onYesIntent`, `onNoIntent`, `onCancelIntent`, `onStopIntent`.
 
-#####Lock Context:
+##### Lock Context:
 In an interaction, you often need to lock the context (force interaction to go back to the last intent) for when you need an answer for the user.
 For that you can use the method `lockIntentContext()` from `IntentExecutor` class. You may remove the lock calling `unlockIntentContext()`
 For example:
@@ -106,7 +106,7 @@ If you're working with Display interface, and you need to handle touch events, y
 
 This lib also supports Skill Connector feature. So if you're expecting a response from an another skill, the `onConnectionsRequest` callback method will be called.
 
-#####Response:
+##### Response:
 Kalexa-sdk has two types of responses.
 ##### Java:
 AlexaBuilder builds the response gracefully to send back to Alexa:
@@ -132,5 +132,8 @@ return alexaResponse {
 }
 ```
 
-#####Directives
-Kalexa-sdk supports most of the directives.
+##### Directives
+Kalexa-sdk supports most of the directives. 
+Dialog directives such Delegate, ElicitSlot and ConfirmIntent directives.
+UI directives: RenderTemplateDirective
+And Skill-to-Skill directives: SendRequestDirective, ReturnFromLinkDirective (this name will probably change).
