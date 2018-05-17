@@ -31,7 +31,7 @@ data class Print<out T : Print.PrintType>(private val printType: T) : Payload<T>
             JsonSubTypes.Type(value = ImagePNG::class, name = "ImagePNG"),
             JsonSubTypes.Type(value = ImageJPEG::class, name = "ImageJPEG")
     )
-    abstract class PrintType(var title: String, var description: String, var url: String) {
+    abstract class PrintType(var title: String, var description: String, var url: String, var version: String) {
         @JsonIgnore
         fun getTypeName(): String = Print::class.java.name
     }

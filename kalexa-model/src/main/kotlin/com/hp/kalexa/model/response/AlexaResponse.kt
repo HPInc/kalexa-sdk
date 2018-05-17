@@ -411,9 +411,10 @@ data class AlexaResponse(
             lateinit var title: String
             lateinit var description: String
             lateinit var url: String
+            var version: String = "1.0"
 
             inline fun <reified T : Print.PrintType> build(): T {
-                return T::class.primaryConstructor!!.call(title, description, url)
+                return T::class.primaryConstructor!!.call(title, description, url, version)
             }
         }
 
@@ -491,6 +492,7 @@ fun main(args: Array<String>) {
                     name = NameType.PRINT
                     payload {
                         webPage {
+                            version = "1.0"
                             title = ""
                             description = ""
                             url = "asdiouasdioas"

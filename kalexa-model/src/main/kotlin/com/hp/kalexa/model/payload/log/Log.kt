@@ -28,7 +28,7 @@ class Log<out T : Log.LogType>(private val logType: T) : Payload<T> {
     @JsonSubTypes(
             JsonSubTypes.Type(value = PhysicalActivity::class, name = "PhysicalActivity")
     )
-    interface LogType {
+    abstract class LogType(var version: String = "1.0") {
         @JsonIgnore
         fun getTypeName(): String = Log::class.java.name
     }

@@ -10,4 +10,4 @@ class PhysicalActivity(var description: String = "",
                        @JsonSerialize(using = LocalDateTimeSerializer::class)
                        var startTime: LocalDateTime = LocalDateTime.now(),
                        var duration: Float = 0.0f,
-                       var distance: Float = 0.0f) : Log.LogType
+                       var distance: Float = 0.0f) : Log.LogType()
