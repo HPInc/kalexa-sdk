@@ -1,5 +1,12 @@
 package com.hp.kalexa.model.payload
 
+import com.fasterxml.jackson.annotation.JsonProperty
+
 enum class NameType {
-    PRINT, LOG, SCHEDULE
+    @JsonProperty("Print")
+    PRINT,
+    @JsonProperty("Log")
+    LOG,
+    @JsonProperty("Schedule")
+    SCHEDULE;
 }
