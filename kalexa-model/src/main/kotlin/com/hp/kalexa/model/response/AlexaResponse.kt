@@ -263,6 +263,10 @@ data class AlexaResponse(
             add(SendRequestDirectiveBuilder().apply { block() }.build())
         }
 
+        fun returnFromLinkDirective(block: ReturnFromLinkDirectiveBuilder.() -> Unit) {
+            add(ReturnFromLinkDirectiveBuilder().apply { block() }.build())
+        }
+
         fun delegateDirective(block: (DelegateDirective.() -> Unit)) {
             add(DelegateDirective().apply { block() })
         }
@@ -350,6 +354,26 @@ data class AlexaResponse(
             }
 
             fun build(): SendRequestDirective = SendRequestDirective(name, payload, token)
+        }
+
+        @AlexaResponseDsl
+        class ReturnFromLinkDirectiveBuilder {
+            lateinit var status: ReturnFromLinkDirective.Status
+            lateinit var payload: Payload<*>
+
+            fun status(block: () -> ReturnFromLinkDirective.Status) {
+                status = block()
+            }
+
+            fun payload(block: ReturnFromLinkDirectiveBuilder.() -> Payload<*>) {
+                apply { payload = block() }
+            }
+
+            fun print(block: PrintBuilder.() -> Unit): Print<*> = PrintBuilder().apply { block() }.build()
+
+            fun log(block: LogBuilder.() -> Unit): Log<*> = LogBuilder().apply { block() }.build()
+
+            fun build(): ReturnFromLinkDirective = ReturnFromLinkDirective(status, payload)
         }
 
 
