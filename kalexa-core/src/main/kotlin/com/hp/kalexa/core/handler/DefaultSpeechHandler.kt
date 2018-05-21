@@ -197,7 +197,7 @@ open class DefaultSpeechHandler : SpeechHandler {
 
     /**
      * Look @Intent annotation up
-     * @return Map of objects with kClass as key and a list of intents that maps to the kClass as value.
+     * @return Map of Kclasses. The Array of mapsTo corresponds to the key and the value is the kClass that has the annotation.
      */
     private fun mapClassesWithIntentAnnotation(): Map<Array<String>, KClass<out IntentExecutor>> {
         return findAnnotatedClasses(intentExecutorClasses, Intent::class)

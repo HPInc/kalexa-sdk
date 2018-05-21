@@ -39,14 +39,14 @@ data class AlexaResponse(
                 .configure(DeserializationFeature.READ_ENUMS_USING_TO_STRING, true)
                 .setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
-        fun builder() = AlexaResponseBuilder()
+        fun builder() = Builder()
         fun emptyResponse() = AlexaResponse()
     }
 
     fun toJsonByteArray(): ByteArray = OBJECT_MAPPER.writeValueAsBytes(this)
     fun toJson(): String = OBJECT_MAPPER.writeValueAsString(this)
 
-    class AlexaResponseBuilder {
+    class Builder {
         private var sessionAttributes: Map<String, Any?> = emptyMap()
         private var version = "1.0"
         private var speech: OutputSpeech? = null
@@ -65,42 +65,42 @@ data class AlexaResponse(
             return AlexaResponse(version = version, response = speechletResponse, sessionAttributes = sessionAttributes)
         }
 
-        fun version(version: String): AlexaResponseBuilder {
+        fun version(version: String): Builder {
             this.version = version
             return this
         }
 
-        fun sessionAttributes(sessionAttributes: Map<String, Any?>): AlexaResponseBuilder {
+        fun sessionAttributes(sessionAttributes: Map<String, Any?>): Builder {
             this.sessionAttributes = sessionAttributes
             return this
         }
 
-        fun speech(speechText: String): AlexaResponseBuilder {
+        fun speech(speechText: String): Builder {
             val speech = PlainTextOutputSpeech()
             speech.text = speechText
             this.speech = speech
             return this
         }
 
-        fun ssmlSpeech(speechText: String): AlexaResponseBuilder {
+        fun ssmlSpeech(speechText: String): Builder {
             val speech = SsmlOutputSpeech()
             speech.ssml = speechText
             this.speech = speech
             return this
         }
 
-        fun consentCard(permissions: List<String>): AlexaResponseBuilder {
+        fun consentCard(permissions: List<String>): Builder {
             val card = AskForPermissionsConsentCard(permissions)
             this.card = card
             return this
         }
 
-        fun linkAccountCard(): AlexaResponseBuilder {
+        fun linkAccountCard(): Builder {
             card = LinkAccountCard()
             return this
         }
 
-        fun simpleCard(cardTitle: String, cardText: String): AlexaResponseBuilder {
+        fun simpleCard(cardTitle: String, cardText: String): Builder {
             val card = SimpleCard()
             card.content = cardText
             card.title = cardTitle
@@ -108,7 +108,7 @@ data class AlexaResponse(
             return this
         }
 
-        fun standardCard(cardTitle: String, cardText: String, image: Image): AlexaResponseBuilder {
+        fun standardCard(cardTitle: String, cardText: String, image: Image): Builder {
             val card = StandardCard()
             card.text = cardText
             card.image = image
@@ -117,7 +117,7 @@ data class AlexaResponse(
             return this
         }
 
-        fun reprompt(text: String): AlexaResponseBuilder {
+        fun reprompt(text: String): Builder {
             val reprompt = Reprompt()
             val speech = PlainTextOutputSpeech()
             speech.text = text
@@ -126,12 +126,12 @@ data class AlexaResponse(
             return this
         }
 
-        fun shouldEndSession(shouldEndSession: Boolean?): AlexaResponseBuilder {
+        fun shouldEndSession(shouldEndSession: Boolean?): Builder {
             this.shouldEndSession = shouldEndSession
             return this
         }
 
-        fun addHintDirective(hintText: String): AlexaResponseBuilder {
+        fun addHintDirective(hintText: String): Builder {
             val hint = PlainTextHint()
             hint.text = hintText
             val hintDirective = HintDirective()
@@ -139,7 +139,7 @@ data class AlexaResponse(
             return addDirective(hintDirective)
         }
 
-        fun addVideoDirective(videoURL: String, title: String, subTitle: String): AlexaResponseBuilder {
+        fun addVideoDirective(videoURL: String, title: String, subTitle: String): Builder {
             val metadata = Metadata()
             metadata.subtitle = subTitle
             metadata.title = title
@@ -153,13 +153,13 @@ data class AlexaResponse(
             return addDirective(videoDirective)
         }
 
-        fun addTemplateDirective(template: Template): AlexaResponseBuilder {
+        fun addTemplateDirective(template: Template): Builder {
             val templateDirective = RenderTemplateDirective()
             templateDirective.template = template
             return addDirective(templateDirective)
         }
 
-        fun addDirective(directive: Directive): AlexaResponseBuilder {
+        fun addDirective(directive: Directive): Builder {
             directiveList.add(directive)
             return this
         }
