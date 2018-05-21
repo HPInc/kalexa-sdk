@@ -26,7 +26,7 @@ import kotlin.reflect.full.superclasses
 open class DefaultSpeechHandler : SpeechHandler {
 
     private val intentExecutorClasses: List<KClass<out IntentExecutor>> by lazy { loadIntentExecutorClasses() }
-    private val intentClasses: Map<List<String>, KClass<out IntentExecutor>> by lazy { mapClassesWithIntentAnnotation() }
+    private val intentClasses: Map<Array<String>, KClass<out IntentExecutor>> by lazy { mapClassesWithIntentAnnotation() }
     private val intentExecutorInstances = mutableMapOf<KClass<out IntentExecutor>, IntentExecutor>()
 
     override fun handleSessionStartedRequest(envelope: AlexaRequestEnvelope<SessionStartedRequest>) = AlexaResponse.emptyResponse()
@@ -199,12 +199,12 @@ open class DefaultSpeechHandler : SpeechHandler {
      * Look @Intent annotation up
      * @return Map of objects with kClass as key and a list of intents that maps to the kClass as value.
      */
-    private fun mapClassesWithIntentAnnotation(): Map<List<String>, KClass<out IntentExecutor>> {
+    private fun mapClassesWithIntentAnnotation(): Map<Array<String>, KClass<out IntentExecutor>> {
         return findAnnotatedClasses(intentExecutorClasses, Intent::class)
-                .map { kclass ->
-                    val intent = kclass.findAnnotation<Intent>()!!
-                    val intents = intent.mapsTo.map { it } + kclass.simpleName!!
-                    intents to kclass
+                .map { annotatedClass ->
+                    val intent = annotatedClass.findAnnotation<Intent>()!!
+                    val mapsTo = intent.mapsTo + annotatedClass.simpleName!!
+                    mapsTo to annotatedClass
                 }.toMap()
     }
 
