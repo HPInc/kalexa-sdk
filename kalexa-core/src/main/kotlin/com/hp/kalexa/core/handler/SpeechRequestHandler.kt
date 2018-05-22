@@ -1,5 +1,6 @@
 package com.hp.kalexa.core.handler
 
+import com.hp.kalexa.core.util.Util
 import com.hp.kalexa.model.request.*
 import com.hp.kalexa.model.response.AlexaResponse
 
@@ -16,24 +17,17 @@ class SpeechRequestHandler(private val speechHandler: SpeechHandler) {
     }
 
     private fun validateApplicationId(requestEnvelope: AlexaRequestEnvelope<*>): Boolean {
-        val applicationId = System.getenv("APPLICATION_ID")
+        val applicationId = Util.getApplicationID()
         if (applicationId == null || applicationId.isEmpty()) {
-            println("Application ID verification has been disabled, allowing request for all " + "application IDs")
-            return true
+            println("Application ID not defined in environment variable.")
+            return false
         }
-        val session = requestEnvelope.session
-        val applicationIdIsMissingFromSession = (session.application?.applicationId == null)
-        if (!applicationIdIsMissingFromSession) {
-            /*
-         * Note: we are still looking at the Session and not just the Context because some
-         * clients may not yet be sending Context.
-         */
-            return applicationId == session.application?.applicationId
+        requestEnvelope.session.application?.applicationId?.let {
+            return applicationId == it
         }
-        val context = requestEnvelope.context
-        return if (context.system.application.applicationId == null) {
-            false
-        } else applicationId == context.system.application.applicationId
+        return requestEnvelope.context.system.application.applicationId?.let {
+            applicationId == it
+        } ?: false
     }
 
     @Suppress("unchecked_cast")
