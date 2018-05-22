@@ -69,7 +69,7 @@ class AlexaRequestEnvelopeTest : Spek({
                 assertEquals("OK", customLinkResultRequest.status.message)
             }
             it("should have Print Name") {
-//                assertEquals("Print", customLinkResultRequest.name)
+                assertEquals("Print", customLinkResultRequest.name)
             }
         }
         on("a error link result request") {
