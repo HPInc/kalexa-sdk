@@ -3,12 +3,13 @@ package com.hp.kalexa.model.response
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.hp.kalexa.model.*
+import com.hp.kalexa.model.ConnectionsStatus
 import com.hp.kalexa.model.directive.*
 import com.hp.kalexa.model.interfaces.display.*
 import com.hp.kalexa.model.interfaces.display.Image
 import com.hp.kalexa.model.interfaces.video.Metadata
 import com.hp.kalexa.model.interfaces.video.VideoItem
+import com.hp.kalexa.model.payload.NameType
 import com.hp.kalexa.model.payload.Payload
 import com.hp.kalexa.model.payload.log.Log
 import com.hp.kalexa.model.payload.log.PhysicalActivity
@@ -38,14 +39,14 @@ data class AlexaResponse(
                 .configure(DeserializationFeature.READ_ENUMS_USING_TO_STRING, true)
                 .setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
-        fun builder() = AlexaResponseBuilder()
+        fun builder() = Builder()
         fun emptyResponse() = AlexaResponse()
     }
 
     fun toJsonByteArray(): ByteArray = OBJECT_MAPPER.writeValueAsBytes(this)
     fun toJson(): String = OBJECT_MAPPER.writeValueAsString(this)
 
-    class AlexaResponseBuilder {
+    class Builder {
         private var sessionAttributes: Map<String, Any?> = emptyMap()
         private var version = "1.0"
         private var speech: OutputSpeech? = null
@@ -64,42 +65,42 @@ data class AlexaResponse(
             return AlexaResponse(version = version, response = speechletResponse, sessionAttributes = sessionAttributes)
         }
 
-        fun version(version: String): AlexaResponseBuilder {
+        fun version(version: String): Builder {
             this.version = version
             return this
         }
 
-        fun sessionAttributes(sessionAttributes: Map<String, Any?>): AlexaResponseBuilder {
+        fun sessionAttributes(sessionAttributes: Map<String, Any?>): Builder {
             this.sessionAttributes = sessionAttributes
             return this
         }
 
-        fun speech(speechText: String): AlexaResponseBuilder {
+        fun speech(speechText: String): Builder {
             val speech = PlainTextOutputSpeech()
             speech.text = speechText
             this.speech = speech
             return this
         }
 
-        fun ssmlSpeech(speechText: String): AlexaResponseBuilder {
+        fun ssmlSpeech(speechText: String): Builder {
             val speech = SsmlOutputSpeech()
             speech.ssml = speechText
             this.speech = speech
             return this
         }
 
-        fun consentCard(permissions: List<String>): AlexaResponseBuilder {
+        fun consentCard(permissions: List<String>): Builder {
             val card = AskForPermissionsConsentCard(permissions)
             this.card = card
             return this
         }
 
-        fun linkAccountCard(): AlexaResponseBuilder {
+        fun linkAccountCard(): Builder {
             card = LinkAccountCard()
             return this
         }
 
-        fun simpleCard(cardTitle: String, cardText: String): AlexaResponseBuilder {
+        fun simpleCard(cardTitle: String, cardText: String): Builder {
             val card = SimpleCard()
             card.content = cardText
             card.title = cardTitle
@@ -107,7 +108,7 @@ data class AlexaResponse(
             return this
         }
 
-        fun standardCard(cardTitle: String, cardText: String, image: Image): AlexaResponseBuilder {
+        fun standardCard(cardTitle: String, cardText: String, image: Image): Builder {
             val card = StandardCard()
             card.text = cardText
             card.image = image
@@ -116,7 +117,7 @@ data class AlexaResponse(
             return this
         }
 
-        fun reprompt(text: String): AlexaResponseBuilder {
+        fun reprompt(text: String): Builder {
             val reprompt = Reprompt()
             val speech = PlainTextOutputSpeech()
             speech.text = text
@@ -125,12 +126,12 @@ data class AlexaResponse(
             return this
         }
 
-        fun shouldEndSession(shouldEndSession: Boolean?): AlexaResponseBuilder {
+        fun shouldEndSession(shouldEndSession: Boolean?): Builder {
             this.shouldEndSession = shouldEndSession
             return this
         }
 
-        fun addHintDirective(hintText: String): AlexaResponseBuilder {
+        fun addHintDirective(hintText: String): Builder {
             val hint = PlainTextHint()
             hint.text = hintText
             val hintDirective = HintDirective()
@@ -138,7 +139,7 @@ data class AlexaResponse(
             return addDirective(hintDirective)
         }
 
-        fun addVideoDirective(videoURL: String, title: String, subTitle: String): AlexaResponseBuilder {
+        fun addVideoDirective(videoURL: String, title: String, subTitle: String): Builder {
             val metadata = Metadata()
             metadata.subtitle = subTitle
             metadata.title = title
@@ -152,13 +153,13 @@ data class AlexaResponse(
             return addDirective(videoDirective)
         }
 
-        fun addTemplateDirective(template: Template): AlexaResponseBuilder {
+        fun addTemplateDirective(template: Template): Builder {
             val templateDirective = RenderTemplateDirective()
             templateDirective.template = template
             return addDirective(templateDirective)
         }
 
-        fun addDirective(directive: Directive): AlexaResponseBuilder {
+        fun addDirective(directive: Directive): Builder {
             directiveList.add(directive)
             return this
         }
@@ -258,12 +259,12 @@ data class AlexaResponse(
             add(hintDirective)
         }
 
-        fun returnFromLinkDirectiveDirective(block: ReturnFromLinkDirectiveBuilder.() -> Unit) {
-            add(ReturnFromLinkDirectiveBuilder().apply { block() }.build())
+        fun sendRequestDirective(block: SendRequestDirectiveBuilder.() -> Unit) {
+            add(SendRequestDirectiveBuilder().apply { block() }.build())
         }
 
-        fun followLinkWithResultDirective(block: (FollowLinkWithResultDirectiveBuilder.() -> Unit)) {
-            add(FollowLinkWithResultDirectiveBuilder().apply { block() }.build())
+        fun returnFromLinkDirective(block: ReturnFromLinkDirectiveBuilder.() -> Unit) {
+            add(ReturnFromLinkDirectiveBuilder().apply { block() }.build())
         }
 
         fun delegateDirective(block: (DelegateDirective.() -> Unit)) {
@@ -319,6 +320,43 @@ data class AlexaResponse(
         }
 
         @AlexaResponseDsl
+        class SendRequestDirectiveBuilder {
+            lateinit var name: NameType
+            private lateinit var payload: Payload<*>
+            var token: String = "none"
+
+            fun webPage(block: PrintTypeBuilder.() -> Unit): Print<WebPage> {
+                return Print(PrintTypeBuilder().apply { block() }.build())
+            }
+
+            fun pdf(block: PrintTypeBuilder.() -> Unit): Print<PDF> {
+                return Print(PrintTypeBuilder().apply { block() }.build())
+            }
+
+            fun imagePNG(block: PrintTypeBuilder.() -> Unit): Print<ImagePNG> {
+                return Print(PrintTypeBuilder().apply(block).build())
+            }
+
+            fun imageJPEG(block: PrintTypeBuilder.() -> Unit): Print<ImageJPEG> {
+                return Print(PrintTypeBuilder().apply(block).build())
+            }
+
+            fun physicalActivity(block: PhysicalActivityBuilder.() -> Unit): Log<PhysicalActivity> {
+                return Log(PhysicalActivityBuilder().apply(block).build())
+            }
+
+            fun print(block: PrintBuilder.() -> Unit): Print<*> = PrintBuilder().apply { block() }.build()
+
+            fun log(block: LogBuilder.() -> Unit): Log<*> = LogBuilder().apply { block() }.build()
+
+            fun payload(block: SendRequestDirectiveBuilder.() -> Payload<*>) {
+                apply { payload = block() }
+            }
+
+            fun build(): SendRequestDirective = SendRequestDirective(name, payload, token)
+        }
+
+        @AlexaResponseDsl
         class ReturnFromLinkDirectiveBuilder {
             lateinit var status: ReturnFromLinkDirective.Status
             lateinit var payload: Payload<*>
@@ -340,81 +378,65 @@ data class AlexaResponse(
 
 
         @AlexaResponseDsl
-        class FollowLinkWithResultDirectiveBuilder {
-            lateinit var targetURI: TargetURI
-            lateinit var payload: Payload<*>
-            var token: String = "none"
+        class ConnectionsStatusBuilder {
+            var code: String = ""
+            var message: String = ""
+            fun build() = ConnectionsStatus(code, message)
+        }
 
-            fun print(block: PrintBuilder.() -> Unit): Print<*> = PrintBuilder().apply { block() }.build()
-
-            fun log(block: LogBuilder.() -> Unit): Log<*> = LogBuilder().apply { block() }.build()
-
-            fun payload(block: FollowLinkWithResultDirectiveBuilder.() -> Payload<*>) {
-                apply { payload = block() }
+        @AlexaResponseDsl
+        class PrintBuilder {
+            private lateinit var printType: Print.PrintType
+            fun webPage(block: PrintTypeBuilder.() -> Unit) {
+                printType = PrintTypeBuilder().apply(block).build<WebPage>()
             }
 
-            fun build(): FollowLinkWithResultDirective = FollowLinkWithResultDirective(targetURI, payload, token)
-        }
-    }
+            fun pdf(block: PrintTypeBuilder.() -> Unit) {
+                printType = PrintTypeBuilder().apply(block).build<PDF>()
+            }
 
-    @AlexaResponseDsl
-    class ConnectionsStatusBuilder {
-        var code: String = ""
-        var message: String = ""
-        fun build() = ConnectionsStatus(code, message)
-    }
+            fun imagePNG(block: PrintTypeBuilder.() -> Unit) {
+                printType = PrintTypeBuilder().apply(block).build<ImagePNG>()
+            }
 
-    @AlexaResponseDsl
-    class PrintBuilder {
-        private lateinit var printType: Print.PrintType
-        fun webPage(block: PrintTypeBuilder.() -> Unit) {
-            printType = PrintTypeBuilder().apply(block).build<WebPage>()
+            fun imageJPEG(block: PrintTypeBuilder.() -> Unit) {
+                printType = PrintTypeBuilder().apply(block).build<ImageJPEG>()
+            }
+
+            fun build(): Print<*> = Print(printType)
         }
 
-        fun pdf(block: PrintTypeBuilder.() -> Unit) {
-            printType = PrintTypeBuilder().apply(block).build<PDF>()
+        @AlexaResponseDsl
+        class PrintTypeBuilder {
+            lateinit var title: String
+            lateinit var description: String
+            lateinit var url: String
+            var version: String = "1.0"
+
+            inline fun <reified T : Print.PrintType> build(): T {
+                return T::class.primaryConstructor!!.call(title, description, url, version)
+            }
         }
 
-        fun imagePNG(block: PrintTypeBuilder.() -> Unit) {
-            printType = PrintTypeBuilder().apply(block).build<ImagePNG>()
+        @AlexaResponseDsl
+        class LogBuilder {
+            lateinit var logType: Log.LogType
+
+            fun physicalActivity(block: PhysicalActivityBuilder.() -> Unit) {
+                logType = PhysicalActivityBuilder().apply(block).build()
+            }
+
+            fun build(): Log<*> = Log(logType)
         }
 
-        fun imageJPEG(block: PrintTypeBuilder.() -> Unit) {
-            printType = PrintTypeBuilder().apply(block).build<ImageJPEG>()
+        @AlexaResponseDsl
+        class PhysicalActivityBuilder {
+            var description: String = ""
+            lateinit var startTime: LocalDateTime
+            var duration: Float = 0F
+            var distance: Float = 0f
+            fun build() = PhysicalActivity(description, startTime, duration, distance)
         }
-
-        fun build(): Print<*> = Print(printType)
-    }
-
-    @AlexaResponseDsl
-    class PrintTypeBuilder {
-        lateinit var title: String
-        lateinit var description: String
-        lateinit var url: String
-
-        inline fun <reified T : Print.PrintType> build(): T {
-            return T::class.primaryConstructor!!.call(title, description, url)
-        }
-    }
-
-    @AlexaResponseDsl
-    class LogBuilder {
-        lateinit var logType: Log.LogType
-
-        fun physicalActivity(block: PhysicalActivityBuilder.() -> Unit) {
-            logType = PhysicalActivityBuilder().apply(block).build()
-        }
-
-        fun build(): Log<*> = Log(logType)
-    }
-
-    @AlexaResponseDsl
-    class PhysicalActivityBuilder {
-        var description: String = ""
-        lateinit var startTime: LocalDateTime
-        var duration: Float = 0F
-        var distance: Float = 0f
-        fun build() = PhysicalActivity(description, startTime, duration, distance)
     }
 }
 
@@ -442,59 +464,12 @@ fun main(args: Array<String>) {
                     source = "http://www.oi.com"
                 }
 
-                returnFromLinkDirectiveDirective {
-                    status {
-                        ReturnFromLinkDirective.Status.SUCCESS
-                    }
-                    payload {
-                        print {
-                            imagePNG {
-                                title = "image"
-                                description = "image description"
-                                url = "http://www.imagembacana.com"
-                            }
-                        }
-                    }
-                }
-                followLinkWithResultDirective {
-                    targetURI = TargetURI.PRINT
-                    payload {
-                        print {
-                            webPage {
-                                title = "Marcelo"
-                                description = "Super bacana"
-                                url = "http://www.marcelorcorrea.com"
-                            }
-                        }
-                    }
-                }
-
-                followLinkWithResultDirective {
-                    targetURI = TargetURI.LOG
-                    payload {
-                        log {
-                            physicalActivity {
-                                description = "OIE"
-                                startTime = LocalDateTime.now()
-                                duration = 10f
-                                distance = 50f
-                            }
-                        }
-                    }
-                }
-
                 directive {
                     val hintDirective = HintDirective()
                     val hint = PlainTextHint()
                     hint.text = "TESTE"
                     hintDirective.hint = hint
                     hintDirective
-                }
-                followLinkWithResultDirective {
-                    targetURI = TargetURI.PRINT
-                    payload {
-                        Print(webPage)
-                    }
                 }
             }
         }
@@ -509,32 +484,20 @@ fun main(args: Array<String>) {
     println(list.textContent)
     println(alexaResponse.toJson())
 
-    val followLinkWithResultDirective = FollowLinkWithResultDirective(
-            targetURI = TargetURI.PRINT,
-            payload = Print(webPage),
-            token = "PrintWebPage")
-    val response = alexaResponse {
-        response {
-            speech { "Okay, I'm sending a WebPage to your printer" }
-            simpleCard {
-                title = "OI"
-                content = "Okay, I'm sending a WebPage to your printer"
-            }
-            directives {
-                directive {
-                    followLinkWithResultDirective
-                }
-            }
-        }
-    }
-    println(response.toJson())
-
     println(alexaResponse {
         response {
             shouldEndSession = false
             directives {
-                directive {
-                    DelegateDirective()
+                sendRequestDirective {
+                    name = NameType.PRINT
+                    payload {
+                        webPage {
+                            version = "1.0"
+                            title = ""
+                            description = ""
+                            url = "asdiouasdioas"
+                        }
+                    }
                 }
             }
         }

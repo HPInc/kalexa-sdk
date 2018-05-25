@@ -2,13 +2,13 @@ package com.hp.kalexa.model.directive
 
 import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.hp.kalexa.model.TargetURI
 import com.hp.kalexa.model.json.PayloadSerializer
+import com.hp.kalexa.model.payload.NameType
 import com.hp.kalexa.model.payload.Payload
 
-@JsonTypeName("Links.FollowLinkWithResult")
-data class FollowLinkWithResultDirective(
-        val targetURI: TargetURI,
+@JsonTypeName("Connections.SendRequest")
+class SendRequestDirective(
+        val name: NameType,
         @JsonSerialize(using = PayloadSerializer::class)
-        var payload: Payload<*>,
-        val token: String = "none") : Directive()
+        val payload: Payload<*>,
+        val token: String) : Directive()

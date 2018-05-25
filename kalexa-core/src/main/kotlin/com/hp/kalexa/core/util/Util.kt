@@ -10,6 +10,8 @@ import kotlin.reflect.full.declaredFunctions
 object Util {
     fun getSkillName() = System.getenv("SKILL_NAME") ?: "This Skill"
 
+    fun getApplicationID(): String? = System.getenv("APPLICATION_ID")
+
     fun getIntentPackage() = System.getenv("INTENT_PACKAGE")
             ?: throw IllegalArgumentException("You must define INTENT_PACKAGE environment variable")
 
