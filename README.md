@@ -150,3 +150,8 @@ Dialog directives such `DelegateDirective`, `ElicitSlotDirective` and `ConfirmIn
 UI directives: `RenderTemplateDirective` and populate with its Templates.
 
 And Skill-to-Skill directives: `SendRequestDirective`, `ReturnFromLinkDirective` (this name will probably change).
+
+
+## License
+
+MIT -- see [LICENSE](LICENSE)
