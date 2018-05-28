@@ -64,12 +64,12 @@ So, the way it works is basically a combination of `IntentExecutor` callbacks an
 For instance: When annotating a class with`@LaunchIntent` you must override the callback method `onLaunchIntent`. 
 So when a SessionRequest comes from Alexa to your skill, `Kalexa-SDK` will map the Launch Request to the class annotated with `@LaunchRequest` and `onLaunchIntent` of that class will be called.
 
- - `LaunchIntent` and  `onLaunchIntent` - Handles the LaunchIntent event.
- - `RecoverIntentContext` and `onUnknownIntentContext` - When a BuiltInIntent comes without a context, you may annotate with `@RecoverIntentContext` to handle the error and respond gracefully.
- - `FallbackIntent` and `onFallbackIntent` - Handles the AMAZON.FallbackIntent
- - `HelpIntent` and `onHelpIntent` - Handles the AMAZON.HelpIntent
- - `FulfillerIntent` and `onConnectionsRequest` - Handles the Skill request from another existent Skill. 
- - `Intent` and `onIntentRequest` - Probably the most important annotation since it's where you will handle all of your Intents. It's basically the entry point of Intents. When an Intent is mapped to your Intent class the `onIntentRequest` will be called. You can also map more than one Intent to an Intent class using the `mapsTo` annotation property.
+ - `@LaunchIntent` and  `onLaunchIntent` - Handles the LaunchIntent event.
+ - `@RecoverIntentContext` and `onUnknownIntentContext` - When a BuiltInIntent comes without a context, you may annotate with `@RecoverIntentContext` to handle the error and respond gracefully.
+ - `@FallbackIntent` and `onFallbackIntent` - Handles the AMAZON.FallbackIntent
+ - `@HelpIntent` and `onHelpIntent` - Handles the AMAZON.HelpIntent
+ - `@FulfillerIntent` and `onConnectionsRequest` - Handles the Skill request from another existent Skill. 
+ - `@Intent` and `onIntentRequest` - Probably the most important annotation since it's where you will handle all of your Intents. It's basically the entry point of Intents. When an Intent is mapped to your Intent class the `onIntentRequest` will be called. You can also map more than one Intent to an Intent class using the `mapsTo` annotation property.
  ```
  @Intent(mapsTo = ["RecipeIntent", "LaunchIntent"])
  class FoodIntent extends IntentExecutor {
@@ -92,6 +92,7 @@ These basic methods are: `onYesIntent`, `onNoIntent`, `onCancelIntent`, `onStopI
 In an interaction, you often need to lock the context (force interaction to go back to the last intent) for when you need an answer for the user.
 For that you can use the method `lockIntentContext()` from `IntentExecutor` class. You may remove the lock calling `unlockIntentContext()`
 For example:
+
 `Java Code:`
    ```
    @Intent
@@ -125,8 +126,9 @@ It's possible to verify if the device has screen support checking if supportedIn
 #### Skill Connection Support
 `Kalexa-SDK` also supports Skill Connector feature. 
 Your skill can act as a `Fulfiller` or as a `Requestor` 
-##### Fulfiller
-If your skill acts as a Fulfiller, you need to annotate your class with `@Fulfiller` and override `onConnectionsRequest` callback method will be called. In this case, after processing the request, you have to answer back to Alexa using the `ReturnFromLinkDirective` directive. **This directive is in the process of being deprecated**
+##### Fulfiller:
+If your skill acts as a Fulfiller, you need to annotate your class with `@Fulfiller` and override `onConnectionsRequest` callback method will be called. In this case, after processing the request, you have to answer back to Alexa using the `ReturnFromLinkDirective` directive. **This directive is in process of being deprecated**
+
 `Java Code:`
 ```
     @NotNull
@@ -146,6 +148,7 @@ If your skill acts as a Fulfiller, you need to annotate your class with `@Fulfil
 
 ##### Requestor:
 If your skill acts as a Requestor, just send to Alexa a `SendRequestDirective` with the type of the Entity-Pair object and the Payload:
+
 `Java Code`
 ```
 new AlexaResponse.Builder().addDirective(
@@ -159,6 +162,7 @@ new AlexaResponse.Builder().addDirective(
 
 ```
 And then expect the response to be on `onConnectionsResponse` method
+
 `Java code:`
 ```
     @NotNull
