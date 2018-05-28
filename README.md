@@ -114,7 +114,9 @@ For example:
    ```  
 #### Display Interface
 If you're working with Display interface, you will probably want to handle touch screen events. To handle it, override the `onElementSelected` and handle properly the touch event.
+
 `Kalexa-SDK` will try to map the intent from `INTENT_CONTEXT` key in session attributes if no such context exists, Kalexa-SDK will look for the Token key in item list object of the request and use its value as the Intent to call its `onElementSelected` method.
+
 `Kalexa-SDK` will use `|` as separator to split the token string in more than one values. But keep in mind that the first value HAS to be the Intent that you want to execute `onElementSelected` method.
 For example: `{"token": "MyIntentName|Value|SomeOtherValue}`
 
@@ -156,7 +158,6 @@ new AlexaResponse.Builder().addDirective(
                         "Token"));
 
 ```
-
 And then expect the response to be on `onConnectionsResponse` method
 `Java code:`
 ```
@@ -173,7 +174,9 @@ And then expect the response to be on `onConnectionsResponse` method
                 .build();
     }
  ```
-#### Response:
+Note that token argument passed to `SendRequestDirective` should be the Intent that you want to be called when Alexa sends the response from the Fulfiller. `Kalexa-SDK` use `|` as separator to split the token string in more values. But keep in mind that the first value HAS to be the Intent that you want to execute `onConnectionsResponse` method.
+For example: `{"token": "MyIntentName|Value|SomeOtherValue}`
+ #### Response:
 Kalexa-sdk has two types of responses.
 ##### Java:
 AlexaBuilder builds the response gracefully to send back to Alexa:
