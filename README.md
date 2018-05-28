@@ -53,16 +53,16 @@ There are three environment variables that you must export on your lambda before
 
 #### Create Intent:
 
-The only thing you need to do is to extend class `IntentExecutor` and override its callbacks.
-
-There are two simple things that you need to do in order to fulfil the requirements to run your skill:
+There are three simple things that you need to follow in order to fulfill the requirements to run your skill:
 
 - Extend `IntentExecutor` abstract class
+- Override `IntentExector` callback methods. 
 - Annotate with the supported annotations: `LaunchIntent`,  `RecoverIntentContext`,  `FallbackIntent`,  `HelpIntent`,  `Intent`, `FulfillerIntent`.
 
-So it's basically a combination of `IntentExecutor` callbacks and the Annotations. 
+So, the way it works is basically a combination of `IntentExecutor` callbacks and the Annotations. 
 
-For instance: When annotating an Intent with`@LauchIntent` you must override the callback method `onLauchIntent`. So, when your app skill is called, the `onLaunchIntent` callback of the intent annotated with `@LaunchIntent` will be called.
+For instance: When annotating a class with`@LaunchIntent` you must override the callback method `onLaunchIntent`. 
+So when a SessionRequest comes from Alexa to your skill, `Kalexa-SDK` will map the Launch Request to the class annotated with `@LaunchRequest` and `onLaunchIntent` of that class will be called.
 
  - `LaunchIntent` and  `onLaunchIntent` - Handles the LaunchIntent event.
  - `RecoverIntentContext` and `onUnknownIntentContext` - When a BuiltInIntent comes without a context, you may annotate with `@RecoverIntentContext` to handle the error and respond gracefully.
@@ -80,11 +80,12 @@ For instance: When annotating an Intent with`@LauchIntent` you must override the
  } 
  ```  
  
- You may annotate an Intent with more than annotation.
- Besides `@Intent` annotation, you can only have **ONE** annotation of the other types.
+ You may annotate with @Intent as many Intent classes you want.
+ But, besides `@Intent` annotation, you can only have **ONE** class annotated with the other types in your skill. Otherwise an exception will be thrown.
 
+#### Overriding Builtin callbacks:
 Your intent can override the `onBuiltInIntent` method to handle Amazon Built In intents properly. 
-Or you can just override some basic callbacks that are already implemented and handle as you like.
+Or you can just override some basic callbacks and handle as you like.
 These basic methods are: `onYesIntent`, `onNoIntent`, `onCancelIntent`, `onStopIntent`.
 
 #### Lock Context:
@@ -142,7 +143,10 @@ return alexaResponse {
 ```
 
 #### Directives
-Kalexa-sdk supports most of the directives. 
-Dialog directives such Delegate, ElicitSlot and ConfirmIntent directives.
-UI directives: RenderTemplateDirective
-And Skill-to-Skill directives: SendRequestDirective, ReturnFromLinkDirective (this name will probably change).
+Kalexa-sdk supports most of the directives.
+
+Dialog directives such `DelegateDirective`, `ElicitSlotDirective` and `ConfirmIntentDirective` directives.
+
+UI directives: `RenderTemplateDirective` and populate with its Templates.
+
+And Skill-to-Skill directives: `SendRequestDirective`, `ReturnFromLinkDirective` (this name will probably change).
