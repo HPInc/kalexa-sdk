@@ -92,6 +92,7 @@ These basic methods are: `onYesIntent`, `onNoIntent`, `onCancelIntent`, `onStopI
 In an interaction, you often need to lock the context (force interaction to go back to the last intent) for when you need an answer for the user.
 For that you can use the method `lockIntentContext()` from `IntentExecutor` class. You may remove the lock calling `unlockIntentContext()`
 For example:
+`Java Code:`
    ```
    @Intent
    class FoodIntent extends IntentExecutor {
@@ -111,11 +112,67 @@ For example:
          }
    } 
    ```  
+#### Display Interface
+If you're working with Display interface, you will probably want to handle touch screen events. To handle it, override the `onElementSelected` and handle properly the touch event.
+`Kalexa-SDK` will try to map the intent from `INTENT_CONTEXT` key in session attributes if no such context exists, Kalexa-SDK will look for the Token key in item list object of the request and use its value as the Intent to call its `onElementSelected` method.
+`Kalexa-SDK` will use `|` as separator to split the token string in more than one values. But keep in mind that the first value HAS to be the Intent that you want to execute `onElementSelected` method.
+For example: `{"token": "MyIntentName|Value|SomeOtherValue}`
 
-If you're working with Display interface, and you need to handle touch events, you can override the `onElementSelected` and handle properly the touch event.
+It's possible to verify if the device has screen support checking if supportedInterfaces from the context object has templateVersion and markupVersion value or by simply calling `IntentUtil.hasDisplay(context)`
 
-This lib also supports Skill Connector feature. So if you're expecting a response from an another skill, the `onConnectionsRequest` callback method will be called.
+#### Skill Connection Support
+`Kalexa-SDK` also supports Skill Connector feature. 
+Your skill can act as a `Fulfiller` or as a `Requestor` 
+##### Fulfiller
+If your skill acts as a Fulfiller, you need to annotate your class with `@Fulfiller` and override `onConnectionsRequest` callback method will be called. In this case, after processing the request, you have to answer back to Alexa using the `ReturnFromLinkDirective` directive. **This directive is in the process of being deprecated**
+`Java Code:`
+```
+    @NotNull
+    @Override
+    public AlexaResponse onConnectionsRequest(ConnectionsRequest request) {
+        // do the logic and reply back to Alexa.
+        return new AlexaResponse.Builder().addDirective(
+                new ReturnFromLinkDirective(
+                        ReturnFromLinkDirective.Status.SUCCESS,
+                        new Print<>(new PDF(
+                                "Document title",
+                                "This is a PDF",
+                                "http://<PDF location>.pdf")),
+                        ));
+    }
+```
 
+##### Requestor:
+If your skill acts as a Requestor, just send to Alexa a `SendRequestDirective` with the type of the Entity-Pair object and the Payload:
+`Java Code`
+```
+new AlexaResponse.Builder().addDirective(
+                new SendRequestDirective(
+                        NameType.PRINT,
+                        new Print<>(new PDF(
+                                "Document title",
+                                "This is a PDF",
+                                "http://<PDF location>.pdf")),
+                        "Token"));
+
+```
+
+And then expect the response to be on `onConnectionsResponse` method
+`Java code:`
+```
+    @NotNull
+    @Override
+    public AlexaResponse onConnectionsResponse(ConnectionsResponseRequest request) {
+        if (request.getStatus().isSuccess()) {
+            return new AlexaResponse.Builder()
+                    .speech("Your request was successfull!")
+                    .build();
+        }
+        return new AlexaResponse.Builder()
+                .speech("Sorry, something went wrong.")
+                .build();
+    }
+ ```
 #### Response:
 Kalexa-sdk has two types of responses.
 ##### Java:
