@@ -3,6 +3,7 @@ package com.hp.kalexa.model.response
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.hp.kalexa.model.ConnectionsStatus
 import com.hp.kalexa.model.directive.*
 import com.hp.kalexa.model.interfaces.display.*
@@ -11,12 +12,8 @@ import com.hp.kalexa.model.interfaces.video.Metadata
 import com.hp.kalexa.model.interfaces.video.VideoItem
 import com.hp.kalexa.model.payload.NameType
 import com.hp.kalexa.model.payload.Payload
-import com.hp.kalexa.model.payload.log.Log
-import com.hp.kalexa.model.payload.log.PhysicalActivity
 import com.hp.kalexa.model.payload.print.*
 import com.hp.kalexa.model.ui.*
-import java.time.LocalDateTime
-import kotlin.reflect.full.primaryConstructor
 
 
 fun alexaResponse(block: AlexaResponse.AlexaDSLResponseBuilder.() -> Unit): AlexaResponse = AlexaResponse.AlexaDSLResponseBuilder().apply(block).build()
@@ -39,7 +36,9 @@ data class AlexaResponse(
                 .configure(DeserializationFeature.READ_ENUMS_USING_TO_STRING, true)
                 .setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
+        @JvmStatic
         fun builder() = Builder()
+
         fun emptyResponse() = AlexaResponse()
     }
 
@@ -56,13 +55,13 @@ data class AlexaResponse(
         private var reprompt: Reprompt? = null
 
         fun build(): AlexaResponse {
-            val speechletResponse = Response()
-            speechletResponse.outputSpeech = speech
-            speechletResponse.card = card
-            speechletResponse.reprompt = reprompt
-            speechletResponse.directives = directiveList
-            speechletResponse.shouldEndSession = shouldEndSession
-            return AlexaResponse(version = version, response = speechletResponse, sessionAttributes = sessionAttributes)
+            val response = Response()
+            response.outputSpeech = speech
+            response.card = card
+            response.reprompt = reprompt
+            response.directives = directiveList
+            response.shouldEndSession = shouldEndSession
+            return AlexaResponse(version = version, response = response, sessionAttributes = sessionAttributes)
         }
 
         fun version(version: String): Builder {
@@ -263,8 +262,8 @@ data class AlexaResponse(
             add(SendRequestDirectiveBuilder().apply { block() }.build())
         }
 
-        fun returnFromLinkDirective(block: ReturnFromLinkDirectiveBuilder.() -> Unit) {
-            add(ReturnFromLinkDirectiveBuilder().apply { block() }.build())
+        fun sendResponseDirective(block: SendResponseDirectiveBuilder.() -> Unit) {
+            add(SendResponseDirectiveBuilder().apply { block() }.build())
         }
 
         fun delegateDirective(block: (DelegateDirective.() -> Unit)) {
@@ -322,34 +321,22 @@ data class AlexaResponse(
         @AlexaResponseDsl
         class SendRequestDirectiveBuilder {
             lateinit var name: NameType
-            private lateinit var payload: Payload<*>
+            private lateinit var payload: Payload
             var token: String = "none"
 
-            fun webPage(block: PrintTypeBuilder.() -> Unit): Print<WebPage> {
-                return Print(PrintTypeBuilder().apply { block() }.build())
+            fun printPDFRequest(block: PrintPDFRequestBuilder.() -> Unit) {
+                apply { payload = PrintPDFRequestBuilder().apply { block() }.build() }
             }
 
-            fun pdf(block: PrintTypeBuilder.() -> Unit): Print<PDF> {
-                return Print(PrintTypeBuilder().apply { block() }.build())
+            fun printWebPageRequest(block: PrintWebPageRequestBuilder.() -> Unit) {
+                apply { payload = PrintWebPageRequestBuilder().apply { block() }.build() }
             }
 
-            fun imagePNG(block: PrintTypeBuilder.() -> Unit): Print<ImagePNG> {
-                return Print(PrintTypeBuilder().apply(block).build())
+            fun printImageRequest(block: PrintImageRequestBuilder.() -> Unit) {
+                apply { payload = PrintImageRequestBuilder().apply { block() }.build() }
             }
 
-            fun imageJPEG(block: PrintTypeBuilder.() -> Unit): Print<ImageJPEG> {
-                return Print(PrintTypeBuilder().apply(block).build())
-            }
-
-            fun physicalActivity(block: PhysicalActivityBuilder.() -> Unit): Log<PhysicalActivity> {
-                return Log(PhysicalActivityBuilder().apply(block).build())
-            }
-
-            fun print(block: PrintBuilder.() -> Unit): Print<*> = PrintBuilder().apply { block() }.build()
-
-            fun log(block: LogBuilder.() -> Unit): Log<*> = LogBuilder().apply { block() }.build()
-
-            fun payload(block: SendRequestDirectiveBuilder.() -> Payload<*>) {
+            fun payload(block: SendRequestDirectiveBuilder.() -> Payload) {
                 apply { payload = block() }
             }
 
@@ -357,23 +344,56 @@ data class AlexaResponse(
         }
 
         @AlexaResponseDsl
-        class ReturnFromLinkDirectiveBuilder {
-            lateinit var status: ReturnFromLinkDirective.Status
-            lateinit var payload: Payload<*>
+        class PrintPDFRequestBuilder: PrintBuilder<PrintPDFRequest>() {
 
-            fun status(block: () -> ReturnFromLinkDirective.Status) {
-                status = block()
+            override fun build() = PrintPDFRequest(version, language, title, description, url)
+
+            companion object {
+                @JvmStatic
+                fun builder() = PrintPDFRequestBuilder()
+            }
+        }
+
+        @AlexaResponseDsl
+        class PrintWebPageRequestBuilder : PrintBuilder<PrintWebPageRequest>() {
+            override fun build() = PrintWebPageRequest(version,language, title, description, url)
+
+            companion object {
+                @JvmStatic
+                fun builder() = PrintWebPageRequestBuilder()
+            }
+        }
+
+        @AlexaResponseDsl
+        class PrintImageRequestBuilder : PrintBuilder<PrintImageRequest>() {
+
+            private lateinit var imageType: PrintImageRequest.ImageType
+            fun imageType(block: () -> PrintImageRequest.ImageType) = apply {
+                imageType = block()
             }
 
-            fun payload(block: ReturnFromLinkDirectiveBuilder.() -> Payload<*>) {
+            override fun build() = PrintImageRequest(version, language, title, description, imageType, url)
+
+            companion object {
+                @JvmStatic
+                fun builder() = PrintImageRequestBuilder()
+            }
+        }
+
+        @AlexaResponseDsl
+        class SendResponseDirectiveBuilder {
+            lateinit var status: SendResponseDirective.Status
+            lateinit var payload: Map<String, Any>
+
+            fun status(block: () -> SendResponseDirective.Status) {
+                apply { status = block() }
+            }
+
+            fun payload(block: SendResponseDirectiveBuilder.() -> Map<String, Any>) {
                 apply { payload = block() }
             }
 
-            fun print(block: PrintBuilder.() -> Unit): Print<*> = PrintBuilder().apply { block() }.build()
-
-            fun log(block: LogBuilder.() -> Unit): Log<*> = LogBuilder().apply { block() }.build()
-
-            fun build(): ReturnFromLinkDirective = ReturnFromLinkDirective(status, payload)
+            fun build(): SendResponseDirective = SendResponseDirective(status, payload)
         }
 
 
@@ -383,65 +403,11 @@ data class AlexaResponse(
             var message: String = ""
             fun build() = ConnectionsStatus(code, message)
         }
-
-        @AlexaResponseDsl
-        class PrintBuilder {
-            private lateinit var printType: Print.PrintType
-            fun webPage(block: PrintTypeBuilder.() -> Unit) {
-                printType = PrintTypeBuilder().apply(block).build<WebPage>()
-            }
-
-            fun pdf(block: PrintTypeBuilder.() -> Unit) {
-                printType = PrintTypeBuilder().apply(block).build<PDF>()
-            }
-
-            fun imagePNG(block: PrintTypeBuilder.() -> Unit) {
-                printType = PrintTypeBuilder().apply(block).build<ImagePNG>()
-            }
-
-            fun imageJPEG(block: PrintTypeBuilder.() -> Unit) {
-                printType = PrintTypeBuilder().apply(block).build<ImageJPEG>()
-            }
-
-            fun build(): Print<*> = Print(printType)
-        }
-
-        @AlexaResponseDsl
-        class PrintTypeBuilder {
-            lateinit var title: String
-            lateinit var description: String
-            lateinit var url: String
-            var version: String = "1.0"
-
-            inline fun <reified T : Print.PrintType> build(): T {
-                return T::class.primaryConstructor!!.call(title, description, url, version)
-            }
-        }
-
-        @AlexaResponseDsl
-        class LogBuilder {
-            lateinit var logType: Log.LogType
-
-            fun physicalActivity(block: PhysicalActivityBuilder.() -> Unit) {
-                logType = PhysicalActivityBuilder().apply(block).build()
-            }
-
-            fun build(): Log<*> = Log(logType)
-        }
-
-        @AlexaResponseDsl
-        class PhysicalActivityBuilder {
-            var description: String = ""
-            lateinit var startTime: LocalDateTime
-            var duration: Float = 0F
-            var distance: Float = 0f
-            fun build() = PhysicalActivity(description, startTime, duration, distance)
-        }
     }
 }
 
 fun main(args: Array<String>) {
-    val webPage = WebPage(title = "Wikipedia", description = "Wikipedia Article about Longest", url = "https://en.wikipedia.org/wiki/Main_Page/")
+//    val webPage = WebPage(title = "Wikipedia", description = "Wikipedia Article about Longest", url = "https://en.wikipedia.org/wiki/Main_Page/")
     val alexaResponse = alexaResponse {
         sessionAttributes { mapOf("Name" to "Marcelo") }
         version = "1.0"
@@ -484,26 +450,54 @@ fun main(args: Array<String>) {
     println(list.textContent)
     println(alexaResponse.toJson())
 
+
     println(alexaResponse {
         response {
             shouldEndSession = false
             directives {
                 sendRequestDirective {
                     name = NameType.PRINT
-                    payload {
-                        webPage {
-                            version = "1.0"
-                            title = ""
-                            description = ""
-                            url = "asdiouasdioas"
-                        }
+                    printPDFRequest {
+                        version { "1" }
+                        title { "title 1" }
+                        description { "description 1" }
+                        url { "http://www.teste.com" }
                     }
                 }
             }
         }
     }.toJson())
 
-    println(textContent {
-        tertiaryText = plainText { "oi" }
-    })
+    println(jacksonObjectMapper().writeValueAsString(PrintPDFRequest(title = "Title", url = "http://www.oi.com")))
+    val j = "{\"@type\":\"PrintWebPageRequest\",\"title\":{\"@type\":\"Title\",\"@version\":\"1\",\"value\":\"Value\"},\"description\":null,\"url\":\"http://www.oi.com\",\"@version\":\"1\",\"@language\":\"en-US\"}"
+    val readValue = jacksonObjectMapper().readValue<PrintWebPageRequest>(j)
+    println(readValue)
+
+
+    println( alexaResponse {
+        response {
+            directives {
+                sendRequestDirective {
+                    name = NameType.PRINT
+                    token = "NewContentIntent"
+                    printPDFRequest {
+                        title { "PDF" }
+                        description { "Random pdf file by Longest." }
+                        url { "http://www.orimi.com/pdf-test.pdf" }
+
+                    }
+                }
+            }
+        }
+    }.toJson())
+//    val readValue = jacksonObjectMapper().readValue<Payload>("{\"type\":\"PrintPDFRequest\",\"version\":\"1.0\",\"PDF\":{\"type\":\"PDF\",\"title\":\"\",\"description\":\"\",\"url\":\"\",\"version\":\"1.0\"}}")
+//    println(readValue)
+//
+//    println(textContent {
+//        tertiaryText = plainText { "oi" }
+//    })
+//
+//    println(AlexaResponse.Builder().addDirective(SendRequestDirective(NameType.PRINT, PrintPDFRequest(
+//            PDF("Title", "description", "http://www.oi.com"), "1.0"
+//    ), token = "none")).build().toJson())
 }

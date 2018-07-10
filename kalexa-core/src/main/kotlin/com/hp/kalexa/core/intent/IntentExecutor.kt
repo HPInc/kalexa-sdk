@@ -12,12 +12,13 @@ import com.hp.kalexa.core.util.Util
 import com.hp.kalexa.model.Context
 import com.hp.kalexa.model.Session
 import com.hp.kalexa.model.request.*
+import com.hp.kalexa.model.request.event.*
 import com.hp.kalexa.model.response.AlexaResponse
 
 abstract class IntentExecutor {
 
     var sessionAttributes: MutableMap<String, Any?> = mutableMapOf()
-    lateinit var session: Session
+    var session: Session? = null
     lateinit var context: Context
     var version: String = "1.0"
 
@@ -37,12 +38,13 @@ abstract class IntentExecutor {
     open fun onIntentRequest(request: IntentRequest) = AlexaResponse.emptyResponse()
 
     /**
-     * Handles Connections Response Request coming from Alexa. This is the result from the skill when using skill to skill
+     * Handles Connections Response Request coming from Alexa. This is the result from a fulfiller skill when using skill connections
      */
     open fun onConnectionsResponse(request: ConnectionsResponseRequest): AlexaResponse = AlexaResponse.emptyResponse()
 
     /**
-     * Handles Connections Request coming from Alexa. This is the request from the skill when using skill to skill
+     * Handles Connections Request coming from Alexa. This is the request from a requester skill when using skill connections
+     * Should be used combined with @Fulfiller annotation
      */
     open fun onConnectionsRequest(request: ConnectionsRequest): AlexaResponse = AlexaResponse.emptyResponse()
 
@@ -114,7 +116,6 @@ abstract class IntentExecutor {
         return unsupportedIntent()
     }
 
-
     /**
      * Handles other Built In Intents coming from Alexa.
      */
@@ -140,5 +141,29 @@ abstract class IntentExecutor {
 
 
     fun hasDisplay() = IntentUtil.hasDisplay(context)
+
+    open fun onListItemsUpdatedEventRequest(request: ListItemsUpdatedEventRequest): AlexaResponse {
+        return AlexaResponse.emptyResponse()
+    }
+
+    open fun onListItemsDeletedEventRequest(request: ListItemsDeletedEventRequest): AlexaResponse {
+        return AlexaResponse.emptyResponse()
+    }
+
+    open fun onListItemsCreatedEventRequest(request: ListItemsCreatedEventRequest): AlexaResponse {
+        return AlexaResponse.emptyResponse()
+    }
+
+    open fun onListDeletedEventRequest(request: ListDeletedEventRequest): AlexaResponse {
+        return AlexaResponse.emptyResponse()
+    }
+
+    open fun onListUpdatedEventRequest(request: ListUpdatedEventRequest): AlexaResponse {
+        return AlexaResponse.emptyResponse()
+    }
+
+    open fun onListCreatedEventRequest(request: ListCreatedEventRequest): AlexaResponse {
+        return AlexaResponse.emptyResponse()
+    }
 
 }

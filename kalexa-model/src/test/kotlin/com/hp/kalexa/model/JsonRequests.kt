@@ -173,22 +173,20 @@ object JsonRequests {
                             "path": "Print",
                             "address": "amzn1.ask.skill.5a8a2654-2e1e-444b-98b3-6a4a617ef9b0"
                         },
-                        "payload":{
-                            "type":"PrintPDFRequest",
-                            "version":"1.0",
-                            "WebPage":{
-                                "type":"WebPage",
-                                 "description": "This is a nice rich mac and cheese. Serve with a salad for a great meatless dinner. Hope you enjoy it",
-                                "title": "Mac & Cheese",
-                                "url": "http://allrecipes.com/recipe/11679/homemade-mac-and-cheese/"
-                            }
+                        "name": "Print",
+                        "token": "none",
+                        "payload": {
+                            "@type" : "PrintWebPageRequest",
+                            "@version": "1",
+                            "@language" : "en-US",
+                            "title" : "Mac & Cheese",
+                            "description" : "This is a nice rich mac and cheese. Serve with a salad for a great meatless dinner. Hope you enjoy it",
+                            "url": "http://allrecipes.com/recipe/11679/homemade-mac-and-cheese/"
                         },
                         "status": {
                             "code": "200",
                             "message": "OK"
-                        },
-                        "token": "none",
-                        "name": "Print"
+                        }
                     }
                 }"""
     const val ERROR_LINK_RESULT = """{
@@ -291,6 +289,37 @@ object JsonRequests {
         "timestamp": "2018-02-27T13:54:06Z",
         "locale": "en-US",
         "token": "TeamsIntent\\|Internacional"
+    }
+}"""
+    val LIST_ITEM_CREATED_EVENT_REQUEST = """{
+    "version": "1.0",
+    "context": {
+        "System": {
+            "application": {
+                "applicationId": "amzn1.ask.skill.7b317edf-ec6b-4f01-916b-ecd1b980e9c1"
+            },
+            "user": {
+                "userId": "amzn1.ask.account.AETBG4VL43EXDW5ZET6R3JCCUVL5WK23CPRNVOOU5LA25SMQPBJKAFPKLNCJYD6O72C5VXMHSYPVBGDE2QLJDATCAVZUDXQQ4BMRZKPNBXRGJYKJNZYBLM5DNYYMWCLVV4XNAEKRWWGDAKE5CFECBYSWEN2PHVDBN7KUAPPTPAED7MK467TW6MQKL5MTKHTZJY6XSNQ64JOT4HQ",
+                "permissions": {
+                    "consentToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IjEifQ.eyJhdWQiOiJodHRwczovL2FwaS5hbWF6b25hbGV4YS5jb20iLCJpc3MiOiJBbGV4YVNraWxsS2l0Iiwic3ViIjoiYW16bjEuYXNrLnNraWxsLjdiMzE3ZWRmLWVjNmItNGYwMS05MTZiLWVjZDFiOTgwZTljMSIsImV4cCI6MTUyNzE3MTQwMiwiaWF0IjoxNTI3MTY3ODAyLCJuYmYiOjE1MjcxNjc4MDIsInByaXZhdGVDbGFpbXMiOnsiY29uc2VudFRva2VuIjoiQXR6YXxJd0VCSUtpM0E2XzFoNzBWWVQ2M2IyX053R3R0cE5iamU0SHh6c3prYlE2QVZHNTZCLVNKcG9BclRYWlh1R1dBTXFFQS1tdDhqZ3d5UkNPeVl3S3JHNFRodGpBR3F5dEpQREh5aWZWNkdjSVlDZ0I4enNvRHhoTzl1cnJ5WE5yWnExUGVtUkpJRFk5QU03WHVzb3dzMHJTQnU5LUIzMGJZUWY5dXFtVXZmcU1CUGxMd0tlaHAtOGhLc0NjckV1eGtxOUctc3RYWTdEamtIYWh4OS1FcFhrUkFtb3d0bE5MMkdDMVBqSjM2c21CMzBVTndlNkVrX1ZHOE9yMDM1YTk5eUV6dWJhRWxLVk1yREZ4cUVEYzNoUHFRZk9EelJhdnFrX0NiSlhGTTZNNGRKWGc5a0tqTjVwV3hyUjdRZ3dwYTBwOGJ1MmtTRUxVaVgtNTJ1T3NfYkotQy1oVGwzcGllLW1DLWs4M0V0dWUxd0s5dHA1aDNrNEZ5MW1CUGdpWDhoUlo0TS1YWnczVGh4ckxkT19IVFZ6cXRnSkt1LTJUX0tRbTVFT3BMaTRVSzRCWGI0Y0xHUHFvRTZuZ1Bvejg5WV9iZXlvQXZPVy0tLWlZV0RGaVBodzlDV0wwemlZX1NnXzlYeWlwa3N1NHNMTUVFLXdaa1dvQ0ROaFZPc18zc1g4eWZmLVB1NVIyd0lzLWZIWG82aEo1WkNrZlUiLCJ1c2VySWQiOiJhbXpuMS5hc2suYWNjb3VudC5BRVRCRzRWTDQzRVhEVzVaRVQ2UjNKQ0NVVkw1V0syM0NQUk5WT09VNUxBMjVTTVFQQkpLQUZQS0xOQ0pZRDZPNzJDNVZYTUhTWVBWQkdERTJRTEpEQVRDQVZaVURYUVE0Qk1SWktQTkJYUkdKWUtKTlpZQkxNNUROWVlNV0NMVlY0WE5BRUtSV1dHREFLRTVDRkVDQllTV0VOMlBIVkRCTjdLVUFQUFRQQUVEN01LNDY3VFc2TVFLTDVNVEtIVFpKWTZYU05RNjRKT1Q0SFEifX0.BrGj7p3JR9Nbp4OQXENottQPxURfVCIBlRqKocUpX08d9ZA98qQ0sklAi569unCueRoKKrgBV2BxgPvG1Sp-b8ERPDvKa-Ny788dL0RsQs4sCTZNn2NcUDZM_oFfB9zy_lpSHHZ_dhLQEndDMfPdh-4pbruspasPldtImUdQ2XkVxeyixS972Xz-0sFOwU38Z2dflOeGsgjYXOcCcqI2c1HGMugV-EOWt5YcSUJY5FHr75SS7NYoHEVUjhThVXTsOWc2YmA-0iuOuzZRHE-efssQ393GuHoUEywCYJSFcjQeJ0VPdf_IAvHpczt6ocnO5GJmn8IEq1BD50Iwwor1SA"
+                }
+            },
+            "apiEndpoint": "https://api.amazonalexa.com",
+            "apiAccessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IjEifQ.eyJhdWQiOiJodHRwczovL2FwaS5hbWF6b25hbGV4YS5jb20iLCJpc3MiOiJBbGV4YVNraWxsS2l0Iiwic3ViIjoiYW16bjEuYXNrLnNraWxsLjdiMzE3ZWRmLWVjNmItNGYwMS05MTZiLWVjZDFiOTgwZTljMSIsImV4cCI6MTUyNzE3MTQwMiwiaWF0IjoxNTI3MTY3ODAyLCJuYmYiOjE1MjcxNjc4MDIsInByaXZhdGVDbGFpbXMiOnsiY29uc2VudFRva2VuIjoiQXR6YXxJd0VCSUtpM0E2XzFoNzBWWVQ2M2IyX053R3R0cE5iamU0SHh6c3prYlE2QVZHNTZCLVNKcG9BclRYWlh1R1dBTXFFQS1tdDhqZ3d5UkNPeVl3S3JHNFRodGpBR3F5dEpQREh5aWZWNkdjSVlDZ0I4enNvRHhoTzl1cnJ5WE5yWnExUGVtUkpJRFk5QU03WHVzb3dzMHJTQnU5LUIzMGJZUWY5dXFtVXZmcU1CUGxMd0tlaHAtOGhLc0NjckV1eGtxOUctc3RYWTdEamtIYWh4OS1FcFhrUkFtb3d0bE5MMkdDMVBqSjM2c21CMzBVTndlNkVrX1ZHOE9yMDM1YTk5eUV6dWJhRWxLVk1yREZ4cUVEYzNoUHFRZk9EelJhdnFrX0NiSlhGTTZNNGRKWGc5a0tqTjVwV3hyUjdRZ3dwYTBwOGJ1MmtTRUxVaVgtNTJ1T3NfYkotQy1oVGwzcGllLW1DLWs4M0V0dWUxd0s5dHA1aDNrNEZ5MW1CUGdpWDhoUlo0TS1YWnczVGh4ckxkT19IVFZ6cXRnSkt1LTJUX0tRbTVFT3BMaTRVSzRCWGI0Y0xHUHFvRTZuZ1Bvejg5WV9iZXlvQXZPVy0tLWlZV0RGaVBodzlDV0wwemlZX1NnXzlYeWlwa3N1NHNMTUVFLXdaa1dvQ0ROaFZPc18zc1g4eWZmLVB1NVIyd0lzLWZIWG82aEo1WkNrZlUiLCJ1c2VySWQiOiJhbXpuMS5hc2suYWNjb3VudC5BRVRCRzRWTDQzRVhEVzVaRVQ2UjNKQ0NVVkw1V0syM0NQUk5WT09VNUxBMjVTTVFQQkpLQUZQS0xOQ0pZRDZPNzJDNVZYTUhTWVBWQkdERTJRTEpEQVRDQVZaVURYUVE0Qk1SWktQTkJYUkdKWUtKTlpZQkxNNUROWVlNV0NMVlY0WE5BRUtSV1dHREFLRTVDRkVDQllTV0VOMlBIVkRCTjdLVUFQUFRQQUVEN01LNDY3VFc2TVFLTDVNVEtIVFpKWTZYU05RNjRKT1Q0SFEifX0.BrGj7p3JR9Nbp4OQXENottQPxURfVCIBlRqKocUpX08d9ZA98qQ0sklAi569unCueRoKKrgBV2BxgPvG1Sp-b8ERPDvKa-Ny788dL0RsQs4sCTZNn2NcUDZM_oFfB9zy_lpSHHZ_dhLQEndDMfPdh-4pbruspasPldtImUdQ2XkVxeyixS972Xz-0sFOwU38Z2dflOeGsgjYXOcCcqI2c1HGMugV-EOWt5YcSUJY5FHr75SS7NYoHEVUjhThVXTsOWc2YmA-0iuOuzZRHE-efssQ393GuHoUEywCYJSFcjQeJ0VPdf_IAvHpczt6ocnO5GJmn8IEq1BD50Iwwor1SA"
+        }
+    },
+    "request": {
+        "type": "AlexaHouseholdListEvent.ItemsDeleted",
+        "requestId": "b795c1d2-2577-4afb-a4f6-0d995fd54a98",
+        "timestamp": "2018-05-24T13:16:42Z",
+        "eventCreationTime": "2018-05-24T13:16:42Z",
+        "eventPublishingTime": "2018-05-24T13:16:42Z",
+        "body": {
+            "listId": "YW16bjEuYWNjb3VudC5BRkhOQkNYVzdITUlQRFVVQ0tOUURJUjRPWjZBLVNIT1BQSU5HX0lURU0=",
+            "listItemIds": [
+                "16d17103-a425-4cb0-a799-5690daae70b9"
+            ]
+        }
     }
 }"""
 }

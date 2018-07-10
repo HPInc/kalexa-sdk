@@ -2,6 +2,7 @@ package com.hp.kalexa.core.handler
 
 import com.hp.kalexa.core.util.Util
 import com.hp.kalexa.model.request.*
+import com.hp.kalexa.model.request.event.*
 import com.hp.kalexa.model.response.AlexaResponse
 import io.mockk.every
 import io.mockk.mockk
@@ -27,6 +28,12 @@ object SpeechRequestHandlerTest : Spek({
                 every { handleConnectionsRequest(any()) } returns alexaResponse
                 every { handleSessionEndedRequest(any()) } returns alexaResponse
                 every { handleElementSelectedRequest(any()) } returns alexaResponse
+                every { handleListCreatedEventRequest(any()) } returns alexaResponse
+                every { handleListUpdatedEventRequest(any()) } returns alexaResponse
+                every { handleListDeletedEventRequest(any()) } returns alexaResponse
+                every { handleListItemsCreatedEventRequest(any()) } returns alexaResponse
+                every { handleListItemsUpdatedEventRequest(any()) } returns alexaResponse
+                every { handleListItemsDeletedEventRequest(any()) } returns alexaResponse
             }
             objectMockk(AlexaRequestEnvelope).mock()
             objectMockk(Util).mock()
@@ -40,7 +47,7 @@ object SpeechRequestHandlerTest : Spek({
                 it("should handle SessionStartedRequest") {
                     val sessionStartedEnvelope = mockk<AlexaRequestEnvelope<SessionStartedRequest>> {
                         every { request } returns mockk<SessionStartedRequest>()
-                        every { session.application?.applicationId } returns "123456"
+                        every { session?.application?.applicationId } returns "123456"
                     }
                     every { AlexaRequestEnvelope.fromJson(any<ByteArray>()) } returns sessionStartedEnvelope
                     val expected = "SessionStartedRequest"
@@ -51,7 +58,7 @@ object SpeechRequestHandlerTest : Spek({
                 it("should handle LaunchRequest") {
                     val launchRequestEnvelope = mockk<AlexaRequestEnvelope<LaunchRequest>> {
                         every { request } returns mockk<LaunchRequest>()
-                        every { session.application?.applicationId } returns "123456"
+                        every { session?.application?.applicationId } returns "123456"
                     }
                     every { AlexaRequestEnvelope.fromJson(any<ByteArray>()) } returns launchRequestEnvelope
                     val expected = "LaunchRequest"
@@ -62,7 +69,7 @@ object SpeechRequestHandlerTest : Spek({
                 it("should handle IntentRequest") {
                     val intentRequestEnvelope = mockk<AlexaRequestEnvelope<IntentRequest>> {
                         every { request } returns mockk<IntentRequest>()
-                        every { session.application?.applicationId } returns "123456"
+                        every { session?.application?.applicationId } returns "123456"
                     }
                     every { AlexaRequestEnvelope.fromJson(any<ByteArray>()) } returns intentRequestEnvelope
                     val expected = "IntentRequest"
@@ -73,7 +80,7 @@ object SpeechRequestHandlerTest : Spek({
                 it("should handle ConnectionsResponseRequest") {
                     val connectionsResponseEnvelope = mockk<AlexaRequestEnvelope<ConnectionsResponseRequest>> {
                         every { request } returns mockk<ConnectionsResponseRequest>()
-                        every { session.application?.applicationId } returns "123456"
+                        every { session?.application?.applicationId } returns "123456"
                     }
                     every { AlexaRequestEnvelope.fromJson(any<ByteArray>()) } returns connectionsResponseEnvelope
                     val expected = "ConnectionsResponseRequest"
@@ -84,7 +91,7 @@ object SpeechRequestHandlerTest : Spek({
                 it("should handle ConnectionsRequest") {
                     val connectionsRequestEnvelope = mockk<AlexaRequestEnvelope<ConnectionsRequest>> {
                         every { request } returns mockk<ConnectionsRequest>()
-                        every { session.application?.applicationId } returns "123456"
+                        every { session?.application?.applicationId } returns "123456"
                     }
                     every { AlexaRequestEnvelope.fromJson(any<ByteArray>()) } returns connectionsRequestEnvelope
                     val expected = "ConnectionsRequest"
@@ -95,7 +102,7 @@ object SpeechRequestHandlerTest : Spek({
                 it("should handle SessionEndedRequest") {
                     val sessionEndedEnvelope = mockk<AlexaRequestEnvelope<SessionEndedRequest>> {
                         every { request } returns mockk<SessionEndedRequest>()
-                        every { session.application?.applicationId } returns "123456"
+                        every { session?.application?.applicationId } returns "123456"
                     }
                     every { AlexaRequestEnvelope.fromJson(any<ByteArray>()) } returns sessionEndedEnvelope
                     val expected = "SessionEndedRequest"
@@ -106,7 +113,7 @@ object SpeechRequestHandlerTest : Spek({
                 it("should handle ElementSelectedRequest") {
                     val envelope = mockk<AlexaRequestEnvelope<ElementSelectedRequest>> {
                         every { request } returns mockk<ElementSelectedRequest>()
-                        every { session.application?.applicationId } returns "123456"
+                        every { session?.application?.applicationId } returns "123456"
                     }
                     every { AlexaRequestEnvelope.fromJson(any<ByteArray>()) } returns envelope
                     val expected = "ElementSelectedRequest"
@@ -115,10 +122,77 @@ object SpeechRequestHandlerTest : Spek({
                     assertEquals(expected, response)
                 }
 
+                it("should handle ListCreatedEventRequest") {
+                    val envelope = mockk<AlexaRequestEnvelope<ListCreatedEventRequest>> {
+                        every { request } returns mockk<ListCreatedEventRequest>()
+                        every { session?.application?.applicationId } returns "123456"
+                    }
+                    every { AlexaRequestEnvelope.fromJson(any<ByteArray>()) } returns envelope
+                    val expected = "ListCreatedEventRequest"
+                    every { alexaResponse.toJson() } returns expected
+                    val response = speechRequestHandler.process("Lorem ipsum dolor sit amet".toByteArray())
+                    assertEquals(expected, response)
+                }
+                it("should handle ListUpdatedEventRequest") {
+                    val envelope = mockk<AlexaRequestEnvelope<ListUpdatedEventRequest>> {
+                        every { request } returns mockk<ListUpdatedEventRequest>()
+                        every { session?.application?.applicationId } returns "123456"
+                    }
+                    every { AlexaRequestEnvelope.fromJson(any<ByteArray>()) } returns envelope
+                    val expected = "ListUpdatedEventRequest"
+                    every { alexaResponse.toJson() } returns expected
+                    val response = speechRequestHandler.process("Lorem ipsum dolor sit amet".toByteArray())
+                    assertEquals(expected, response)
+                }
+                it("should handle ListDeletedEventRequest") {
+                    val envelope = mockk<AlexaRequestEnvelope<ListDeletedEventRequest>> {
+                        every { request } returns mockk<ListDeletedEventRequest>()
+                        every { session?.application?.applicationId } returns "123456"
+                    }
+                    every { AlexaRequestEnvelope.fromJson(any<ByteArray>()) } returns envelope
+                    val expected = "ListDeletedEventRequest"
+                    every { alexaResponse.toJson() } returns expected
+                    val response = speechRequestHandler.process("Lorem ipsum dolor sit amet".toByteArray())
+                    assertEquals(expected, response)
+                }
+                it("should handle ListItemsCreatedEventRequest") {
+                    val envelope = mockk<AlexaRequestEnvelope<ListItemsCreatedEventRequest>> {
+                        every { request } returns mockk<ListItemsCreatedEventRequest>()
+                        every { session?.application?.applicationId } returns "123456"
+                    }
+                    every { AlexaRequestEnvelope.fromJson(any<ByteArray>()) } returns envelope
+                    val expected = "ListItemsCreatedEventRequest"
+                    every { alexaResponse.toJson() } returns expected
+                    val response = speechRequestHandler.process("Lorem ipsum dolor sit amet".toByteArray())
+                    assertEquals(expected, response)
+                }
+                it("should handle ListItemsUpdatedEventRequest") {
+                    val envelope = mockk<AlexaRequestEnvelope<ListItemsUpdatedEventRequest>> {
+                        every { request } returns mockk<ListItemsUpdatedEventRequest>()
+                        every { session?.application?.applicationId } returns "123456"
+                    }
+                    every { AlexaRequestEnvelope.fromJson(any<ByteArray>()) } returns envelope
+                    val expected = "ListItemsUpdatedEventRequest"
+                    every { alexaResponse.toJson() } returns expected
+                    val response = speechRequestHandler.process("Lorem ipsum dolor sit amet".toByteArray())
+                    assertEquals(expected, response)
+                }
+                it("should handle ListItemsDeletedEventRequest") {
+                    val envelope = mockk<AlexaRequestEnvelope<ListItemsDeletedEventRequest>> {
+                        every { request } returns mockk<ListItemsDeletedEventRequest>()
+                        every { session?.application?.applicationId } returns "123456"
+                    }
+                    every { AlexaRequestEnvelope.fromJson(any<ByteArray>()) } returns envelope
+                    val expected = "ListItemsDeletedEventRequest"
+                    every { alexaResponse.toJson() } returns expected
+                    val response = speechRequestHandler.process("Lorem ipsum dolor sit amet".toByteArray())
+                    assertEquals(expected, response)
+                }
+
                 it("should return empty response") {
                     val envelope = mockk<AlexaRequestEnvelope<*>> {
                         every { request } returns mockk<ElementSelectedRequest>()
-                        every { session.application?.applicationId } returns "123456"
+                        every { session?.application?.applicationId } returns "123456"
                     }
                     every { AlexaRequestEnvelope.fromJson(any<ByteArray>()) } returns envelope
                     val expected = "ElementSelectedRequest"
@@ -136,7 +210,7 @@ object SpeechRequestHandlerTest : Spek({
             val launchRequest = mockk<LaunchRequest>()
             val requestEnvelope = mockk<AlexaRequestEnvelope<LaunchRequest>> {
                 every { request } returns launchRequest
-                every { session.application?.applicationId } returns "123456"
+                every { session?.application?.applicationId } returns "123456"
             }
             val handler = mockk<SpeechHandler> {
                 every { handleLaunchRequest(requestEnvelope) } returns response
@@ -170,7 +244,7 @@ object SpeechRequestHandlerTest : Spek({
             }
 
             on("Valid Application Id in context.system.application.applicationId") {
-                every { requestEnvelope.session.application?.applicationId } returns null
+                every { requestEnvelope.session?.application?.applicationId } returns null
                 every { requestEnvelope.context.system.application.applicationId } returns "123456"
                 every { Util.getApplicationID() } returns "123456"
                 it("should process the requestEnvelope without errors") {
@@ -181,7 +255,7 @@ object SpeechRequestHandlerTest : Spek({
             }
 
             on("Invalid Application Id in context.system.application.applicationId") {
-                every { requestEnvelope.session.application?.applicationId } returns null
+                every { requestEnvelope.session?.application?.applicationId } returns null
                 every { requestEnvelope.context.system.application.applicationId } returns "123456"
                 every { Util.getApplicationID() } returns "654321"
                 it("should throw IllegalArgumentException") {
@@ -190,7 +264,7 @@ object SpeechRequestHandlerTest : Spek({
             }
 
             on("No Application Id in context.system.application.applicationId") {
-                every { requestEnvelope.session.application?.applicationId } returns null
+                every { requestEnvelope.session?.application?.applicationId } returns null
                 every { requestEnvelope.context.system.application.applicationId } returns null
                 every { Util.getApplicationID() } returns "123456"
                 every { AlexaRequestEnvelope.fromJson(any<ByteArray>()) } returns requestEnvelope

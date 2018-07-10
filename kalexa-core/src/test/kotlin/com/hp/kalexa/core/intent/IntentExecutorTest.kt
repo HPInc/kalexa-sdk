@@ -2,9 +2,11 @@ package com.hp.kalexa.core.intent
 
 import com.hp.kalexa.core.handler.SpeechHandler
 import com.hp.kalexa.core.model.DummyIntent
+import com.hp.kalexa.core.util.IntentUtil
 import com.hp.kalexa.model.*
 import com.hp.kalexa.model.interfaces.display.Display
 import com.hp.kalexa.model.request.IntentRequest
+import com.hp.kalexa.model.response.AlexaResponse
 import io.mockk.every
 import io.mockk.mockk
 import org.jetbrains.spek.api.Spek
@@ -49,7 +51,7 @@ class IntentExecutorTest : Spek({
         on("onIntentRequest") {
             it("should return default response") {
                 val response = dummyIntent.onIntentRequest(request)
-                assertEquals("{\"response\":{\"directives\":[]},\"sessionAttributes\":{},\"version\":\"1.0\"}",
+                assertEquals(AlexaResponse.emptyResponse().toJson(),
                         response.toJson())
             }
         }
@@ -57,46 +59,89 @@ class IntentExecutorTest : Spek({
         on("onConnectionsResponse") {
             it("should return default response") {
                 val response = dummyIntent.onConnectionsResponse(mockk())
-                assertEquals("{\"response\":{\"directives\":[]},\"sessionAttributes\":{},\"version\":\"1.0\"}",
+                assertEquals(AlexaResponse.emptyResponse().toJson(),
+                        response.toJson())
+            }
+        }
+
+        on("onConnectionsRequest") {
+            it("should return default response") {
+                val response = dummyIntent.onConnectionsRequest(mockk())
+                assertEquals(AlexaResponse.emptyResponse().toJson(),
                         response.toJson())
             }
         }
 
         on("BuiltInIntent") {
-            it("should call retryIntent default response") {
+            it("should call retryIntent default response with repeat message") {
                 val response = dummyIntent.onBuiltInIntent(BuiltInIntent.FALLBACK_INTENT, mockk())
-                assertEquals("{\"response\":{\"outputSpeech\":{\"type\":\"PlainText\",\"text\":\"I'm sorry, I couldn't understand what you have said. Could you say it again?\"},\"directives\":[],\"shouldEndSession\":false},\"sessionAttributes\":{\"retry\":1},\"version\":\"1.0\"}",
+                assertEquals(IntentUtil.retryIntent(mutableMapOf()).toJson(),
                         response.toJson())
             }
-            it("should call onYesIntent implemented callback through onBuiltInIntent ") {
+            it("should call onYesIntent retryIntent default response with end message.") {
                 val response = dummyIntent.onBuiltInIntent(BuiltInIntent.YES_INTENT, mockk())
-                assertEquals("{\"response\":{\"outputSpeech\":{\"type\":\"PlainText\",\"text\":\"Yes Intent\"},\"directives\":[],\"shouldEndSession\":true},\"sessionAttributes\":{},\"version\":\"1.0\"}",
+                assertEquals(IntentUtil.retryIntent(mutableMapOf("retry" to 1)).toJson(),
                         response.toJson())
 
             }
-            it("should call onNoIntent implemented callback through onBuiltInIntent ") {
+            it("should call onNoIntent default response callback through onBuiltInIntent ") {
                 val response = dummyIntent.onBuiltInIntent(BuiltInIntent.NO_INTENT, mockk())
-                assertEquals("{\"response\":{\"outputSpeech\":{\"type\":\"PlainText\",\"text\":\"No Intent\"},\"directives\":[],\"shouldEndSession\":true},\"sessionAttributes\":{},\"version\":\"1.0\"}",
+                assertEquals(IntentUtil.finish().toJson(),
                         response.toJson())
 
             }
-            it("should call onStopIntent implemented callback through onBuiltInIntent ") {
+            it("should call onStopIntent default response callback through onBuiltInIntent ") {
                 val response = dummyIntent.onBuiltInIntent(BuiltInIntent.STOP_INTENT, mockk())
-                assertEquals("{\"response\":{\"outputSpeech\":{\"type\":\"PlainText\",\"text\":\"Stop Intent\"},\"directives\":[],\"shouldEndSession\":true},\"sessionAttributes\":{},\"version\":\"1.0\"}",
+                assertEquals(IntentUtil.goodbye().toJson(),
                         response.toJson())
 
             }
-            it("should call onHelpIntent implemented callback through onBuiltInIntent ") {
+            it("should call onHelpIntent default response callback through onBuiltInIntent ") {
                 val response = dummyIntent.onBuiltInIntent(BuiltInIntent.HELP_INTENT, mockk())
-                assertEquals("{\"response\":{\"outputSpeech\":{\"type\":\"PlainText\",\"text\":\"Help Intent\"},\"directives\":[],\"shouldEndSession\":true},\"sessionAttributes\":{},\"version\":\"1.0\"}",
+                assertEquals(IntentUtil.helpIntent().toJson(),
                         response.toJson())
 
             }
-            it("should call onCancelIntent implemented callback through onBuiltInIntent ") {
+            it("should call onCancelIntent default response callback through onBuiltInIntent ") {
                 val response = dummyIntent.onBuiltInIntent(BuiltInIntent.CANCEL_INTENT, mockk())
-                assertEquals("{\"response\":{\"outputSpeech\":{\"type\":\"PlainText\",\"text\":\"Cancel Intent\"},\"directives\":[],\"shouldEndSession\":true},\"sessionAttributes\":{},\"version\":\"1.0\"}",
+                assertEquals(IntentUtil.finish().toJson(),
                         response.toJson())
 
+            }
+        }
+        on("No Intent") {
+            val response = dummyIntent.onNoIntent(mockk())
+            it("should return default response") {
+                assertEquals(IntentUtil.finish().toJson(),
+                        response.toJson())
+            }
+        }
+        on("Yes Intent") {
+            val response = dummyIntent.onYesIntent(mockk())
+            it("should return default response") {
+                assertEquals(IntentUtil.retryIntent(mutableMapOf()).toJson(),
+                        response.toJson())
+            }
+        }
+        on("Stop Intent") {
+            val response = dummyIntent.onStopIntent(mockk())
+            it("should return default response") {
+                assertEquals(IntentUtil.goodbye().toJson(),
+                        response.toJson())
+            }
+        }
+        on("Cancel Intent") {
+            val response = dummyIntent.onCancelIntent(mockk())
+            it("should return default response") {
+                assertEquals(IntentUtil.finish().toJson(),
+                        response.toJson())
+            }
+        }
+        on("Help Intent") {
+            val response = dummyIntent.onHelpIntent(mockk())
+            it("should return default response") {
+                assertEquals(IntentUtil.helpIntent().toJson(),
+                        response.toJson())
             }
         }
 
@@ -120,6 +165,48 @@ class IntentExecutorTest : Spek({
             it("should return default response") {
                 val response = dummyIntent.onFallbackIntent(mockk())
                 assertEquals("{\"response\":{\"outputSpeech\":{\"type\":\"PlainText\",\"text\":\"This is unsupported. Please try something else.\"},\"card\":{\"type\":\"Simple\",\"title\":\"Unsupported Intent\",\"content\":\"This is unsupported. Please try something else.\"},\"directives\":[],\"shouldEndSession\":true},\"sessionAttributes\":{},\"version\":\"1.0\"}",
+                        response.toJson())
+            }
+        }
+        on("onListCreatedEventRequest") {
+            it("should return default response") {
+                val response = dummyIntent.onListCreatedEventRequest(mockk())
+                assertEquals(AlexaResponse.emptyResponse().toJson(),
+                        response.toJson())
+            }
+        }
+        on("onListUpdatedEventRequest") {
+            it("should return default response") {
+                val response = dummyIntent.onListUpdatedEventRequest(mockk())
+                assertEquals(AlexaResponse.emptyResponse().toJson(),
+                        response.toJson())
+            }
+        }
+        on("onListDeletedEventRequest") {
+            it("should return default response") {
+                val response = dummyIntent.onListDeletedEventRequest(mockk())
+                assertEquals(AlexaResponse.emptyResponse().toJson(),
+                        response.toJson())
+            }
+        }
+        on("onListItemsCreatedEventRequest") {
+            it("should return default response") {
+                val response = dummyIntent.onListItemsCreatedEventRequest(mockk())
+                assertEquals(AlexaResponse.emptyResponse().toJson(),
+                        response.toJson())
+            }
+        }
+        on("onListItemsDeletedEventRequest") {
+            it("should return default response") {
+                val response = dummyIntent.onListItemsUpdatedEventRequest(mockk())
+                assertEquals(AlexaResponse.emptyResponse().toJson(),
+                        response.toJson())
+            }
+        }
+        on("onListItemsUpdatedEventRequest") {
+            it("should return default response") {
+                val response = dummyIntent.onListItemsDeletedEventRequest(mockk())
+                assertEquals(AlexaResponse.emptyResponse().toJson(),
                         response.toJson())
             }
         }
@@ -160,14 +247,14 @@ class IntentExecutorTest : Spek({
             every { device.supportedInterfaces } returns supportedInterfaces
             every { supportedInterfaces.display } returns display
             it("should have display interface") {
-                every {display.markupVersion} returns "1.0"
-                every {display.templateVersion} returns "1.0"
+                every { display.markupVersion } returns "1.0"
+                every { display.templateVersion } returns "1.0"
                 val response = dummyIntent.hasDisplay()
                 assertTrue { response }
             }
             it("should not have display interface") {
-                every {display.markupVersion} returns ""
-                every {display.templateVersion} returns ""
+                every { display.markupVersion } returns ""
+                every { display.templateVersion } returns ""
                 val response = dummyIntent.hasDisplay()
                 assertFalse { response }
             }

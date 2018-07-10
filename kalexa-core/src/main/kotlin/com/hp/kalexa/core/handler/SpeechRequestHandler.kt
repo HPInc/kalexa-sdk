@@ -2,6 +2,7 @@ package com.hp.kalexa.core.handler
 
 import com.hp.kalexa.core.util.Util
 import com.hp.kalexa.model.request.*
+import com.hp.kalexa.model.request.event.*
 import com.hp.kalexa.model.response.AlexaResponse
 
 class SpeechRequestHandler(private val speechHandler: SpeechHandler) {
@@ -22,7 +23,7 @@ class SpeechRequestHandler(private val speechHandler: SpeechHandler) {
             println("Application ID not defined in environment variable.")
             return false
         }
-        requestEnvelope.session.application?.applicationId?.let {
+        requestEnvelope.session?.application?.applicationId?.let {
             return applicationId == it
         }
         return requestEnvelope.context.system.application.applicationId?.let {
@@ -47,6 +48,18 @@ class SpeechRequestHandler(private val speechHandler: SpeechHandler) {
                 speechHandler.handleSessionEndedRequest(alexaRequest as AlexaRequestEnvelope<SessionEndedRequest>)
             is ElementSelectedRequest ->
                 speechHandler.handleElementSelectedRequest(alexaRequest as AlexaRequestEnvelope<ElementSelectedRequest>)
+            is ListCreatedEventRequest ->
+                speechHandler.handleListCreatedEventRequest(alexaRequest as AlexaRequestEnvelope<ListCreatedEventRequest>)
+            is ListUpdatedEventRequest ->
+                speechHandler.handleListUpdatedEventRequest(alexaRequest as AlexaRequestEnvelope<ListUpdatedEventRequest>)
+            is ListDeletedEventRequest ->
+                speechHandler.handleListDeletedEventRequest(alexaRequest as AlexaRequestEnvelope<ListDeletedEventRequest>)
+            is ListItemsCreatedEventRequest ->
+                speechHandler.handleListItemsCreatedEventRequest(alexaRequest as AlexaRequestEnvelope<ListItemsCreatedEventRequest>)
+            is ListItemsUpdatedEventRequest ->
+                speechHandler.handleListItemsUpdatedEventRequest(alexaRequest as AlexaRequestEnvelope<ListItemsUpdatedEventRequest>)
+            is ListItemsDeletedEventRequest ->
+                speechHandler.handleListItemsDeletedEventRequest(alexaRequest as AlexaRequestEnvelope<ListItemsDeletedEventRequest>)
             else -> AlexaResponse.emptyResponse()
         }
         return alexaResponse.toJson()

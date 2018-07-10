@@ -11,12 +11,12 @@ import com.hp.kalexa.model.response.alexaResponse
 
 object IntentUtil {
 
-    internal fun defaultBuiltInResponse(builtInIntent: BuiltInIntent, attributes: MutableMap<String, Any?> = mutableMapOf()): AlexaResponse {
+    internal fun defaultBuiltInResponse(builtInIntent: BuiltInIntent, attributes: MutableMap<String, Any?>?): AlexaResponse {
         return when (builtInIntent) {
             BuiltInIntent.CANCEL_INTENT -> finish()
             BuiltInIntent.STOP_INTENT -> finish()
             BuiltInIntent.FALLBACK_INTENT -> finish()
-            else -> retryIntent(attributes)
+            else -> attributes?.let { retryIntent(it) } ?: finish()
         }
     }
 

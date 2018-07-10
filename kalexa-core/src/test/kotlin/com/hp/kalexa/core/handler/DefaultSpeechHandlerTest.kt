@@ -9,6 +9,7 @@ import com.hp.kalexa.core.util.Util
 import com.hp.kalexa.model.Context
 import com.hp.kalexa.model.Session
 import com.hp.kalexa.model.request.*
+import com.hp.kalexa.model.request.event.*
 import com.hp.kalexa.model.response.AlexaResponse
 import com.sun.xml.internal.txw2.IllegalAnnotationException
 import io.mockk.every
@@ -375,6 +376,318 @@ object DefaultSpeechHandlerTest : Spek({
                 every { Util.findAnnotatedClasses(any(), FulfillerIntent::class) } returns listOf(intentExecutor, intentExecutor2)
                 it("should throw illegal annotation argument") {
                     assertFailsWith(exceptionClass = IllegalAnnotationException::class) { defaultSpeechHandler.handleConnectionsRequest(connectionsRequest) }
+                }
+            }
+        }
+        describe("When handleListCreatedEventRequest method is called") {
+            val listCreatedEventRequest = mockk<AlexaRequestEnvelope<ListCreatedEventRequest>>()
+            lateinit var fakeIntent: IntentExecutor
+            lateinit var context: Context
+            lateinit var request: ListCreatedEventRequest
+            lateinit var session: Session
+            val attributesSession = mutableMapOf<String, Any?>()
+            beforeEachTest {
+                fakeIntent = mockk<FakeIntent>()
+                attributesSession.clear()
+                every { Util.loadIntentClassesFromPackage() } returns listOf(fakeIntent::class)
+                every { Util.getIntentPackage() } returns "package.with.intent"
+                session = mockk {
+                    every { attributes } returns attributesSession
+                }
+                context = mockk()
+                request = mockk()
+                every { listCreatedEventRequest.session } returns session
+                every { listCreatedEventRequest.request } returns request
+                every { listCreatedEventRequest.context } returns context
+                every { listCreatedEventRequest.version } returns "1.0"
+                every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns listOf(fakeIntent::class)
+            }
+
+            on("Intent without ListEvents annotation") {
+                every { Util.loadIntentClassesFromPackage() } returns emptyList()
+                every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns emptyList()
+                it("should return a default ListEvents response") {
+                    every { Util.getIntentPackage() } returns "package.with.no.intent"
+                    val alexaResponse = defaultSpeechHandler.handleListCreatedEventRequest(listCreatedEventRequest)
+                    assertEquals(IntentUtil.unsupportedIntent().toJson(), alexaResponse.toJson())
+                }
+            }
+            on("Intent with ListEvents annotation") {
+                every { Util.getIntentPackage() } returns "package.with.intent"
+                every { Util.loadIntentClassesFromPackage() } returns listOf(fakeIntent::class)
+
+                it("should return a call onListCreatedEventRequest method from the intent annotated with ListEvents") {
+                    val alexaResponse = defaultSpeechHandler.handleListCreatedEventRequest(listCreatedEventRequest)
+                    assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a ListCreatedEventRequest response"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""",
+                            alexaResponse.toJson())
+                }
+            }
+            on("More than one Intent with @ListEvents annotation") {
+                val intentExecutor = mockk<KClass<out IntentExecutor>>()
+                val intentExecutor2 = mockk<KClass<out IntentExecutor>>()
+                every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns listOf(intentExecutor, intentExecutor2)
+                it("should throw illegal annotation argument") {
+                    assertFailsWith(exceptionClass = IllegalAnnotationException::class) { defaultSpeechHandler.handleListCreatedEventRequest(listCreatedEventRequest) }
+                }
+            }
+        }
+        describe("When handleListUpdatedEventRequest method is called") {
+            val listUpdatedEventRequest = mockk<AlexaRequestEnvelope<ListUpdatedEventRequest>>()
+            lateinit var fakeIntent: IntentExecutor
+            lateinit var context: Context
+            lateinit var request: ListUpdatedEventRequest
+            lateinit var session: Session
+            val attributesSession = mutableMapOf<String, Any?>()
+            beforeEachTest {
+                fakeIntent = mockk<FakeIntent>()
+                attributesSession.clear()
+                every { Util.loadIntentClassesFromPackage() } returns listOf(fakeIntent::class)
+                every { Util.getIntentPackage() } returns "package.with.intent"
+                session = mockk {
+                    every { attributes } returns attributesSession
+                }
+                context = mockk()
+                request = mockk()
+                every { listUpdatedEventRequest.session } returns session
+                every { listUpdatedEventRequest.request } returns request
+                every { listUpdatedEventRequest.context } returns context
+                every { listUpdatedEventRequest.version } returns "1.0"
+                every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns listOf(fakeIntent::class)
+            }
+
+            on("Intent without ListEvents annotation") {
+                every { Util.loadIntentClassesFromPackage() } returns emptyList()
+                every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns emptyList()
+                it("should return a default ListEvents response") {
+                    every { Util.getIntentPackage() } returns "package.with.no.intent"
+                    val alexaResponse = defaultSpeechHandler.handleListUpdatedEventRequest(listUpdatedEventRequest)
+                    assertEquals(IntentUtil.unsupportedIntent().toJson(), alexaResponse.toJson())
+                }
+            }
+            on("Intent with ListEvents annotation") {
+                every { Util.getIntentPackage() } returns "package.with.intent"
+                every { Util.loadIntentClassesFromPackage() } returns listOf(fakeIntent::class)
+
+                it("should return a call onListUpdatedEventRequest method from the intent annotated with ListEvents") {
+                    val alexaResponse = defaultSpeechHandler.handleListUpdatedEventRequest(listUpdatedEventRequest)
+                    assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a ListUpdatedEventRequest response"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""",
+                            alexaResponse.toJson())
+                }
+            }
+            on("More than one Intent with @ListEvents annotation") {
+                val intentExecutor = mockk<KClass<out IntentExecutor>>()
+                val intentExecutor2 = mockk<KClass<out IntentExecutor>>()
+                every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns listOf(intentExecutor, intentExecutor2)
+                it("should throw illegal annotation argument") {
+                    assertFailsWith(exceptionClass = IllegalAnnotationException::class) { defaultSpeechHandler.handleListUpdatedEventRequest(listUpdatedEventRequest) }
+                }
+            }
+        }
+        describe("When handleListDeletedEventRequest method is called") {
+            val listDeletedEventRequest = mockk<AlexaRequestEnvelope<ListDeletedEventRequest>>()
+            lateinit var fakeIntent: IntentExecutor
+            lateinit var context: Context
+            lateinit var request: ListDeletedEventRequest
+            lateinit var session: Session
+            val attributesSession = mutableMapOf<String, Any?>()
+            beforeEachTest {
+                fakeIntent = mockk<FakeIntent>()
+                attributesSession.clear()
+                every { Util.loadIntentClassesFromPackage() } returns listOf(fakeIntent::class)
+                every { Util.getIntentPackage() } returns "package.with.intent"
+                session = mockk {
+                    every { attributes } returns attributesSession
+                }
+                context = mockk()
+                request = mockk()
+                every { listDeletedEventRequest.session } returns session
+                every { listDeletedEventRequest.request } returns request
+                every { listDeletedEventRequest.context } returns context
+                every { listDeletedEventRequest.version } returns "1.0"
+                every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns listOf(fakeIntent::class)
+            }
+
+            on("Intent without ListEvents annotation") {
+                every { Util.loadIntentClassesFromPackage() } returns emptyList()
+                every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns emptyList()
+                it("should return a default ListEvents response") {
+                    every { Util.getIntentPackage() } returns "package.with.no.intent"
+                    val alexaResponse = defaultSpeechHandler.handleListDeletedEventRequest(listDeletedEventRequest)
+                    assertEquals(IntentUtil.unsupportedIntent().toJson(), alexaResponse.toJson())
+                }
+            }
+            on("Intent with ListEvents annotation") {
+                every { Util.getIntentPackage() } returns "package.with.intent"
+                every { Util.loadIntentClassesFromPackage() } returns listOf(fakeIntent::class)
+
+                it("should return a call onListDeletedEventRequest method from the intent annotated with ListEvents") {
+                    val alexaResponse = defaultSpeechHandler.handleListDeletedEventRequest(listDeletedEventRequest)
+                    assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a ListDeletedEventRequest response"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""",
+                            alexaResponse.toJson())
+                }
+            }
+            on("More than one Intent with @ListEvents annotation") {
+                val intentExecutor = mockk<KClass<out IntentExecutor>>()
+                val intentExecutor2 = mockk<KClass<out IntentExecutor>>()
+                every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns listOf(intentExecutor, intentExecutor2)
+                it("should throw illegal annotation argument") {
+                    assertFailsWith(exceptionClass = IllegalAnnotationException::class) { defaultSpeechHandler.handleListDeletedEventRequest(listDeletedEventRequest) }
+                }
+            }
+        }
+        describe("When handleListItemsCreatedEventRequest method is called") {
+            val listItemsCreatedEventRequest = mockk<AlexaRequestEnvelope<ListItemsCreatedEventRequest>>()
+            lateinit var fakeIntent: IntentExecutor
+            lateinit var context: Context
+            lateinit var request: ListItemsCreatedEventRequest
+            lateinit var session: Session
+            val attributesSession = mutableMapOf<String, Any?>()
+            beforeEachTest {
+                fakeIntent = mockk<FakeIntent>()
+                attributesSession.clear()
+                every { Util.loadIntentClassesFromPackage() } returns listOf(fakeIntent::class)
+                every { Util.getIntentPackage() } returns "package.with.intent"
+                session = mockk {
+                    every { attributes } returns attributesSession
+                }
+                context = mockk()
+                request = mockk()
+                every { listItemsCreatedEventRequest.session } returns session
+                every { listItemsCreatedEventRequest.request } returns request
+                every { listItemsCreatedEventRequest.context } returns context
+                every { listItemsCreatedEventRequest.version } returns "1.0"
+                every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns listOf(fakeIntent::class)
+            }
+
+            on("Intent without ListEvents annotation") {
+                every { Util.loadIntentClassesFromPackage() } returns emptyList()
+                every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns emptyList()
+                it("should return a default ListEvents response") {
+                    every { Util.getIntentPackage() } returns "package.with.no.intent"
+                    val alexaResponse = defaultSpeechHandler.handleListItemsCreatedEventRequest(listItemsCreatedEventRequest)
+                    assertEquals(IntentUtil.unsupportedIntent().toJson(), alexaResponse.toJson())
+                }
+            }
+            on("Intent with ListEvents annotation") {
+                every { Util.getIntentPackage() } returns "package.with.intent"
+                every { Util.loadIntentClassesFromPackage() } returns listOf(fakeIntent::class)
+
+                it("should return a call onListItemsCreatedEventRequest method from the intent annotated with ListEvents") {
+                    val alexaResponse = defaultSpeechHandler.handleListItemsCreatedEventRequest(listItemsCreatedEventRequest)
+                    assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a ListItemsCreatedEventRequest response"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""",
+                            alexaResponse.toJson())
+                }
+            }
+            on("More than one Intent with @ListEvents annotation") {
+                val intentExecutor = mockk<KClass<out IntentExecutor>>()
+                val intentExecutor2 = mockk<KClass<out IntentExecutor>>()
+                every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns listOf(intentExecutor, intentExecutor2)
+                it("should throw illegal annotation argument") {
+                    assertFailsWith(exceptionClass = IllegalAnnotationException::class) { defaultSpeechHandler.handleListItemsCreatedEventRequest(listItemsCreatedEventRequest) }
+                }
+            }
+        }
+        describe("When handleListItemsUpdatedEventRequest method is called") {
+            val listItemsUpdatedEventRequest = mockk<AlexaRequestEnvelope<ListItemsUpdatedEventRequest>>()
+            lateinit var fakeIntent: IntentExecutor
+            lateinit var context: Context
+            lateinit var request: ListItemsUpdatedEventRequest
+            lateinit var session: Session
+            val attributesSession = mutableMapOf<String, Any?>()
+            beforeEachTest {
+                fakeIntent = mockk<FakeIntent>()
+                attributesSession.clear()
+                every { Util.loadIntentClassesFromPackage() } returns listOf(fakeIntent::class)
+                every { Util.getIntentPackage() } returns "package.with.intent"
+                session = mockk {
+                    every { attributes } returns attributesSession
+                }
+                context = mockk()
+                request = mockk()
+                every { listItemsUpdatedEventRequest.session } returns session
+                every { listItemsUpdatedEventRequest.request } returns request
+                every { listItemsUpdatedEventRequest.context } returns context
+                every { listItemsUpdatedEventRequest.version } returns "1.0"
+                every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns listOf(fakeIntent::class)
+            }
+
+            on("Intent without ListEvents annotation") {
+                every { Util.loadIntentClassesFromPackage() } returns emptyList()
+                every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns emptyList()
+                it("should return a default ListEvents response") {
+                    every { Util.getIntentPackage() } returns "package.with.no.intent"
+                    val alexaResponse = defaultSpeechHandler.handleListItemsUpdatedEventRequest(listItemsUpdatedEventRequest)
+                    assertEquals(IntentUtil.unsupportedIntent().toJson(), alexaResponse.toJson())
+                }
+            }
+            on("Intent with ListEvents annotation") {
+                every { Util.getIntentPackage() } returns "package.with.intent"
+                every { Util.loadIntentClassesFromPackage() } returns listOf(fakeIntent::class)
+
+                it("should return a call onListItemsUpdatedEventRequest method from the intent annotated with ListEvents") {
+                    val alexaResponse = defaultSpeechHandler.handleListItemsUpdatedEventRequest(listItemsUpdatedEventRequest)
+                    assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a ListItemsUpdatedEventRequest response"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""",
+                            alexaResponse.toJson())
+                }
+            }
+            on("More than one Intent with @ListEvents annotation") {
+                val intentExecutor = mockk<KClass<out IntentExecutor>>()
+                val intentExecutor2 = mockk<KClass<out IntentExecutor>>()
+                every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns listOf(intentExecutor, intentExecutor2)
+                it("should throw illegal annotation argument") {
+                    assertFailsWith(exceptionClass = IllegalAnnotationException::class) { defaultSpeechHandler.handleListItemsUpdatedEventRequest(listItemsUpdatedEventRequest) }
+                }
+            }
+        }
+        describe("When handleListItemsDeletedEventRequest method is called") {
+            val listItemsDeletedEventRequest = mockk<AlexaRequestEnvelope<ListItemsDeletedEventRequest>>()
+            lateinit var fakeIntent: IntentExecutor
+            lateinit var context: Context
+            lateinit var request: ListItemsDeletedEventRequest
+            lateinit var session: Session
+            val attributesSession = mutableMapOf<String, Any?>()
+            beforeEachTest {
+                fakeIntent = mockk<FakeIntent>()
+                attributesSession.clear()
+                every { Util.loadIntentClassesFromPackage() } returns listOf(fakeIntent::class)
+                every { Util.getIntentPackage() } returns "package.with.intent"
+                session = mockk {
+                    every { attributes } returns attributesSession
+                }
+                context = mockk()
+                request = mockk()
+                every { listItemsDeletedEventRequest.session } returns session
+                every { listItemsDeletedEventRequest.request } returns request
+                every { listItemsDeletedEventRequest.context } returns context
+                every { listItemsDeletedEventRequest.version } returns "1.0"
+                every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns listOf(fakeIntent::class)
+            }
+
+            on("Intent without ListEvents annotation") {
+                every { Util.loadIntentClassesFromPackage() } returns emptyList()
+                every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns emptyList()
+                it("should return a default ListEvents response") {
+                    every { Util.getIntentPackage() } returns "package.with.no.intent"
+                    val alexaResponse = defaultSpeechHandler.handleListItemsDeletedEventRequest(listItemsDeletedEventRequest)
+                    assertEquals(IntentUtil.unsupportedIntent().toJson(), alexaResponse.toJson())
+                }
+            }
+            on("Intent with ListEvents annotation") {
+                every { Util.getIntentPackage() } returns "package.with.intent"
+                every { Util.loadIntentClassesFromPackage() } returns listOf(fakeIntent::class)
+
+                it("should return a call onListItemsDeletedEventRequest method from the intent annotated with ListEvents") {
+                    val alexaResponse = defaultSpeechHandler.handleListItemsDeletedEventRequest(listItemsDeletedEventRequest)
+                    assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a ListItemsDeletedEventRequest response"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""",
+                            alexaResponse.toJson())
+                }
+            }
+            on("More than one Intent with @ListEvents annotation") {
+                val intentExecutor = mockk<KClass<out IntentExecutor>>()
+                val intentExecutor2 = mockk<KClass<out IntentExecutor>>()
+                every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns listOf(intentExecutor, intentExecutor2)
+                it("should throw illegal annotation argument") {
+                    assertFailsWith(exceptionClass = IllegalAnnotationException::class) { defaultSpeechHandler.handleListItemsDeletedEventRequest(listItemsDeletedEventRequest) }
                 }
             }
         }

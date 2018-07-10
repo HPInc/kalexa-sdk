@@ -4,6 +4,7 @@ import com.hp.kalexa.core.annotation.*
 import com.hp.kalexa.core.intent.BuiltInIntent
 import com.hp.kalexa.core.intent.IntentExecutor
 import com.hp.kalexa.model.request.*
+import com.hp.kalexa.model.request.event.*
 import com.hp.kalexa.model.response.AlexaResponse
 import com.hp.kalexa.model.response.alexaResponse
 
@@ -13,6 +14,7 @@ import com.hp.kalexa.model.response.alexaResponse
 @RecoverIntentContext
 @FulfillerIntent
 @HelpIntent
+@ListEvents
 class FakeIntent : IntentExecutor() {
     override fun onLaunchIntent(request: LaunchRequest): AlexaResponse {
         return alexaResponse {
@@ -58,4 +60,27 @@ class FakeIntent : IntentExecutor() {
         }
     }
 
+    override fun onListItemsUpdatedEventRequest(request: ListItemsUpdatedEventRequest): AlexaResponse {
+        return alexaResponse { response { speech { "This is a ListItemsUpdatedEventRequest response" } } }
+    }
+
+    override fun onListItemsDeletedEventRequest(request: ListItemsDeletedEventRequest): AlexaResponse {
+        return alexaResponse { response { speech { "This is a ListItemsDeletedEventRequest response" } } }
+    }
+
+    override fun onListItemsCreatedEventRequest(request: ListItemsCreatedEventRequest): AlexaResponse {
+        return alexaResponse { response { speech { "This is a ListItemsCreatedEventRequest response" } } }
+    }
+
+    override fun onListDeletedEventRequest(request: ListDeletedEventRequest): AlexaResponse {
+        return alexaResponse { response { speech { "This is a ListDeletedEventRequest response" } } }
+    }
+
+    override fun onListUpdatedEventRequest(request: ListUpdatedEventRequest): AlexaResponse {
+        return alexaResponse { response { speech { "This is a ListUpdatedEventRequest response" } } }
+    }
+
+    override fun onListCreatedEventRequest(request: ListCreatedEventRequest): AlexaResponse {
+        return alexaResponse { response { speech { "This is a ListCreatedEventRequest response" } } }
+    }
 }

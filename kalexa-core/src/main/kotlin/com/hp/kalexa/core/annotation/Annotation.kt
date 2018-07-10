@@ -17,3 +17,6 @@ annotation class Intent(val mapsTo: Array<String> = [])
 
 @Target(AnnotationTarget.CLASS)
 annotation class FulfillerIntent
+
+@Target(AnnotationTarget.CLASS)
+annotation class ListEvents

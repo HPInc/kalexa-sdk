@@ -1,19 +1,18 @@
 package com.hp.kalexa.model.request
 
-import com.hp.kalexa.model.extension.attribute
-import com.hp.kalexa.model.payload.EmptyPayload
-import com.hp.kalexa.model.payload.print.Print
-import com.hp.kalexa.model.payload.print.WebPage
 import com.hp.kalexa.model.JsonRequests.DISPLAY_SELECTED_REQUEST
 import com.hp.kalexa.model.JsonRequests.ERROR_LINK_RESULT
 import com.hp.kalexa.model.JsonRequests.INTENT_REQUEST_JSON
 import com.hp.kalexa.model.JsonRequests.LAUNCH_REQUEST_JSON
 import com.hp.kalexa.model.JsonRequests.WEB_PAGE_LINK_RESULT
+import com.hp.kalexa.model.extension.attribute
+import com.hp.kalexa.model.payload.print.PrintWebPageRequest
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class AlexaRequestEnvelopeTest : Spek({
 
@@ -32,7 +31,7 @@ class AlexaRequestEnvelopeTest : Spek({
                 assert(envelope.request is IntentRequest)
             }
             it("should have MailingLabelIntent action in session attributes") {
-                val action = envelope.session.attribute<String>("action")
+                val action = envelope.session?.attribute<String>("action")
                 assertEquals("MailingLabelIntent", action)
             }
             val customIntentRequest = envelope.request as IntentRequest
@@ -53,16 +52,14 @@ class AlexaRequestEnvelopeTest : Spek({
                 assert(envelope.request is ConnectionsResponseRequest)
             }
             val customLinkResultRequest = envelope.request as ConnectionsResponseRequest
-            it("should have a webpage payload type") {
-                assert(customLinkResultRequest.payload is Print<*>)
-                println(customLinkResultRequest.payload)
-                assert(customLinkResultRequest.payload?.getObject() is WebPage)
+            it("should be a PrintWebPageRequest payload type") {
+                assert(customLinkResultRequest.payload is PrintWebPageRequest)
             }
             it("should parse title, description and url") {
-                val webPage = customLinkResultRequest.payload?.getObject() as WebPage
-                assertEquals("Mac & Cheese", webPage.title)
-                assertEquals("This is a nice rich mac and cheese. Serve with a salad for a great meatless dinner. Hope you enjoy it", webPage.description)
-                assertEquals("http://allrecipes.com/recipe/11679/homemade-mac-and-cheese/", webPage.url)
+                val printWebPageRequest = customLinkResultRequest.payload as PrintWebPageRequest
+                assertEquals("Mac & Cheese", printWebPageRequest.title)
+                assertEquals("This is a nice rich mac and cheese. Serve with a salad for a great meatless dinner. Hope you enjoy it", printWebPageRequest.description)
+                assertEquals("http://allrecipes.com/recipe/11679/homemade-mac-and-cheese/", printWebPageRequest.url)
             }
             it("should have a success connectionsStatus") {
                 assertEquals("200", customLinkResultRequest.status.code)
@@ -79,9 +76,9 @@ class AlexaRequestEnvelopeTest : Spek({
             }
             val customLinkResultRequest = envelope.request as ConnectionsResponseRequest
             it("should have an empty payload type") {
-                assert(customLinkResultRequest.payload is Print)
-                assert(customLinkResultRequest.payload?.getObject() is EmptyPayload)
+                assertNull(customLinkResultRequest.payload)
             }
+
             it("should have an Error connectionsStatus") {
                 assertEquals("500", customLinkResultRequest.status.code)
                 assertEquals("INTERNAL ERROR", customLinkResultRequest.status.message)
