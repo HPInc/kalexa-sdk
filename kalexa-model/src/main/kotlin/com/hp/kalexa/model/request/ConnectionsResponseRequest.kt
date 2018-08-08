@@ -14,5 +14,5 @@ class ConnectionsResponseRequest(
         timestamp: LocalDateTime,
         val status: ConnectionsStatus,
         val name: String,
-        val payload: Payload?,
+        val payload: Map<String, Any>?,
         val token: String) : Request(requestId, locale, timestamp)

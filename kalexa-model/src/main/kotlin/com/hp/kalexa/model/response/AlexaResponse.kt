@@ -384,10 +384,10 @@ data class AlexaResponse(
 
         @AlexaResponseDsl
         class SendResponseDirectiveBuilder {
-            lateinit var status: SendResponseDirective.Status
+            lateinit var status: ConnectionsStatus
             lateinit var payload: Map<String, Any>
 
-            fun status(block: () -> SendResponseDirective.Status) {
+            fun status(block: () -> ConnectionsStatus) {
                 apply { status = block() }
             }
 

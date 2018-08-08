@@ -53,13 +53,13 @@ class AlexaRequestEnvelopeTest : Spek({
             }
             val customLinkResultRequest = envelope.request as ConnectionsResponseRequest
             it("should be a PrintWebPageRequest payload type") {
-                assert(customLinkResultRequest.payload is PrintWebPageRequest)
+                assert(customLinkResultRequest.payload is Map<String, Any>)
             }
             it("should parse title, description and url") {
-                val printWebPageRequest = customLinkResultRequest.payload as PrintWebPageRequest
-                assertEquals("Mac & Cheese", printWebPageRequest.title)
-                assertEquals("This is a nice rich mac and cheese. Serve with a salad for a great meatless dinner. Hope you enjoy it", printWebPageRequest.description)
-                assertEquals("http://allrecipes.com/recipe/11679/homemade-mac-and-cheese/", printWebPageRequest.url)
+                val printWebPageRequest = customLinkResultRequest.payload
+                assertEquals("Mac & Cheese", printWebPageRequest?.get("title"))
+                assertEquals("This is a nice rich mac and cheese. Serve with a salad for a great meatless dinner. Hope you enjoy it", printWebPageRequest?.get("description"))
+                assertEquals("http://allrecipes.com/recipe/11679/homemade-mac-and-cheese/", printWebPageRequest?.get("url"))
             }
             it("should have a success connectionsStatus") {
                 assertEquals("200", customLinkResultRequest.status.code)
