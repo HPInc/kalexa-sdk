@@ -3,7 +3,6 @@ package com.hp.kalexa.model.response
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.hp.kalexa.model.ConnectionsStatus
 import com.hp.kalexa.model.directive.*
 import com.hp.kalexa.model.interfaces.display.*
@@ -12,7 +11,10 @@ import com.hp.kalexa.model.interfaces.video.Metadata
 import com.hp.kalexa.model.interfaces.video.VideoItem
 import com.hp.kalexa.model.payload.NameType
 import com.hp.kalexa.model.payload.Payload
-import com.hp.kalexa.model.payload.print.*
+import com.hp.kalexa.model.payload.print.PrintBuilder
+import com.hp.kalexa.model.payload.print.PrintImageRequest
+import com.hp.kalexa.model.payload.print.PrintPDFRequest
+import com.hp.kalexa.model.payload.print.PrintWebPageRequest
 import com.hp.kalexa.model.ui.*
 
 
@@ -344,9 +346,9 @@ data class AlexaResponse(
         }
 
         @AlexaResponseDsl
-        class PrintPDFRequestBuilder: PrintBuilder<PrintPDFRequest>() {
+        class PrintPDFRequestBuilder : PrintBuilder<PrintPDFRequest>() {
 
-            override fun build() = PrintPDFRequest(version, language, title, description, url)
+            override fun build() = PrintPDFRequest(version, language, context, title, description, url)
 
             companion object {
                 @JvmStatic
@@ -356,7 +358,7 @@ data class AlexaResponse(
 
         @AlexaResponseDsl
         class PrintWebPageRequestBuilder : PrintBuilder<PrintWebPageRequest>() {
-            override fun build() = PrintWebPageRequest(version,language, title, description, url)
+            override fun build() = PrintWebPageRequest(version, language, context, title, description, url)
 
             companion object {
                 @JvmStatic
@@ -372,7 +374,7 @@ data class AlexaResponse(
                 imageType = block()
             }
 
-            override fun build() = PrintImageRequest(version, language, title, description, imageType, url)
+            override fun build() = PrintImageRequest(version, language, context, title, description, imageType, url)
 
             companion object {
                 @JvmStatic
@@ -407,7 +409,6 @@ data class AlexaResponse(
 }
 
 fun main(args: Array<String>) {
-//    val webPage = WebPage(title = "Wikipedia", description = "Wikipedia Article about Longest", url = "https://en.wikipedia.org/wiki/Main_Page/")
     val alexaResponse = alexaResponse {
         sessionAttributes { mapOf("Name" to "Marcelo") }
         version = "1.0"
@@ -441,16 +442,6 @@ fun main(args: Array<String>) {
         }
     }
 
-    val list = ListItem()
-    list.textContent {
-        primaryText = plainText { "Marcelo" }
-        secondaryText = plainText { "Rodrigues" }
-        tertiaryText = richText { "Correa" }
-    }
-    println(list.textContent)
-    println(alexaResponse.toJson())
-
-
     println(alexaResponse {
         response {
             shouldEndSession = false
@@ -462,19 +453,16 @@ fun main(args: Array<String>) {
                         title { "title 1" }
                         description { "description 1" }
                         url { "http://www.teste.com" }
+                        context {
+                            providerId = ""
+                        }
                     }
                 }
             }
         }
     }.toJson())
 
-    println(jacksonObjectMapper().writeValueAsString(PrintPDFRequest(title = "Title", url = "http://www.oi.com")))
-    val j = "{\"@type\":\"PrintWebPageRequest\",\"title\":{\"@type\":\"Title\",\"@version\":\"1\",\"value\":\"Value\"},\"description\":null,\"url\":\"http://www.oi.com\",\"@version\":\"1\",\"@language\":\"en-US\"}"
-    val readValue = jacksonObjectMapper().readValue<PrintWebPageRequest>(j)
-    println(readValue)
-
-
-    println( alexaResponse {
+    println(alexaResponse {
         response {
             directives {
                 sendRequestDirective {
@@ -484,20 +472,39 @@ fun main(args: Array<String>) {
                         title { "PDF" }
                         description { "Random pdf file by Longest." }
                         url { "http://www.orimi.com/pdf-test.pdf" }
-
+                        context {
+                            providerId = "Provider ID"
+                        }
                     }
                 }
             }
         }
     }.toJson())
-//    val readValue = jacksonObjectMapper().readValue<Payload>("{\"type\":\"PrintPDFRequest\",\"version\":\"1.0\",\"PDF\":{\"type\":\"PDF\",\"title\":\"\",\"description\":\"\",\"url\":\"\",\"version\":\"1.0\"}}")
-//    println(readValue)
-//
-//    println(textContent {
-//        tertiaryText = plainText { "oi" }
-//    })
-//
-//    println(AlexaResponse.Builder().addDirective(SendRequestDirective(NameType.PRINT, PrintPDFRequest(
-//            PDF("Title", "description", "http://www.oi.com"), "1.0"
-//    ), token = "none")).build().toJson())
+
+    val imageRequest = PrintImageRequest(
+            title = "Title",
+            imageType = PrintImageRequest.ImageType.JPEG,
+            url = "http://www.oi.com"
+    )
+    Payload.newRequest<PrintPDFRequest> {
+        description = ""
+    }
+    println(jacksonObjectMapper().writeValueAsString(imageRequest))
+    println(Payload.newRequest<PrintImageRequest> {
+        title = "Image PNG"
+        description = "Random png image by Longest."
+        url = "https://s3.amazonaws.com/uploads.hipchat.com/716626/5042546/blJjSQ4oi8pvOsp/fulfiller.png"
+        imageType = PrintImageRequest.ImageType.PNG
+    })
+
+    val followLinkWithResultDirective = SendRequestDirective(
+            name = NameType.PRINT,
+            payload = Payload.newRequest<PrintImageRequest> {
+                title = "Image PNG"
+                description = "Random png image by Longest."
+                url = "https://s3.amazonaws.com/uploads.hipchat.com/716626/5042546/blJjSQ4oi8pvOsp/fulfiller.png"
+                imageType = PrintImageRequest.ImageType.PNG
+            },
+            token = "PrintPNG")
+    println(followLinkWithResultDirective)
 }
