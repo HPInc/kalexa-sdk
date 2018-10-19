@@ -295,7 +295,7 @@ open class DefaultSpeechHandler : SpeechHandler {
     @Suppress("unchecked_cast")
     private fun loadIntentExecutorClasses(): List<KClass<out IntentExecutor>> {
         return loadIntentClassesFromPackage()
-                .filter { it.superclasses.find { it.simpleName == IntentExecutor::class.java.simpleName } != null }
+                .filter { clazz -> clazz.superclasses.find { superclazz -> superclazz.simpleName == IntentExecutor::class.java.simpleName } != null }
                 .cast()
     }
 

@@ -3,7 +3,6 @@ package com.hp.kalexa.model.payload
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.hp.kalexa.model.payload.print.Language
 import com.hp.kalexa.model.payload.print.PrintImageRequest
 import com.hp.kalexa.model.payload.print.PrintPDFRequest
 import com.hp.kalexa.model.payload.print.PrintWebPageRequest
@@ -19,8 +18,6 @@ import com.hp.kalexa.model.payload.print.PrintWebPageRequest
 abstract class Payload(
         @field:JsonProperty("@version")
         val version: String,
-        @field:JsonProperty("@language")
-        val language: Language,
         @field:JsonProperty("context")
         val context: Context? = null) {
 

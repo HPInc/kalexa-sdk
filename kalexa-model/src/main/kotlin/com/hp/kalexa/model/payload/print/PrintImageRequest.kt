@@ -7,12 +7,11 @@ import com.hp.kalexa.model.payload.Payload
 @JsonTypeName("PrintImageRequest")
 class PrintImageRequest @JvmOverloads constructor(
         version: String = "1",
-        language: Language = Language.EN_US,
         context: Context? = null,
         var title: String,
         var description: String? = null,
         var imageType: ImageType,
-        var url: String) : Payload(version, language, context) {
+        var url: String) : Payload(version, context) {
 
     enum class ImageType {
         JPG, JPEG, TIFF, TIF, PNG

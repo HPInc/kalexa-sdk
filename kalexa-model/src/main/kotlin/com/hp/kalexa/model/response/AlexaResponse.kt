@@ -348,7 +348,7 @@ data class AlexaResponse(
         @AlexaResponseDsl
         class PrintPDFRequestBuilder : PrintBuilder<PrintPDFRequest>() {
 
-            override fun build() = PrintPDFRequest(version, language, context, title, description, url)
+            override fun build() = PrintPDFRequest(version, context, title, description, url)
 
             companion object {
                 @JvmStatic
@@ -358,7 +358,7 @@ data class AlexaResponse(
 
         @AlexaResponseDsl
         class PrintWebPageRequestBuilder : PrintBuilder<PrintWebPageRequest>() {
-            override fun build() = PrintWebPageRequest(version, language, context, title, description, url)
+            override fun build() = PrintWebPageRequest(version, context, title, description, url)
 
             companion object {
                 @JvmStatic
@@ -374,7 +374,7 @@ data class AlexaResponse(
                 imageType = block()
             }
 
-            override fun build() = PrintImageRequest(version, language, context, title, description, imageType, url)
+            override fun build() = PrintImageRequest(version, context, title, description, imageType, url)
 
             companion object {
                 @JvmStatic

@@ -7,7 +7,6 @@ abstract class PrintBuilder<T> {
     protected var description: String? = null
     protected lateinit var url: String
     protected var version: String = "1"
-    protected var language: Language = Language.EN_US
     protected var context: Context? = null
 
     fun title(block: () -> String) = apply { this.title = block() }

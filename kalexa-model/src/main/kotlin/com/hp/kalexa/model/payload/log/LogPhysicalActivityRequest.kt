@@ -2,11 +2,7 @@ package com.hp.kalexa.model.payload.log
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonTypeName
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.hp.kalexa.model.json.LocalDateTimeSerializer
 import com.hp.kalexa.model.payload.Payload
-import com.hp.kalexa.model.payload.print.Language
-import java.time.LocalDateTime
 
 //class PhysicalActivity(var description: String = "",
 //                       @JsonSerialize(using = LocalDateTimeSerializer::class)
@@ -37,6 +33,4 @@ class LogPhysicalActivityRequest(
 //        @JsonProperty("PhysicalActitivy")
 //        val physicalActivity: PhysicalActivity,
         @JsonProperty("@version")
-        version: String = "1.0",
-        @JsonProperty("@language")
-        language: Language = Language.EN_US) : Payload(version, language)
+        version: String = "1.0") : Payload(version)
