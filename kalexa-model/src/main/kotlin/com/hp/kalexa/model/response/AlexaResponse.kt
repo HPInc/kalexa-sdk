@@ -288,12 +288,12 @@ data class AlexaResponse(
             return block()
         }
 
-        fun listTemplate2(block: (ListTemplate2.() -> Unit)): ListTemplate2 {
-            return ListTemplate2().apply { block() }
+        fun listTemplate2(block: (ListTemplateBuilder.() -> Unit)): ListTemplate2 {
+            return ListTemplateBuilder().apply { block() }.buildListTemplate2()
         }
 
-        fun listTemplate1(block: (ListTemplate1.() -> Unit)): ListTemplate1 {
-            return ListTemplate1().apply { block() }
+        fun listTemplate1(block: (ListTemplateBuilder.() -> Unit)): ListTemplate1 {
+            return ListTemplateBuilder().apply { block() }.buildListTemplate1()
         }
 
         fun bodyTemplate7(block: (BodyTemplate7.() -> Unit)): BodyTemplate7 {
@@ -318,6 +318,28 @@ data class AlexaResponse(
 
         fun directive(block: () -> Directive) {
             add(block())
+        }
+
+        @AlexaResponseDsl
+        class ListTemplateBuilder {
+            var backgroundImage: Image? = null
+            var title: String = ""
+            var listItems = mutableListOf<ListItem>()
+
+            fun listItems(block: ListItemsBuilder.() -> Unit) {
+                listItems.addAll(ListItemsBuilder().apply { block() })
+            }
+
+            fun buildListTemplate1() = ListTemplate1(backgroundImage, title, listItems)
+
+            fun buildListTemplate2() = ListTemplate2(backgroundImage, title, listItems)
+        }
+
+        @AlexaResponseDsl
+        class ListItemsBuilder : ArrayList<ListItem>() {
+            fun listItem(block: ListItem.() -> Unit) {
+                add(ListItem().apply { block() })
+            }
         }
 
         @AlexaResponseDsl
@@ -409,6 +431,8 @@ data class AlexaResponse(
 }
 
 fun main(args: Array<String>) {
+
+    val list = listOf("Kotlin", "is", "awesome")
     val alexaResponse = alexaResponse {
         sessionAttributes { mapOf("Name" to "Marcelo") }
         version = "1.0"
@@ -420,6 +444,20 @@ fun main(args: Array<String>) {
             }
             shouldEndSession = true
             directives {
+                renderTemplateDirective {
+                    listTemplate1 {
+                        listItems {
+                            list.map {
+                                listItem {
+                                    textContent {
+                                        primaryText = plainText { it }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 hintDirective {
                     text = "HELP"
                 }
@@ -441,6 +479,7 @@ fun main(args: Array<String>) {
             }
         }
     }
+    println(alexaResponse.toJson())
 
     println(alexaResponse {
         response {
@@ -480,31 +519,4 @@ fun main(args: Array<String>) {
             }
         }
     }.toJson())
-
-    val imageRequest = PrintImageRequest(
-            title = "Title",
-            imageType = PrintImageRequest.ImageType.JPEG,
-            url = "http://www.oi.com"
-    )
-    Payload.newRequest<PrintPDFRequest> {
-        description = ""
-    }
-    println(jacksonObjectMapper().writeValueAsString(imageRequest))
-    println(Payload.newRequest<PrintImageRequest> {
-        title = "Image PNG"
-        description = "Random png image by Longest."
-        url = "https://s3.amazonaws.com/uploads.hipchat.com/716626/5042546/blJjSQ4oi8pvOsp/fulfiller.png"
-        imageType = PrintImageRequest.ImageType.PNG
-    })
-
-    val followLinkWithResultDirective = SendRequestDirective(
-            name = NameType.PRINT,
-            payload = Payload.newRequest<PrintImageRequest> {
-                title = "Image PNG"
-                description = "Random png image by Longest."
-                url = "https://s3.amazonaws.com/uploads.hipchat.com/716626/5042546/blJjSQ4oi8pvOsp/fulfiller.png"
-                imageType = PrintImageRequest.ImageType.PNG
-            },
-            token = "PrintPNG")
-    println(followLinkWithResultDirective)
 }
