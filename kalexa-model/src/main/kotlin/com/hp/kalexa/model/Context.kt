@@ -10,4 +10,17 @@ data class Context(
         @JsonProperty("AudioPlayer")
         val audioPlayer: AudioPlayer? = null,
         @JsonProperty("Display")
-        val display: Display? = null)
+        val display: Display? = null) {
+
+    /**
+     * Verifies whether the device has display or not.
+     * @return true if device has display interface or false otherwise.
+     */
+    fun hasDisplay(): Boolean {
+        val supportedInterfaces = system.device?.supportedInterfaces
+        val display = supportedInterfaces?.display
+        return display?.templateVersion.equals("1.0") &&
+                display?.markupVersion.equals("1.0")
+    }
+
+}

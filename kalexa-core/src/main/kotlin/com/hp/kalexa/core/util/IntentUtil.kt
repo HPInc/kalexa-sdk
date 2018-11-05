@@ -2,13 +2,16 @@ package com.hp.kalexa.core.util
 
 import com.hp.kalexa.core.intent.BuiltInIntent
 import com.hp.kalexa.core.util.Util.getSkillName
-import com.hp.kalexa.model.Context
-import com.hp.kalexa.model.Slot
+import com.hp.kalexa.model.*
 import com.hp.kalexa.model.entitiyresolution.StatusCode
 import com.hp.kalexa.model.extension.getAttr
+import com.hp.kalexa.model.interfaces.display.Display
 import com.hp.kalexa.model.response.AlexaResponse
 import com.hp.kalexa.model.response.alexaResponse
 
+/**
+ * This class has some useful default responses that you can use it.
+ */
 object IntentUtil {
 
     internal fun defaultBuiltInResponse(builtInIntent: BuiltInIntent, attributes: MutableMap<String, Any?>?): AlexaResponse {
@@ -115,6 +118,9 @@ object IntentUtil {
         }
     }
 
+    @Deprecated(message = "This method has been incorporated into Context class.",
+            replaceWith = ReplaceWith(expression = "context.hasDisplay()",
+                    imports = ["com.hp.kalexa.model.Context"]))
     fun hasDisplay(context: Context): Boolean {
         val supportedInterfaces = context.system.device?.supportedInterfaces
         val display = supportedInterfaces?.display
@@ -127,6 +133,9 @@ object IntentUtil {
      * @param Slot to be read
      * @return value from the given slot
      */
+    @Deprecated(message = "This method has been incorporated into Slot class.",
+            replaceWith = ReplaceWith(expression = "slot.resolvedValue()",
+                    imports = ["com.hp.kalexa.model.Slot"]))
     fun readSlot(slot: Slot?): String? {
         val resolution = slot?.resolutions?.resolutionsPerAuthority?.first()
         return resolution?.status?.code?.let {
