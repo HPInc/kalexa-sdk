@@ -2,7 +2,7 @@ package com.hp.kalexa.core.model
 
 import com.hp.kalexa.core.annotation.*
 import com.hp.kalexa.core.intent.BuiltInIntent
-import com.hp.kalexa.core.intent.IntentExecutor
+import com.hp.kalexa.core.intent.IntentHandler
 import com.hp.kalexa.model.request.*
 import com.hp.kalexa.model.request.event.*
 import com.hp.kalexa.model.response.AlexaResponse
@@ -15,7 +15,7 @@ import com.hp.kalexa.model.response.alexaResponse
 @FulfillerIntent
 @HelpIntent
 @ListEvents
-class FakeIntent : IntentExecutor() {
+class FakeIntent : IntentHandler() {
     override fun onLaunchIntent(request: LaunchRequest): AlexaResponse {
         return alexaResponse {
             response {

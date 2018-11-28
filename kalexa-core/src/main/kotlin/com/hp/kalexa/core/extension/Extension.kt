@@ -1,5 +1,6 @@
 package com.hp.kalexa.core.extension
 
+import com.hp.kalexa.model.json.JacksonSerializer
 import kotlin.reflect.KAnnotatedElement
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
@@ -11,3 +12,7 @@ fun <T : Annotation> KAnnotatedElement.findAnnotation(clazz: KClass<T>): T? = an
 } as T?
 
 inline fun <reified T> Any.cast(): T = this as T
+
+inline fun  <reified T> Any.toValueType(): T {
+    return JacksonSerializer.convert(this, T::class.java)
+}

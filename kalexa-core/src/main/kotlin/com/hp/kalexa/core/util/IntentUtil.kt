@@ -2,10 +2,10 @@ package com.hp.kalexa.core.util
 
 import com.hp.kalexa.core.intent.BuiltInIntent
 import com.hp.kalexa.core.util.Util.getSkillName
-import com.hp.kalexa.model.*
+import com.hp.kalexa.model.Context
+import com.hp.kalexa.model.Slot
 import com.hp.kalexa.model.entitiyresolution.StatusCode
 import com.hp.kalexa.model.extension.getAttr
-import com.hp.kalexa.model.interfaces.display.Display
 import com.hp.kalexa.model.response.AlexaResponse
 import com.hp.kalexa.model.response.alexaResponse
 
@@ -14,7 +14,7 @@ import com.hp.kalexa.model.response.alexaResponse
  */
 object IntentUtil {
 
-    internal fun defaultBuiltInResponse(builtInIntent: BuiltInIntent, attributes: MutableMap<String, Any?>?): AlexaResponse {
+    internal fun defaultBuiltInResponse(builtInIntent: BuiltInIntent, attributes: MutableMap<String, Any>?): AlexaResponse {
         return when (builtInIntent) {
             BuiltInIntent.CANCEL_INTENT -> finish()
             BuiltInIntent.STOP_INTENT -> finish()
@@ -79,7 +79,7 @@ object IntentUtil {
     }
 
     @JvmOverloads
-    fun retryIntent(attributes: MutableMap<String, Any?>,
+    fun retryIntent(attributes: MutableMap<String, Any>,
                     retryMsg: String = "I'm sorry, I couldn't understand what you have said. Could you say it again?",
                     endMessage: String = "Thank you for using ${getSkillName()}"): AlexaResponse {
         val attempts = attributes.getAttr<Int>("retry")

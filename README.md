@@ -3,7 +3,7 @@ The Kalexa SDK is a Kotlin library that makes easier for developers to work with
 This library aims to simplify the skill creation without writing boiler-plate code.
 It's also possible to use Java and add kalexa-sdk as dependency.
 
-Currently the SDK only works with Amazon Lambda.
+Currently the SDK is optimized to Amazon Lambda, but it's also compatible to an instance on EC2, locally or any other host.
 
 ## Usage:
 You need to add this lib as dependency in your project.
@@ -55,11 +55,11 @@ There are three environment variables that you must export on your lambda before
 
 There are three simple things that you need to follow in order to fulfill the requirements to run your skill:
 
-- Extend `IntentExecutor` abstract class
+- Extend `IntentHandler` abstract class
 - Override `IntentExector` callback methods. 
 - Annotate with the supported annotations: `LaunchIntent`,  `RecoverIntentContext`,  `FallbackIntent`,  `HelpIntent`,  `Intent`, `FulfillerIntent`.
 
-So, the way it works is basically a combination of `IntentExecutor` callbacks and the Annotations. 
+So, the way it works is basically a combination of `IntentHandler` callbacks and the Annotations. 
 
 For instance: When annotating a class with`@LaunchIntent` you must override the callback method `onLaunchIntent`. 
 So when a SessionRequest comes from Alexa to your skill, `Kalexa-SDK` will map the Launch Request to the class annotated with `@LaunchRequest` and `onLaunchIntent` of that class will be called.
@@ -72,7 +72,7 @@ So when a SessionRequest comes from Alexa to your skill, `Kalexa-SDK` will map t
  - `@Intent` and `onIntentRequest` - Probably the most important annotation since it's where you will handle all of your Intents. It's basically the entry point of Intents. When an Intent is mapped to your Intent class the `onIntentRequest` will be called. You can also map more than one Intent to an Intent class using the `mapsTo` annotation property.
  ```
  @Intent(mapsTo = ["RecipeIntent", "LaunchIntent"])
- class FoodIntent extends IntentExecutor {
+ class FoodIntent extends IntentHandler {
      @Override
         public AlexaResponse onIntentRequest(IntentRequest request) {
         ...
@@ -90,13 +90,13 @@ These basic methods are: `onYesIntent`, `onNoIntent`, `onCancelIntent`, `onStopI
 
 #### Lock Context:
 In an interaction, you often need to lock the context (force interaction to go back to the last intent) for when you need an answer for the user.
-For that you can use the method `lockIntentContext()` from `IntentExecutor` class. You may remove the lock calling `unlockIntentContext()`
+For that you can use the method `lockIntentContext()` from `IntentHandler` class. You may remove the lock calling `unlockIntentContext()`
 For example:
 
 `Java Code:`
    ```
    @Intent
-   class FoodIntent extends IntentExecutor {
+   class FoodIntent extends IntentHandler {
          @Override
          public AlexaResponse onIntentRequest(IntentRequest request) {
             lockIntentContext();

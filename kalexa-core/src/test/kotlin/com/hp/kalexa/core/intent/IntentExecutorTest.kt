@@ -18,9 +18,9 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class IntentExecutorTest : Spek({
+class IntentHandlerTest : Spek({
 
-    given("Intent Executor implementor") {
+    given("Intent Handler implementor") {
         val dummyIntent by memoized { DummyIntent() }
         val session = mockk<Session>()
         val context = mockk<Context>()
@@ -247,14 +247,12 @@ class IntentExecutorTest : Spek({
             every { device.supportedInterfaces } returns supportedInterfaces
             every { supportedInterfaces.display } returns display
             it("should have display interface") {
-                every { display.markupVersion } returns "1.0"
-                every { display.templateVersion } returns "1.0"
+                every { context.hasDisplay() } returns true
                 val response = dummyIntent.hasDisplay()
                 assertTrue { response }
             }
             it("should not have display interface") {
-                every { display.markupVersion } returns ""
-                every { display.templateVersion } returns ""
+                every { context.hasDisplay() } returns false
                 val response = dummyIntent.hasDisplay()
                 assertFalse { response }
             }

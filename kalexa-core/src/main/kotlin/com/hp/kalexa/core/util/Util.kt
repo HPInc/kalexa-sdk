@@ -2,7 +2,7 @@ package com.hp.kalexa.core.util
 
 import com.google.common.reflect.ClassPath
 import com.hp.kalexa.core.extension.findAnnotation
-import com.hp.kalexa.core.intent.IntentExecutor
+import com.hp.kalexa.core.intent.IntentHandler
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.full.declaredFunctions
@@ -16,7 +16,7 @@ object Util {
             ?: throw IllegalArgumentException("You must define INTENT_PACKAGE environment variable")
 
     @Suppress("unchecked_cast")
-    fun <T : Annotation> findAnnotatedMethod(intentClasses: Map<String, KClass<out IntentExecutor>>, annotation: KClass<T>): List<KFunction<*>> {
+    fun <T : Annotation> findAnnotatedMethod(intentClasses: Map<String, KClass<out IntentHandler>>, annotation: KClass<T>): List<KFunction<*>> {
         val functions = intentClasses.map { entry ->
             entry.value.declaredFunctions.find {
                 it.findAnnotation(annotation) != null
@@ -26,7 +26,7 @@ object Util {
     }
 
     @Suppress("unchecked_cast")
-    fun <T : Annotation> findAnnotatedMethod(intentClasses: Map<String, KClass<out IntentExecutor>>, annotation: KClass<T>, methodName: String): Map<String, KClass<out IntentExecutor>> {
+    fun <T : Annotation> findAnnotatedMethod(intentClasses: Map<String, KClass<out IntentHandler>>, annotation: KClass<T>, methodName: String): Map<String, KClass<out IntentHandler>> {
         return intentClasses.filter {
             it.value.declaredFunctions.find {
                 it.findAnnotation(annotation) != null && it.name == methodName
@@ -34,7 +34,7 @@ object Util {
         }
     }
 
-    fun <T : Annotation> findAnnotatedClasses(intentClasses: List<KClass<out IntentExecutor>>, annotation: KClass<T>): List<KClass<out IntentExecutor>> {
+    fun <T : Annotation> findAnnotatedClasses(intentClasses: List<KClass<out IntentHandler>>, annotation: KClass<T>): List<KClass<out IntentHandler>> {
         return intentClasses.filter {
             it.findAnnotation(annotation) != null
         }

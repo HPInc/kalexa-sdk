@@ -1,7 +1,6 @@
 package com.hp.kalexa.core.intent
 
 import com.hp.kalexa.core.handler.SpeechHandler.Companion.INTENT_CONTEXT
-import com.hp.kalexa.core.util.IntentUtil
 import com.hp.kalexa.core.util.IntentUtil.defaultGreetings
 import com.hp.kalexa.core.util.IntentUtil.finish
 import com.hp.kalexa.core.util.IntentUtil.goodbye
@@ -15,9 +14,9 @@ import com.hp.kalexa.model.request.*
 import com.hp.kalexa.model.request.event.*
 import com.hp.kalexa.model.response.AlexaResponse
 
-abstract class IntentExecutor {
+abstract class IntentHandler {
 
-    var sessionAttributes: MutableMap<String, Any?> = mutableMapOf()
+    var sessionAttributes: MutableMap<String, Any> = mutableMapOf()
     var session: Session? = null
     lateinit var context: Context
     var version: String = "1.0"
@@ -134,13 +133,13 @@ abstract class IntentExecutor {
      * Unlocks the context on the intent caller.
      */
     fun unlockIntentContext() {
-        sessionAttributes[INTENT_CONTEXT] = null
+        sessionAttributes.remove(INTENT_CONTEXT)
     }
 
     fun isIntentContextLocked() = sessionAttributes[INTENT_CONTEXT] != null
 
 
-    fun hasDisplay() = IntentUtil.hasDisplay(context)
+    fun hasDisplay() = context.hasDisplay()
 
     open fun onListItemsUpdatedEventRequest(request: ListItemsUpdatedEventRequest): AlexaResponse {
         return AlexaResponse.emptyResponse()

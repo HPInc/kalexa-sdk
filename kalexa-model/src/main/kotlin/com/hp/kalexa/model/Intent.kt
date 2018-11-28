@@ -7,4 +7,3 @@ data class Intent(val name: String,
 
     fun getSlot(key: String) = slots[key]
 }
-

@@ -109,7 +109,7 @@ data class AlexaResponse(
             return this
         }
 
-        fun standardCard(cardTitle: String, cardText: String, image: Image): Builder {
+        fun standardCard(cardTitle: String, cardText: String, image: com.hp.kalexa.model.ui.Image): Builder {
             val card = StandardCard()
             card.text = cardText
             card.image = image

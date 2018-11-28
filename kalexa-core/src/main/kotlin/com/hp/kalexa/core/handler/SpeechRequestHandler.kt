@@ -1,14 +1,17 @@
 package com.hp.kalexa.core.handler
 
 import com.hp.kalexa.core.util.Util
+import com.hp.kalexa.model.json.JacksonSerializer
 import com.hp.kalexa.model.request.*
 import com.hp.kalexa.model.request.event.*
 import com.hp.kalexa.model.response.AlexaResponse
+import org.apache.logging.log4j.LogManager
 
 class SpeechRequestHandler(private val speechHandler: SpeechHandler) {
+    private val logger = LogManager.getLogger(SpeechRequestHandler::class.java)
 
     fun process(input: ByteArray): String {
-        val requestEnvelope = AlexaRequestEnvelope.fromJson(input)
+        val requestEnvelope = JacksonSerializer.deserialize(input, AlexaRequestEnvelope::class.java)
 
         if (validateApplicationId(requestEnvelope).not()) {
             throw IllegalArgumentException("Request application ID doesn't match with given Application ID")
@@ -20,7 +23,7 @@ class SpeechRequestHandler(private val speechHandler: SpeechHandler) {
     private fun validateApplicationId(requestEnvelope: AlexaRequestEnvelope<*>): Boolean {
         val applicationId = Util.getApplicationID()
         if (applicationId == null || applicationId.isEmpty()) {
-            println("Application ID not defined in environment variable.")
+            logger.error("Application ID not defined in environment variable.")
             return false
         }
         requestEnvelope.session?.application?.applicationId?.let {

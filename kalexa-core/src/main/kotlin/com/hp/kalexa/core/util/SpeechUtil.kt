@@ -65,7 +65,7 @@ object SpeechUtil {
             return ""
         }
 
-        return inlineImageTag(imageInstance.url, imageInstance.widthPixels, imageInstance.heightPixels)
+        return inlineImageTag(imageInstance.url, imageInstance.widthPixels ?: 0, imageInstance.heightPixels ?: 0)
     }
 
     fun inlineImageTag(url: String, width: Int, height: Int): String {
