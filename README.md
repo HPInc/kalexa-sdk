@@ -1,5 +1,5 @@
 # kalexa-sdk
-The Kalexa SDK is a Kotlin library that makes easier for developers to work with Amazon Alexa Skill.
+The Kalexa SDK is a very simple library that makes easier for developers to work with Amazon Alexa Skill using Kotlin Language.
 This library aims to simplify the skill creation without writing boiler-plate code.
 It's also possible to use Java and add kalexa-sdk as dependency.
 
@@ -21,7 +21,6 @@ This will handle dependencies and also install kalexa-sdk in your local reposito
 
 Then, in your project:
 ##### Gradle
-add `MavenLocal()` to repositories task.  
 add dependency to build.gradle
 ```
 compile "com.hp.kalexa:kalexa-sdk:0.0.1" 
@@ -56,7 +55,7 @@ There are three environment variables that you must export on your lambda before
 There are three simple things that you need to follow in order to fulfill the requirements to run your skill:
 
 - Extend `IntentHandler` abstract class
-- Override `IntentExector` callback methods. 
+- Override `IntentHandler` callback methods. 
 - Annotate with the supported annotations: `LaunchIntent`,  `RecoverIntentContext`,  `FallbackIntent`,  `HelpIntent`,  `Intent`, `FulfillerIntent`.
 
 So, the way it works is basically a combination of `IntentHandler` callbacks and the Annotations. 
@@ -70,6 +69,18 @@ So when a SessionRequest comes from Alexa to your skill, `Kalexa-SDK` will map t
  - `@HelpIntent` and `onHelpIntent` - Handles the AMAZON.HelpIntent
  - `@FulfillerIntent` and `onConnectionsRequest` - Handles the Skill request from another existent Skill. 
  - `@Intent` and `onIntentRequest` - Probably the most important annotation since it's where you will handle all of your Intents. It's basically the entry point of Intents. When an Intent is mapped to your Intent class the `onIntentRequest` will be called. You can also map more than one Intent to an Intent class using the `mapsTo` annotation property.
+
+Kotlin Code:
+ ```
+ @Intent(mapsTo = ["RecipeIntent", "LaunchIntent"])
+ class FoodIntent : IntentHandler() {
+     override fun onIntentRequest(request: IntentRequest): AlexaResponse {
+        ...
+      }
+ } 
+ ```
+
+Java code:
  ```
  @Intent(mapsTo = ["RecipeIntent", "LaunchIntent"])
  class FoodIntent extends IntentHandler {
@@ -123,42 +134,57 @@ For example: `{"token": "MyIntentName|Value|SomeOtherValue}`
 
 It's possible to verify if the device has screen support checking if supportedInterfaces from the context object has templateVersion and markupVersion value or by simply calling `IntentUtil.hasDisplay(context)`
 
-#### Skill Connection Support
+#### Skill Connections Support
 `Kalexa-SDK` also supports Skill Connector feature. 
-Your skill can act as a `Fulfiller` or as a `Requestor` 
+Your skill can act as a `Fulfiller` or as a `Requestor`
+Currently, it only supports Image, PDF and WebPage types. 
 ##### Fulfiller:
-If your skill acts as a Fulfiller, you need to annotate your class with `@Fulfiller` and override `onConnectionsRequest` callback method will be called. In this case, after processing the request, you have to answer back to Alexa using the `ReturnFromLinkDirective` directive. **This directive is in process of being deprecated**
+If your skill acts as a Fulfiller, you need to annotate your class with `@Fulfiller` and override `onConnectionsRequest` callback method. In this case, after processing the request, you have to answer back to Alexa using the `SendResponseDirective` directive.
 
-`Java Code:`
+`Kotlin Code:`
 ```
-    @NotNull
-    @Override
-    public AlexaResponse onConnectionsRequest(ConnectionsRequest request) {
-        // do the logic and reply back to Alexa.
-        return new AlexaResponse.Builder().addDirective(
-                new ReturnFromLinkDirective(
-                        ReturnFromLinkDirective.Status.SUCCESS,
-                        new Print<>(new PDF(
-                                "Document title",
-                                "This is a PDF",
-                                "http://<PDF location>.pdf")),
-                        ));
+    override fun onConnectionsRequest(request: ConnectionsRequest): AlexaResponse {
+        return alexaResponse {
+            response {
+                directives {
+                    sendResponseDirective {
+                        status { ConnectionsStatus("200", "Success") }
+                        payload {
+                            mapOf("url" to "http://<PDF location>.pdf")
+                        }
+                    }
+                }
+            }
+        }
     }
 ```
 
-##### Requestor:
-If your skill acts as a Requestor, just send to Alexa a `SendRequestDirective` with the type of the Entity-Pair object and the Payload:
+##### Requester:
+If your skill acts as a Requester, just return to Alexa a `SendRequestDirective` with the type of the Entity-Pair object and the Payload:
 
-`Java Code`
+`Kotlin Code:`
 ```
-new AlexaResponse.Builder().addDirective(
-                new SendRequestDirective(
-                        NameType.PRINT,
-                        new Print<>(new PDF(
-                                "Document title",
-                                "This is a PDF",
-                                "http://<PDF location>.pdf")),
-                        "Token"));
+    override fun onConnectionsRequest(request: ConnectionsRequest): AlexaResponse {
+        return alexaResponse {
+            response {
+                directives {
+                    sendRequestDirective {
+                        name = NameType.PRINT
+                        printPDFRequest {
+                            version { "1" }
+                            title {  "Document title" }
+                            description { "This is a PDF" }
+                            url { "http://<PDF location>.pdf" }
+                            context {
+                                providerId = ""
+                            }
+                        }
+                    }
+                }
+                speech { "This is a onConnectionsRequest from FakeIntent" }
+            }
+        }
+    }
 
 ```
 And then expect the response to be on `onConnectionsResponse` method
@@ -178,7 +204,7 @@ And then expect the response to be on `onConnectionsResponse` method
                 .build();
     }
  ```
-Note that token argument passed to `SendRequestDirective` should be the Intent that you want to be called when Alexa sends the response from the Fulfiller. `Kalexa-SDK` use `|` as separator to split the token string in more values. But keep in mind that the first value HAS to be the Intent that you want to execute `onConnectionsResponse` method.
+Note that token argument passed to `SendRequestDirective` should be the Intent that you want to be called when Alexa sends the response from the Fulfiller. `Kalexa-SDK` uses `|` as separator to split the token string in more values. But keep in mind that the first value has to be the Intent that you want to execute the `onConnectionsResponse` method.
 For example: `{"token": "MyIntentName|Value|SomeOtherValue}`
  #### Response:
 Kalexa-sdk has two types of responses.
@@ -213,7 +239,6 @@ Dialog directives such `DelegateDirective`, `ElicitSlotDirective` and `ConfirmIn
 
 UI directives: `RenderTemplateDirective` and populate with its Templates.
 
-And Skill-to-Skill directives: `SendRequestDirective`, `ReturnFromLinkDirective` (this name will probably change).
 
 
 ## License
