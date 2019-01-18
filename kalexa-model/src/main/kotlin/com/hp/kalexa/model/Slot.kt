@@ -1,7 +1,7 @@
 package com.hp.kalexa.model
 
-import com.hp.kalexa.model.entitiyresolution.Resolutions
-import com.hp.kalexa.model.entitiyresolution.StatusCode
+import com.hp.kalexa.model.entityresolution.Resolutions
+import com.hp.kalexa.model.entityresolution.StatusCode
 
 data class Slot(val name: String,
                 val value: String? = null,

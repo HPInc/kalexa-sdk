@@ -43,8 +43,7 @@ class ApiClient {
 
     @Throws(IOException::class)
     private fun getHttpConnection(uri: String): HttpURLConnection {
-        val url = URL(uri)
-        return url.openConnection() as HttpURLConnection
+        return URL(uri).openConnection() as HttpURLConnection
     }
 
     @Throws(IOException::class)

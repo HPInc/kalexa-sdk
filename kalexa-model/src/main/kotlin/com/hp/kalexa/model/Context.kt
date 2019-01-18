@@ -3,6 +3,7 @@ package com.hp.kalexa.model
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.hp.kalexa.model.interfaces.audioplayer.AudioPlayer
 import com.hp.kalexa.model.interfaces.display.Display
+import com.hp.kalexa.model.interfaces.geolocation.Geolocation
 
 data class Context(
         @JsonProperty("System")
@@ -10,7 +11,9 @@ data class Context(
         @JsonProperty("AudioPlayer")
         val audioPlayer: AudioPlayer? = null,
         @JsonProperty("Display")
-        val display: Display? = null) {
+        val display: Display? = null,
+        @JsonProperty("Geolocation")
+        val geolocation: Geolocation? = null) {
 
     /**
      * Verifies whether the device has display or not.

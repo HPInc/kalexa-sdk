@@ -1,6 +1,7 @@
-package com.hp.kalexa.model.services
+package com.hp.kalexa.model.services.list
 
 import com.hp.kalexa.model.request.list.*
+import com.hp.kalexa.model.services.ServiceException
 
 interface ListService {
 

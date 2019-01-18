@@ -1,4 +1,4 @@
-package com.hp.kalexa.model.entitiyresolution
+package com.hp.kalexa.model.entityresolution
 
 data class Resolution(
         val authority: String,

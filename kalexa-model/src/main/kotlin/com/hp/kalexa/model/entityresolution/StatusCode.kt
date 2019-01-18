@@ -1,4 +1,4 @@
-package com.hp.kalexa.model.entitiyresolution
+package com.hp.kalexa.model.entityresolution
 
 import com.fasterxml.jackson.annotation.JsonCreator
 

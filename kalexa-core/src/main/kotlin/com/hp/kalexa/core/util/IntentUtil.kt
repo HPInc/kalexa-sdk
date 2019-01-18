@@ -4,7 +4,7 @@ import com.hp.kalexa.core.intent.BuiltInIntent
 import com.hp.kalexa.core.util.Util.getSkillName
 import com.hp.kalexa.model.Context
 import com.hp.kalexa.model.Slot
-import com.hp.kalexa.model.entitiyresolution.StatusCode
+import com.hp.kalexa.model.entityresolution.StatusCode
 import com.hp.kalexa.model.extension.getAttr
 import com.hp.kalexa.model.response.AlexaResponse
 import com.hp.kalexa.model.response.alexaResponse

@@ -1,13 +1,14 @@
-package com.hp.kalexa.model.services
+package com.hp.kalexa.model.services.list
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.hp.kalexa.model.request.list.*
-
+import com.hp.kalexa.model.services.ApiClient
+import com.hp.kalexa.model.services.ServiceException
+import com.hp.kalexa.model.services.toTypedObject
 import java.io.IOException
 
-class ListServiceClient(private val client: ApiClient) : ListService {
+class ListServiceClient(private val client: ApiClient = ApiClient()) : ListService {
 
     private val mapper: ObjectMapper = jacksonObjectMapper()
 
@@ -16,11 +17,7 @@ class ListServiceClient(private val client: ApiClient) : ListService {
         val uri = "$API_ENDPOINT/v2/householdlists/"
         try {
             val response = client.get(uri, getRequestHeaders(token))
-            return if (response.responseCode in 200..299) {
-                mapper.readValue(response.responseBody)
-            } else {
-                throw ServiceException("Got a non-successful response for lists metadata query")
-            }
+            return response.toTypedObject()
         } catch (e: IOException) {
             throw ServiceException("Encountered an IOException while attempting to retrieve lists metadata", e)
         }
@@ -31,11 +28,7 @@ class ListServiceClient(private val client: ApiClient) : ListService {
         val uri = "$API_ENDPOINT/v2/householdlists/$listId/$status"
         try {
             val response = client.get(uri, getRequestHeaders(token))
-            return if (response.responseCode in 200..299) {
-                mapper.readValue(response.responseBody)
-            } else {
-                throw ServiceException("Got a non-successful response for list query")
-            }
+            return response.toTypedObject()
         } catch (e: IOException) {
             throw ServiceException("Encountered an IOException while attempting to retrieve list", e)
         }
@@ -46,11 +39,7 @@ class ListServiceClient(private val client: ApiClient) : ListService {
         val uri = "$API_ENDPOINT/v2/householdlists/"
         try {
             val response = client.post(uri, getRequestHeaders(token), mapper.writeValueAsString(request))
-            return if (response.responseCode in 200..299) {
-                mapper.readValue(response.responseBody)
-            } else {
-                throw ServiceException("Got a non-successful response for create list request")
-            }
+            return response.toTypedObject()
         } catch (e: IOException) {
             throw ServiceException("Encountered an IOException while attempting to create list", e)
         }
@@ -61,11 +50,7 @@ class ListServiceClient(private val client: ApiClient) : ListService {
         val uri = "$API_ENDPOINT/v2/householdlists/$listId"
         try {
             val response = client.put(uri, getRequestHeaders(token), mapper.writeValueAsString(request))
-            return if (response.responseCode in 200..299) {
-                mapper.readValue(response.responseBody)
-            } else {
-                throw ServiceException("Got a non-successful response for update list request")
-            }
+            return response.toTypedObject()
         } catch (e: IOException) {
             throw ServiceException("Encountered an IOException while attempting to update list", e)
         }
@@ -77,7 +62,7 @@ class ListServiceClient(private val client: ApiClient) : ListService {
         try {
             val response = client.delete(uri, getRequestHeaders(token))
             if (response.responseCode < 200 || response.responseCode >= 300) {
-                throw ServiceException("Got a non-successful response for delete list request")
+                throw ServiceException(response.responseBody)
             }
         } catch (e: IOException) {
             throw ServiceException("Encountered an IOException while attempting to delete list", e)
@@ -89,11 +74,7 @@ class ListServiceClient(private val client: ApiClient) : ListService {
         val uri = "$API_ENDPOINT/v2/householdlists/$listId/items/$itemId"
         try {
             val response = client.get(uri, getRequestHeaders(token))
-            return if (response.responseCode in 200..299) {
-                mapper.readValue(response.responseBody)
-            } else {
-                throw ServiceException("Got a non-successful response for list item query")
-            }
+            return response.toTypedObject()
         } catch (e: IOException) {
             throw ServiceException("Encountered an IOException while attempting to retrieve list item", e)
         }
@@ -104,11 +85,7 @@ class ListServiceClient(private val client: ApiClient) : ListService {
         val uri = "$API_ENDPOINT/v2/householdlists/$listId/items"
         try {
             val response = client.post(uri, getRequestHeaders(token), mapper.writeValueAsString(request))
-            return if (response.responseCode in 200..299) {
-                mapper.readValue(response.responseBody)
-            } else {
-                throw ServiceException("Got a non-successful response for create list item request")
-            }
+            return response.toTypedObject()
         } catch (e: IOException) {
             throw ServiceException("Encountered an IOException while attempting to create list item", e)
         }
@@ -119,11 +96,7 @@ class ListServiceClient(private val client: ApiClient) : ListService {
         val uri = "$API_ENDPOINT/v2/householdlists/$listId/items/$itemId"
         try {
             val response = client.put(uri, getRequestHeaders(token), mapper.writeValueAsString(request))
-            return if (response.responseCode in 200..299) {
-                mapper.readValue(response.responseBody)
-            } else {
-                throw ServiceException("Got a non-successful response for update list item request")
-            }
+            return response.toTypedObject()
         } catch (e: IOException) {
             throw ServiceException("Encountered an IOException while attempting to update list item", e)
         }
@@ -135,7 +108,7 @@ class ListServiceClient(private val client: ApiClient) : ListService {
         try {
             val response = client.delete(uri, getRequestHeaders(token))
             if (response.responseCode < 200 || response.responseCode >= 300) {
-                throw ServiceException("Got a non-successful response for delete list item request")
+                throw ServiceException(response.responseBody)
             }
         } catch (e: IOException) {
             throw ServiceException("Encountered an IOException while attempting to delete list item", e)

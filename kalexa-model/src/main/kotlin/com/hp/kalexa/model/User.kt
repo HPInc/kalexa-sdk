@@ -4,6 +4,5 @@ data class User(
         val userId: String,
         val accessToken: String = "",
         val permissions: Permissions? = null
-
 )
 
