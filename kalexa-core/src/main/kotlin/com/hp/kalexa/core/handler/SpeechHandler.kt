@@ -6,36 +6,35 @@ import com.hp.kalexa.model.response.AlexaResponse
 
 interface SpeechHandler {
 
-    fun handleSessionStartedRequest(envelope: AlexaRequestEnvelope<SessionStartedRequest>): AlexaResponse
+    fun handleSessionStartedRequest(alexaRequest: AlexaRequest<SessionStartedRequest>): AlexaResponse
 
-    fun handleLaunchRequest(envelope: AlexaRequestEnvelope<LaunchRequest>): AlexaResponse
+    fun handleLaunchRequest(alexaRequest: AlexaRequest<LaunchRequest>): AlexaResponse
 
-    fun handleIntentRequest(envelope: AlexaRequestEnvelope<IntentRequest>): AlexaResponse
+    fun handleIntentRequest(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse
 
-    fun handleElementSelectedRequest(envelope: AlexaRequestEnvelope<ElementSelectedRequest>): AlexaResponse
+    fun handleElementSelectedRequest(alexaRequest: AlexaRequest<ElementSelectedRequest>): AlexaResponse
 
-    fun handleSessionEndedRequest(envelope: AlexaRequestEnvelope<SessionEndedRequest>): AlexaResponse
+    fun handleSessionEndedRequest(alexaRequest: AlexaRequest<SessionEndedRequest>): AlexaResponse
 
-    fun handleConnectionsResponseRequest(envelope: AlexaRequestEnvelope<ConnectionsResponseRequest>): AlexaResponse
+    fun handleConnectionsResponseRequest(alexaRequest: AlexaRequest<ConnectionsResponseRequest>): AlexaResponse
 
-    fun handleConnectionsRequest(envelope: AlexaRequestEnvelope<ConnectionsRequest>): AlexaResponse
+    fun handleConnectionsRequest(alexaRequest: AlexaRequest<ConnectionsRequest>): AlexaResponse
 
-    fun handleListCreatedEventRequest(envelope: AlexaRequestEnvelope<ListCreatedEventRequest>): AlexaResponse
+    fun handleListCreatedEventRequest(alexaRequest: AlexaRequest<ListCreatedEventRequest>): AlexaResponse
 
-    fun handleListUpdatedEventRequest(envelope: AlexaRequestEnvelope<ListUpdatedEventRequest>): AlexaResponse
+    fun handleListUpdatedEventRequest(alexaRequest: AlexaRequest<ListUpdatedEventRequest>): AlexaResponse
 
-    fun handleListDeletedEventRequest(envelope: AlexaRequestEnvelope<ListDeletedEventRequest>): AlexaResponse
+    fun handleListDeletedEventRequest(alexaRequest: AlexaRequest<ListDeletedEventRequest>): AlexaResponse
 
-    fun handleListItemsCreatedEventRequest(envelope: AlexaRequestEnvelope<ListItemsCreatedEventRequest>): AlexaResponse
+    fun handleListItemsCreatedEventRequest(alexaRequest: AlexaRequest<ListItemsCreatedEventRequest>): AlexaResponse
 
-    fun handleListItemsUpdatedEventRequest(envelope: AlexaRequestEnvelope<ListItemsUpdatedEventRequest>): AlexaResponse
+    fun handleListItemsUpdatedEventRequest(alexaRequest: AlexaRequest<ListItemsUpdatedEventRequest>): AlexaResponse
 
-    fun handleListItemsDeletedEventRequest(envelope: AlexaRequestEnvelope<ListItemsDeletedEventRequest>): AlexaResponse
+    fun handleListItemsDeletedEventRequest(alexaRequest: AlexaRequest<ListItemsDeletedEventRequest>): AlexaResponse
 
 
     companion object {
         const val INTENT_CONTEXT = "com.hp.kalexa.intentContext"
-        const val SESSION_ID = "sessionId"
     }
 
 }

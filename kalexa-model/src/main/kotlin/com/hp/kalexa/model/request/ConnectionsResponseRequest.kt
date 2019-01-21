@@ -3,7 +3,6 @@ package com.hp.kalexa.model.request
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.hp.kalexa.model.ConnectionsStatus
 import com.hp.kalexa.model.json.LocalDateTimeDeserializer
-import com.hp.kalexa.model.payload.Payload
 import java.time.LocalDateTime
 
 

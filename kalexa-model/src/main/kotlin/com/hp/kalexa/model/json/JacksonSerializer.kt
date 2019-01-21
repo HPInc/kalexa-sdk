@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.hp.kalexa.model.exception.KalexaSDKException
-import com.hp.kalexa.model.request.AlexaRequestEnvelope
+import com.hp.kalexa.model.request.AlexaRequest
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -18,12 +18,12 @@ object JacksonSerializer {
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
 
-    fun fromJson(json: String): AlexaRequestEnvelope<*> {
-        return OBJECT_MAPPER.readValue(json, AlexaRequestEnvelope::class.java)
+    fun fromJson(json: String): AlexaRequest<*> {
+        return OBJECT_MAPPER.readValue(json, AlexaRequest::class.java)
     }
 
-    fun fromJson(json: ByteArray): AlexaRequestEnvelope<*> {
-        return OBJECT_MAPPER.readValue(json, AlexaRequestEnvelope::class.java)
+    fun fromJson(json: ByteArray): AlexaRequest<*> {
+        return OBJECT_MAPPER.readValue(json, AlexaRequest::class.java)
     }
 
     fun <T> serialize(obj: T): String {

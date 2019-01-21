@@ -11,7 +11,7 @@ class SpeechRequestHandler(private val speechHandler: SpeechHandler) {
     private val logger = LogManager.getLogger(SpeechRequestHandler::class.java)
 
     fun process(input: ByteArray): String {
-        val requestEnvelope = JacksonSerializer.deserialize(input, AlexaRequestEnvelope::class.java)
+        val requestEnvelope = JacksonSerializer.deserialize(input, AlexaRequest::class.java)
 
         if (validateApplicationId(requestEnvelope).not()) {
             throw IllegalArgumentException("Request application ID doesn't match with given Application ID")
@@ -20,49 +20,49 @@ class SpeechRequestHandler(private val speechHandler: SpeechHandler) {
         return handleRequestType(requestEnvelope)
     }
 
-    private fun validateApplicationId(requestEnvelope: AlexaRequestEnvelope<*>): Boolean {
+    private fun validateApplicationId(alexaRequest: AlexaRequest<*>): Boolean {
         val applicationId = Util.getApplicationID()
         if (applicationId == null || applicationId.isEmpty()) {
             logger.error("Application ID not defined in environment variable.")
             return false
         }
-        requestEnvelope.session?.application?.applicationId?.let {
+        alexaRequest.session?.application?.applicationId?.let {
             return applicationId == it
         }
-        return requestEnvelope.context.system.application.applicationId?.let {
+        return alexaRequest.context.system.application.applicationId?.let {
             applicationId == it
         } ?: false
     }
 
     @Suppress("unchecked_cast")
-    private fun handleRequestType(alexaRequest: AlexaRequestEnvelope<*>): String {
+    private fun handleRequestType(alexaRequest: AlexaRequest<*>): String {
         val alexaResponse = when (alexaRequest.request) {
             is SessionStartedRequest ->
-                speechHandler.handleSessionStartedRequest(alexaRequest as AlexaRequestEnvelope<SessionStartedRequest>)
+                speechHandler.handleSessionStartedRequest(alexaRequest as AlexaRequest<SessionStartedRequest>)
             is LaunchRequest ->
-                speechHandler.handleLaunchRequest(alexaRequest as AlexaRequestEnvelope<LaunchRequest>)
+                speechHandler.handleLaunchRequest(alexaRequest as AlexaRequest<LaunchRequest>)
             is IntentRequest ->
-                speechHandler.handleIntentRequest(alexaRequest as AlexaRequestEnvelope<IntentRequest>)
+                speechHandler.handleIntentRequest(alexaRequest as AlexaRequest<IntentRequest>)
             is ConnectionsResponseRequest ->
-                speechHandler.handleConnectionsResponseRequest(alexaRequest as AlexaRequestEnvelope<ConnectionsResponseRequest>)
+                speechHandler.handleConnectionsResponseRequest(alexaRequest as AlexaRequest<ConnectionsResponseRequest>)
             is ConnectionsRequest ->
-                speechHandler.handleConnectionsRequest(alexaRequest as AlexaRequestEnvelope<ConnectionsRequest>)
+                speechHandler.handleConnectionsRequest(alexaRequest as AlexaRequest<ConnectionsRequest>)
             is SessionEndedRequest ->
-                speechHandler.handleSessionEndedRequest(alexaRequest as AlexaRequestEnvelope<SessionEndedRequest>)
+                speechHandler.handleSessionEndedRequest(alexaRequest as AlexaRequest<SessionEndedRequest>)
             is ElementSelectedRequest ->
-                speechHandler.handleElementSelectedRequest(alexaRequest as AlexaRequestEnvelope<ElementSelectedRequest>)
+                speechHandler.handleElementSelectedRequest(alexaRequest as AlexaRequest<ElementSelectedRequest>)
             is ListCreatedEventRequest ->
-                speechHandler.handleListCreatedEventRequest(alexaRequest as AlexaRequestEnvelope<ListCreatedEventRequest>)
+                speechHandler.handleListCreatedEventRequest(alexaRequest as AlexaRequest<ListCreatedEventRequest>)
             is ListUpdatedEventRequest ->
-                speechHandler.handleListUpdatedEventRequest(alexaRequest as AlexaRequestEnvelope<ListUpdatedEventRequest>)
+                speechHandler.handleListUpdatedEventRequest(alexaRequest as AlexaRequest<ListUpdatedEventRequest>)
             is ListDeletedEventRequest ->
-                speechHandler.handleListDeletedEventRequest(alexaRequest as AlexaRequestEnvelope<ListDeletedEventRequest>)
+                speechHandler.handleListDeletedEventRequest(alexaRequest as AlexaRequest<ListDeletedEventRequest>)
             is ListItemsCreatedEventRequest ->
-                speechHandler.handleListItemsCreatedEventRequest(alexaRequest as AlexaRequestEnvelope<ListItemsCreatedEventRequest>)
+                speechHandler.handleListItemsCreatedEventRequest(alexaRequest as AlexaRequest<ListItemsCreatedEventRequest>)
             is ListItemsUpdatedEventRequest ->
-                speechHandler.handleListItemsUpdatedEventRequest(alexaRequest as AlexaRequestEnvelope<ListItemsUpdatedEventRequest>)
+                speechHandler.handleListItemsUpdatedEventRequest(alexaRequest as AlexaRequest<ListItemsUpdatedEventRequest>)
             is ListItemsDeletedEventRequest ->
-                speechHandler.handleListItemsDeletedEventRequest(alexaRequest as AlexaRequestEnvelope<ListItemsDeletedEventRequest>)
+                speechHandler.handleListItemsDeletedEventRequest(alexaRequest as AlexaRequest<ListItemsDeletedEventRequest>)
             else -> AlexaResponse.emptyResponse()
         }
         return alexaResponse.toJson()

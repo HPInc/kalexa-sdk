@@ -4,7 +4,7 @@ import com.hp.kalexa.model.Context
 import com.hp.kalexa.model.Session
 
 
-class AlexaRequestEnvelope<out T : Request>(
+class AlexaRequest<out T : Request>(
         val version: String,
         val session: Session?,
         val context: Context,

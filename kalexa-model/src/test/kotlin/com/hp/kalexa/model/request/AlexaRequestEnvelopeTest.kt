@@ -19,14 +19,14 @@ class AlexaRequestEnvelopeTest : Spek({
     given("a incoming json request") {
 
         on("a Launch Request") {
-            val launchIntentRequest = JacksonSerializer.deserialize(LAUNCH_REQUEST_JSON, AlexaRequestEnvelope::class.java)
+            val launchIntentRequest = JacksonSerializer.deserialize(LAUNCH_REQUEST_JSON, AlexaRequest::class.java)
             it("should be CustomLaunchRequest type") {
                 assert(launchIntentRequest.request is LaunchRequest)
             }
         }
 
         on("a Intent request") {
-            val envelope = JacksonSerializer.deserialize(INTENT_REQUEST_JSON, AlexaRequestEnvelope::class.java)
+            val envelope = JacksonSerializer.deserialize(INTENT_REQUEST_JSON, AlexaRequest::class.java)
             it("should be CustomIntentRequest type") {
                 assert(envelope.request is IntentRequest)
             }
@@ -47,7 +47,7 @@ class AlexaRequestEnvelopeTest : Spek({
             }
         }
         on("a Connections.Response request") {
-            val envelope = JacksonSerializer.deserialize(WEB_PAGE_LINK_RESULT, AlexaRequestEnvelope::class.java)
+            val envelope = JacksonSerializer.deserialize(WEB_PAGE_LINK_RESULT, AlexaRequest::class.java)
             it("should be ConnectionsResponseRequest type") {
                 assert(envelope.request is ConnectionsResponseRequest)
             }
@@ -70,7 +70,7 @@ class AlexaRequestEnvelopeTest : Spek({
             }
         }
         on("a error link result request") {
-            val envelope = JacksonSerializer.deserialize(ERROR_LINK_RESULT, AlexaRequestEnvelope::class.java)
+            val envelope = JacksonSerializer.deserialize(ERROR_LINK_RESULT, AlexaRequest::class.java)
             it("should be CustomLinkResultRequest type") {
                 assert(envelope.request is ConnectionsResponseRequest)
             }
@@ -88,7 +88,7 @@ class AlexaRequestEnvelopeTest : Spek({
             }
         }
         on("a display element element request") {
-            val envelope = JacksonSerializer.deserialize(DISPLAY_SELECTED_REQUEST, AlexaRequestEnvelope::class.java)
+            val envelope = JacksonSerializer.deserialize(DISPLAY_SELECTED_REQUEST, AlexaRequest::class.java)
             it("should be CustomElementSelectedRequest type") {
                 assert(envelope.request is ElementSelectedRequest)
             }

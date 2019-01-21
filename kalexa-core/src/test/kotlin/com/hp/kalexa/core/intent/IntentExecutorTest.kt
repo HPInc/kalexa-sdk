@@ -5,6 +5,7 @@ import com.hp.kalexa.core.model.DummyIntent
 import com.hp.kalexa.core.util.IntentUtil
 import com.hp.kalexa.model.*
 import com.hp.kalexa.model.interfaces.display.Display
+import com.hp.kalexa.model.request.AlexaRequest
 import com.hp.kalexa.model.request.IntentRequest
 import com.hp.kalexa.model.response.AlexaResponse
 import io.mockk.every
@@ -22,16 +23,16 @@ class IntentHandlerTest : Spek({
 
     given("Intent Handler implementor") {
         val dummyIntent by memoized { DummyIntent() }
+        val attributes = mutableMapOf<String, Any>()
         val session = mockk<Session>()
         val context = mockk<Context>()
-        val request = mockk<IntentRequest>()
-        val version = "1.0"
+        val envelope = mockk<AlexaRequest<IntentRequest>>()
+
         beforeEachTest {
-            dummyIntent.context = context
-            dummyIntent.session = session
-            dummyIntent.version = version
-            dummyIntent.sessionAttributes = mutableMapOf()
-            every { request.intent.name } returns "DummyIntent"
+            every { session.attributes } returns attributes
+            every { envelope.session } returns session
+            every { envelope.context } returns context
+            every { envelope.request.intent.name } returns "DummyIntent"
         }
         on("getSkillName method") {
             it("should return the skill name") {
@@ -50,7 +51,7 @@ class IntentHandlerTest : Spek({
 
         on("onIntentRequest") {
             it("should return default response") {
-                val response = dummyIntent.onIntentRequest(request)
+                val response = dummyIntent.onIntentRequest(envelope)
                 assertEquals(AlexaResponse.emptyResponse().toJson(),
                         response.toJson())
             }
@@ -74,71 +75,73 @@ class IntentHandlerTest : Spek({
 
         on("BuiltInIntent") {
             it("should call retryIntent default response with repeat message") {
-                val response = dummyIntent.onBuiltInIntent(BuiltInIntent.FALLBACK_INTENT, mockk())
+                val response = dummyIntent.onBuiltInIntent(BuiltInIntent.FALLBACK_INTENT, envelope)
                 assertEquals(IntentUtil.retryIntent(mutableMapOf()).toJson(),
                         response.toJson())
             }
             it("should call onYesIntent retryIntent default response with end message.") {
-                val response = dummyIntent.onBuiltInIntent(BuiltInIntent.YES_INTENT, mockk())
+                val response = dummyIntent.onBuiltInIntent(BuiltInIntent.YES_INTENT, envelope)
                 assertEquals(IntentUtil.retryIntent(mutableMapOf("retry" to 1)).toJson(),
                         response.toJson())
 
             }
             it("should call onNoIntent default response callback through onBuiltInIntent ") {
-                val response = dummyIntent.onBuiltInIntent(BuiltInIntent.NO_INTENT, mockk())
+                val response = dummyIntent.onBuiltInIntent(BuiltInIntent.NO_INTENT, envelope)
                 assertEquals(IntentUtil.finish().toJson(),
                         response.toJson())
 
             }
             it("should call onStopIntent default response callback through onBuiltInIntent ") {
-                val response = dummyIntent.onBuiltInIntent(BuiltInIntent.STOP_INTENT, mockk())
+                val response = dummyIntent.onBuiltInIntent(BuiltInIntent.STOP_INTENT, envelope)
                 assertEquals(IntentUtil.goodbye().toJson(),
                         response.toJson())
 
             }
             it("should call onHelpIntent default response callback through onBuiltInIntent ") {
-                val response = dummyIntent.onBuiltInIntent(BuiltInIntent.HELP_INTENT, mockk())
+                val response = dummyIntent.onBuiltInIntent(BuiltInIntent.HELP_INTENT, envelope)
                 assertEquals(IntentUtil.helpIntent().toJson(),
                         response.toJson())
 
             }
             it("should call onCancelIntent default response callback through onBuiltInIntent ") {
-                val response = dummyIntent.onBuiltInIntent(BuiltInIntent.CANCEL_INTENT, mockk())
+                val response = dummyIntent.onBuiltInIntent(BuiltInIntent.CANCEL_INTENT, envelope)
                 assertEquals(IntentUtil.finish().toJson(),
                         response.toJson())
 
             }
         }
         on("No Intent") {
-            val response = dummyIntent.onNoIntent(mockk())
+            val response = dummyIntent.onNoIntent(envelope)
             it("should return default response") {
                 assertEquals(IntentUtil.finish().toJson(),
                         response.toJson())
             }
         }
         on("Yes Intent") {
-            val response = dummyIntent.onYesIntent(mockk())
+            every { envelope.session?.attributes } returns mutableMapOf()
+            val response = dummyIntent.onYesIntent(envelope)
+            println("RESPONSE -> $response")
             it("should return default response") {
                 assertEquals(IntentUtil.retryIntent(mutableMapOf()).toJson(),
                         response.toJson())
             }
         }
         on("Stop Intent") {
-            val response = dummyIntent.onStopIntent(mockk())
+            val response = dummyIntent.onStopIntent(envelope)
             it("should return default response") {
                 assertEquals(IntentUtil.goodbye().toJson(),
                         response.toJson())
             }
         }
         on("Cancel Intent") {
-            val response = dummyIntent.onCancelIntent(mockk())
+            val response = dummyIntent.onCancelIntent(envelope)
             it("should return default response") {
                 assertEquals(IntentUtil.finish().toJson(),
                         response.toJson())
             }
         }
         on("Help Intent") {
-            val response = dummyIntent.onHelpIntent(mockk())
+            val response = dummyIntent.onHelpIntent(envelope)
             it("should return default response") {
                 assertEquals(IntentUtil.helpIntent().toJson(),
                         response.toJson())
@@ -213,28 +216,40 @@ class IntentHandlerTest : Spek({
 
         on("lockIntentContext") {
             it("should return true") {
-                dummyIntent.lockIntentContext()
-                assertEquals(dummyIntent.sessionAttributes[SpeechHandler.INTENT_CONTEXT], "DummyIntent")
+                val response = mutableMapOf<String, Any>()
+                every { envelope.session } returns session
+                every { envelope.session?.attributes } returns response
+                dummyIntent.lockIntentContext(envelope)
+                assertEquals(response[SpeechHandler.INTENT_CONTEXT], "DummyIntent")
             }
         }
 
         on("unlockIntentContext") {
             it("should return default response") {
-                dummyIntent.unlockIntentContext()
-                assertNull(dummyIntent.sessionAttributes[SpeechHandler.INTENT_CONTEXT])
+                val response = mutableMapOf<String, Any>()
+                every { envelope.session } returns session
+                every { envelope.session?.attributes } returns response
+                dummyIntent.unlockIntentContext(envelope)
+                assertNull(response[SpeechHandler.INTENT_CONTEXT])
             }
         }
 
         on("isIntentContextLocked") {
             it("should return true") {
-                dummyIntent.lockIntentContext()
-                val response = dummyIntent.isIntentContextLocked()
-                assertTrue { response }
+                val response = mutableMapOf<String, Any>()
+                every { envelope.session } returns session
+                every { envelope.session?.attributes } returns response
+                dummyIntent.lockIntentContext(envelope)
+                val isIntentContextLocked = dummyIntent.isIntentContextLocked(envelope)
+                assertTrue { isIntentContextLocked }
             }
             it("should return false") {
-                dummyIntent.unlockIntentContext()
-                val response = dummyIntent.isIntentContextLocked()
-                assertFalse { response }
+                val response = mutableMapOf<String, Any>()
+                every { envelope.session } returns session
+                every { envelope.session?.attributes } returns response
+                dummyIntent.unlockIntentContext(envelope)
+                val isIntentContextLocked = dummyIntent.isIntentContextLocked(envelope)
+                assertFalse { isIntentContextLocked }
             }
         }
         on("hasDisplay") {
@@ -248,12 +263,12 @@ class IntentHandlerTest : Spek({
             every { supportedInterfaces.display } returns display
             it("should have display interface") {
                 every { context.hasDisplay() } returns true
-                val response = dummyIntent.hasDisplay()
+                val response = dummyIntent.hasDisplay(envelope)
                 assertTrue { response }
             }
             it("should not have display interface") {
                 every { context.hasDisplay() } returns false
-                val response = dummyIntent.hasDisplay()
+                val response = dummyIntent.hasDisplay(envelope)
                 assertFalse { response }
             }
         }

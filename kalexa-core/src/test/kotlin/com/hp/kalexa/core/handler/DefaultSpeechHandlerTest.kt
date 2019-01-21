@@ -32,7 +32,7 @@ object DefaultSpeechHandlerTest : Spek({
         every { Util.getIntentPackage() } returns "com.hp.kalexa.core.model"
 
         describe("When handleSessionStarted method is called") {
-            val envelope = mockk<AlexaRequestEnvelope<SessionStartedRequest>>()
+            val envelope = mockk<AlexaRequest<SessionStartedRequest>>()
             it("should return an empty response") {
                 val alexaResponse = defaultSpeechHandler.handleSessionStartedRequest(envelope)
                 assertEquals(AlexaResponse.emptyResponse().toJson(), alexaResponse.toJson())
@@ -40,7 +40,7 @@ object DefaultSpeechHandlerTest : Spek({
         }
 
         describe("When handleLaunchRequest method is called") {
-            val customLaunchRequestEnvelope = mockk<AlexaRequestEnvelope<LaunchRequest>>()
+            val customLaunchRequestEnvelope = mockk<AlexaRequest<LaunchRequest>>()
             beforeGroup {
                 val session = mockk<Session>()
                 val context = mockk<Context>()
@@ -82,7 +82,7 @@ object DefaultSpeechHandlerTest : Spek({
         }
 
         describe("When handleIntentRequest method is called") {
-            val intentRequestEnvelope = mockk<AlexaRequestEnvelope<IntentRequest>>()
+            val intentRequestEnvelope = mockk<AlexaRequest<IntentRequest>>()
             lateinit var fakeIntent: IntentHandler
             lateinit var context: Context
             lateinit var request: IntentRequest
@@ -242,7 +242,7 @@ object DefaultSpeechHandlerTest : Spek({
             }
         }
         describe("When handleElementSelectedRequest method is called") {
-            val elementSelectedRequest = mockk<AlexaRequestEnvelope<ElementSelectedRequest>>()
+            val elementSelectedRequest = mockk<AlexaRequest<ElementSelectedRequest>>()
             lateinit var fakeIntent: IntentHandler
             lateinit var context: Context
             lateinit var request: ElementSelectedRequest
@@ -288,7 +288,7 @@ object DefaultSpeechHandlerTest : Spek({
             }
         }
         describe("When handleConnectionsResponseRequest method is called") {
-            val connectionsResponseRequest = mockk<AlexaRequestEnvelope<ConnectionsResponseRequest>>()
+            val connectionsResponseRequest = mockk<AlexaRequest<ConnectionsResponseRequest>>()
             lateinit var fakeIntent: IntentHandler
             lateinit var context: Context
             lateinit var request: ConnectionsResponseRequest
@@ -328,7 +328,7 @@ object DefaultSpeechHandlerTest : Spek({
         }
 
         describe("When handleConnectionsRequest method is called") {
-            val connectionsRequest = mockk<AlexaRequestEnvelope<ConnectionsRequest>>()
+            val connectionsRequest = mockk<AlexaRequest<ConnectionsRequest>>()
             lateinit var fakeIntent: IntentHandler
             lateinit var context: Context
             lateinit var request: ConnectionsRequest
@@ -380,7 +380,7 @@ object DefaultSpeechHandlerTest : Spek({
             }
         }
         describe("When handleListCreatedEventRequest method is called") {
-            val listCreatedEventRequest = mockk<AlexaRequestEnvelope<ListCreatedEventRequest>>()
+            val listCreatedEventRequest = mockk<AlexaRequest<ListCreatedEventRequest>>()
             lateinit var fakeIntent: IntentHandler
             lateinit var context: Context
             lateinit var request: ListCreatedEventRequest
@@ -432,7 +432,7 @@ object DefaultSpeechHandlerTest : Spek({
             }
         }
         describe("When handleListUpdatedEventRequest method is called") {
-            val listUpdatedEventRequest = mockk<AlexaRequestEnvelope<ListUpdatedEventRequest>>()
+            val listUpdatedEventRequest = mockk<AlexaRequest<ListUpdatedEventRequest>>()
             lateinit var fakeIntent: IntentHandler
             lateinit var context: Context
             lateinit var request: ListUpdatedEventRequest
@@ -484,7 +484,7 @@ object DefaultSpeechHandlerTest : Spek({
             }
         }
         describe("When handleListDeletedEventRequest method is called") {
-            val listDeletedEventRequest = mockk<AlexaRequestEnvelope<ListDeletedEventRequest>>()
+            val listDeletedEventRequest = mockk<AlexaRequest<ListDeletedEventRequest>>()
             lateinit var fakeIntent: IntentHandler
             lateinit var context: Context
             lateinit var request: ListDeletedEventRequest
@@ -536,7 +536,7 @@ object DefaultSpeechHandlerTest : Spek({
             }
         }
         describe("When handleListItemsCreatedEventRequest method is called") {
-            val listItemsCreatedEventRequest = mockk<AlexaRequestEnvelope<ListItemsCreatedEventRequest>>()
+            val listItemsCreatedEventRequest = mockk<AlexaRequest<ListItemsCreatedEventRequest>>()
             lateinit var fakeIntent: IntentHandler
             lateinit var context: Context
             lateinit var request: ListItemsCreatedEventRequest
@@ -588,7 +588,7 @@ object DefaultSpeechHandlerTest : Spek({
             }
         }
         describe("When handleListItemsUpdatedEventRequest method is called") {
-            val listItemsUpdatedEventRequest = mockk<AlexaRequestEnvelope<ListItemsUpdatedEventRequest>>()
+            val listItemsUpdatedEventRequest = mockk<AlexaRequest<ListItemsUpdatedEventRequest>>()
             lateinit var fakeIntent: IntentHandler
             lateinit var context: Context
             lateinit var request: ListItemsUpdatedEventRequest
@@ -640,7 +640,7 @@ object DefaultSpeechHandlerTest : Spek({
             }
         }
         describe("When handleListItemsDeletedEventRequest method is called") {
-            val listItemsDeletedEventRequest = mockk<AlexaRequestEnvelope<ListItemsDeletedEventRequest>>()
+            val listItemsDeletedEventRequest = mockk<AlexaRequest<ListItemsDeletedEventRequest>>()
             lateinit var fakeIntent: IntentHandler
             lateinit var context: Context
             lateinit var request: ListItemsDeletedEventRequest

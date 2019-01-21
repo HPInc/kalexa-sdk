@@ -15,8 +15,8 @@ import com.hp.kalexa.model.response.alexaResponse
 @FulfillerIntent
 @HelpIntent
 @ListEvents
-class FakeIntent : IntentHandler() {
-    override fun onLaunchIntent(request: LaunchRequest): AlexaResponse {
+class FakeIntent : IntentHandler {
+    override fun onLaunchIntent(alexaRequest: AlexaRequest<LaunchRequest>): AlexaResponse {
         return alexaResponse {
             response {
                 speech {
@@ -26,7 +26,7 @@ class FakeIntent : IntentHandler() {
         }
     }
 
-    override fun onIntentRequest(request: IntentRequest): AlexaResponse {
+    override fun onIntentRequest(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
         return alexaResponse {
             response {
                 speech {
@@ -40,11 +40,11 @@ class FakeIntent : IntentHandler() {
         }
     }
 
-    override fun onHelpIntent(request: IntentRequest): AlexaResponse {
+    override fun onHelpIntent(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
         return alexaResponse { response { speech { "This is a help response" } } }
     }
 
-    override fun onFallbackIntent(request: IntentRequest): AlexaResponse {
+    override fun onFallbackIntent(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
         return alexaResponse { response { speech { "This is a fallback response" } } }
     }
 
@@ -52,7 +52,7 @@ class FakeIntent : IntentHandler() {
         return alexaResponse { response { speech { "This is a unknown intent context response" } } }
     }
 
-    override fun onConnectionsRequest(request: ConnectionsRequest): AlexaResponse {
+    override fun onConnectionsRequest(alexaRequest: AlexaRequest<ConnectionsRequest>): AlexaResponse {
         return alexaResponse {
             response {
                 speech { "This is a onConnectionsRequest from FakeIntent" }
@@ -60,27 +60,27 @@ class FakeIntent : IntentHandler() {
         }
     }
 
-    override fun onListItemsUpdatedEventRequest(request: ListItemsUpdatedEventRequest): AlexaResponse {
+    override fun onListItemsUpdatedEventRequest(alexaRequest: AlexaRequest<ListItemsUpdatedEventRequest>): AlexaResponse {
         return alexaResponse { response { speech { "This is a ListItemsUpdatedEventRequest response" } } }
     }
 
-    override fun onListItemsDeletedEventRequest(request: ListItemsDeletedEventRequest): AlexaResponse {
+    override fun onListItemsDeletedEventRequest(alexaRequest: AlexaRequest<ListItemsDeletedEventRequest>): AlexaResponse {
         return alexaResponse { response { speech { "This is a ListItemsDeletedEventRequest response" } } }
     }
 
-    override fun onListItemsCreatedEventRequest(request: ListItemsCreatedEventRequest): AlexaResponse {
+    override fun onListItemsCreatedEventRequest(alexaRequest: AlexaRequest<ListItemsCreatedEventRequest>): AlexaResponse {
         return alexaResponse { response { speech { "This is a ListItemsCreatedEventRequest response" } } }
     }
 
-    override fun onListDeletedEventRequest(request: ListDeletedEventRequest): AlexaResponse {
+    override fun onListDeletedEventRequest(alexaRequest: AlexaRequest<ListDeletedEventRequest>): AlexaResponse {
         return alexaResponse { response { speech { "This is a ListDeletedEventRequest response" } } }
     }
 
-    override fun onListUpdatedEventRequest(request: ListUpdatedEventRequest): AlexaResponse {
+    override fun onListUpdatedEventRequest(alexaRequest: AlexaRequest<ListUpdatedEventRequest>): AlexaResponse {
         return alexaResponse { response { speech { "This is a ListUpdatedEventRequest response" } } }
     }
 
-    override fun onListCreatedEventRequest(request: ListCreatedEventRequest): AlexaResponse {
+    override fun onListCreatedEventRequest(alexaRequest: AlexaRequest<ListCreatedEventRequest>): AlexaResponse {
         return alexaResponse { response { speech { "This is a ListCreatedEventRequest response" } } }
     }
 }
