@@ -120,7 +120,6 @@ class IntentHandlerTest : Spek({
         on("Yes Intent") {
             every { envelope.session?.attributes } returns mutableMapOf()
             val response = dummyIntent.onYesIntent(envelope)
-            println("RESPONSE -> $response")
             it("should return default response") {
                 assertEquals(IntentUtil.retryIntent(mutableMapOf()).toJson(),
                         response.toJson())

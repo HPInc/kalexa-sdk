@@ -12,12 +12,12 @@ import com.hp.kalexa.core.util.IntentUtil.unsupportedIntent
 import com.hp.kalexa.core.util.Util.findAnnotatedClasses
 import com.hp.kalexa.core.util.Util.getIntentPackage
 import com.hp.kalexa.core.util.Util.loadIntentClassesFromPackage
+import com.hp.kalexa.model.exception.IllegalAnnotationException
 import com.hp.kalexa.model.extension.attribute
 import com.hp.kalexa.model.request.*
 import com.hp.kalexa.model.request.event.*
 import com.hp.kalexa.model.response.AlexaResponse
 import com.hp.kalexa.model.response.alexaResponse
-import com.sun.xml.internal.txw2.IllegalAnnotationException
 import org.apache.logging.log4j.LogManager
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
@@ -32,24 +32,25 @@ open class DefaultSpeechHandler : SpeechHandler {
     private val intentClasses: Map<Set<String>, KClass<out IntentHandler>> = mapClassesWithIntentAnnotation()
     private val intentHandlerInstances = mutableMapOf<KClass<out Any>, IntentHandler>()
 
-    override fun handleSessionStartedRequest(alexaRequest: AlexaRequest<SessionStartedRequest>) = AlexaResponse.emptyResponse()
+    override fun handleSessionStartedRequest(alexaRequest: AlexaRequest<SessionStartedRequest>) =
+        AlexaResponse.emptyResponse()
 
     override fun handleLaunchRequest(alexaRequest: AlexaRequest<LaunchRequest>): AlexaResponse {
         logger.info("=========================== LaunchRequest =========================")
         logger.debug("Looking for LaunchIntent intents in ${getIntentPackage()}")
         return intentHandlerInstances[LaunchIntent::class]?.onLaunchIntent(alexaRequest)
-                ?: run {
-                    return lookupIntentHandlerFromAnnotation<LaunchIntent> { result ->
-                        when (result) {
-                            is Result.Content -> {
-                                val alexaResponse = result.intentHandler.onLaunchIntent(alexaRequest)
-                                generateResponse(result.intentHandler, alexaRequest, alexaResponse)
-                            }
-                            is Result.None -> defaultGreetings()
-                            is Result.Error -> throw result.exception
+            ?: run {
+                return lookupIntentHandlerFromAnnotation<LaunchIntent> { result ->
+                    when (result) {
+                        is Result.Content -> {
+                            val alexaResponse = result.intentHandler.onLaunchIntent(alexaRequest)
+                            generateResponse(result.intentHandler, alexaRequest, alexaResponse)
                         }
+                        is Result.None -> defaultGreetings()
+                        is Result.Error -> throw result.exception
                     }
                 }
+            }
     }
 
     override fun handleIntentRequest(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
@@ -77,70 +78,76 @@ open class DefaultSpeechHandler : SpeechHandler {
     private fun fallbackIntent(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
         logger.info("=========================== Fallback Intent =========================")
         return intentHandlerInstances[FallbackIntent::class]?.onFallbackIntent(alexaRequest)
-                ?: run {
-                    return lookupIntentHandlerFromAnnotation<FallbackIntent> { result ->
-                        when (result) {
-                            is Result.Content -> result.intentHandler.onFallbackIntent(alexaRequest)
-                            is Result.None -> unsupportedIntent()
-                            is Result.Error -> throw result.exception
-                        }
+            ?: run {
+                return lookupIntentHandlerFromAnnotation<FallbackIntent> { result ->
+                    when (result) {
+                        is Result.Content -> result.intentHandler.onFallbackIntent(alexaRequest)
+                        is Result.None -> unsupportedIntent()
+                        is Result.Error -> throw result.exception
                     }
                 }
+            }
     }
 
     private fun helpIntent(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
         logger.info("=========================== Help Intent =========================")
         return intentHandlerInstances[HelpIntent::class]?.onHelpIntent(alexaRequest)
-                ?: run {
-                    return lookupIntentHandlerFromAnnotation<HelpIntent> { result ->
-                        when (result) {
-                            is Result.Content -> result.intentHandler.onHelpIntent(alexaRequest)
-                            is Result.None -> helpIntent()
-                            is Result.Error -> throw result.exception
-                        }
+            ?: run {
+                return lookupIntentHandlerFromAnnotation<HelpIntent> { result ->
+                    when (result) {
+                        is Result.Content -> result.intentHandler.onHelpIntent(alexaRequest)
+                        is Result.None -> helpIntent()
+                        is Result.Error -> throw result.exception
                     }
                 }
+            }
     }
 
-    private fun unknownIntentContext(builtInIntent: BuiltInIntent, alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
+    private fun unknownIntentContext(
+        builtInIntent: BuiltInIntent,
+        alexaRequest: AlexaRequest<IntentRequest>
+    ): AlexaResponse {
         return intentHandlerInstances[RecoverIntentContext::class]?.onUnknownIntentContext(builtInIntent)
-                ?: run {
-                    return lookupIntentHandlerFromAnnotation<RecoverIntentContext> { result ->
-                        when (result) {
-                            is Result.Content -> result.intentHandler.onUnknownIntentContext(builtInIntent)
-                            is Result.None -> defaultBuiltInResponse(builtInIntent, alexaRequest.session?.attributes)
-                            is Result.Error -> throw result.exception
-                        }
+            ?: run {
+                return lookupIntentHandlerFromAnnotation<RecoverIntentContext> { result ->
+                    when (result) {
+                        is Result.Content -> result.intentHandler.onUnknownIntentContext(builtInIntent)
+                        is Result.None -> defaultBuiltInResponse(builtInIntent, alexaRequest.session?.attributes)
+                        is Result.Error -> throw result.exception
                     }
                 }
+            }
     }
 
     /**
-     * Executes builtInIntent method of the Intent Handler instance from the given intent name.
+     * Executes builtInIntent callback method from the Intent Handler instance from the given intent name.
      * First it looks in the IntentClasses, if the class is not found then it looks in the intent handler instances.
      * This way every built in method works without the need of annotating a class as @Intent if the class is annotated
      * with @LaunchIntent or any other type.
      * @param intentName Intent to have the onBuiltInIntent method executed
      * @param builtInIntent the BuiltInIntent itself
      */
-    private fun builtInIntent(intentName: String, builtInIntent: BuiltInIntent, alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
+    private fun builtInIntent(
+        intentName: String,
+        builtInIntent: BuiltInIntent,
+        alexaRequest: AlexaRequest<IntentRequest>
+    ): AlexaResponse {
         val intentHandler = getIntentHandlerOf(intentName) ?: run {
             intentHandlerInstances.keys
-                    .find { it.simpleName == intentName }
-                    ?.cast<KClass<out IntentHandler>?>()
-                    ?.let { getIntentHandlerOf(it) }
-                    ?: run { return unknownIntentException(intentName) }
+                .find { it.simpleName == intentName }
+                ?.cast<KClass<out IntentHandler>?>()
+                ?.let { getIntentHandlerOf(it) }
+                ?: run { return unknownIntentException(intentName) }
         }
         val alexaResponse = intentHandler.onBuiltInIntent(builtInIntent, alexaRequest)
         return generateResponse(intentHandler, alexaRequest, alexaResponse)
 
     }
 
-
     override fun handleElementSelectedRequest(alexaRequest: AlexaRequest<ElementSelectedRequest>): AlexaResponse {
         logger.info("=========================== ElementSelectedRequest =========================")
         val intentName = alexaRequest.session?.attribute<String>(INTENT_CONTEXT)
-                ?: alexaRequest.request.token.split("\\|".toRegex()).first()
+            ?: alexaRequest.request.token.split("\\|".toRegex()).first()
         val intentHandler = getIntentHandlerOf(intentName)
         return intentHandler?.let {
             val alexaResponse = it.onElementSelected(alexaRequest)
@@ -193,85 +200,85 @@ open class DefaultSpeechHandler : SpeechHandler {
     override fun handleListCreatedEventRequest(alexaRequest: AlexaRequest<ListCreatedEventRequest>): AlexaResponse {
         logger.info("=========================== ListCreatedEventRequest =========================")
         return intentHandlerInstances[ListEvents::class]?.onListCreatedEventRequest(alexaRequest)
-                ?: run {
-                    return lookupIntentHandlerFromAnnotation<ListEvents> { result ->
-                        when (result) {
-                            is Result.Content -> result.intentHandler.onListCreatedEventRequest(alexaRequest)
-                            is Result.None -> unsupportedIntent()
-                            is Result.Error -> throw result.exception
-                        }
+            ?: run {
+                return lookupIntentHandlerFromAnnotation<ListEvents> { result ->
+                    when (result) {
+                        is Result.Content -> result.intentHandler.onListCreatedEventRequest(alexaRequest)
+                        is Result.None -> unsupportedIntent()
+                        is Result.Error -> throw result.exception
                     }
                 }
+            }
     }
 
     override fun handleListUpdatedEventRequest(alexaRequest: AlexaRequest<ListUpdatedEventRequest>): AlexaResponse {
         logger.info("=========================== ListUpdatedEventRequest =========================")
         return intentHandlerInstances[ListEvents::class]?.onListUpdatedEventRequest(alexaRequest)
-                ?: run {
-                    return lookupIntentHandlerFromAnnotation<ListEvents> { result ->
-                        when (result) {
-                            is Result.Content -> result.intentHandler.onListUpdatedEventRequest(alexaRequest)
-                            is Result.None -> unsupportedIntent()
-                            is Result.Error -> throw result.exception
-                        }
+            ?: run {
+                return lookupIntentHandlerFromAnnotation<ListEvents> { result ->
+                    when (result) {
+                        is Result.Content -> result.intentHandler.onListUpdatedEventRequest(alexaRequest)
+                        is Result.None -> unsupportedIntent()
+                        is Result.Error -> throw result.exception
                     }
                 }
+            }
     }
 
     override fun handleListDeletedEventRequest(alexaRequest: AlexaRequest<ListDeletedEventRequest>): AlexaResponse {
         logger.info("=========================== ListDeletedEventRequest =========================")
         return intentHandlerInstances[ListEvents::class]?.onListDeletedEventRequest(alexaRequest)
-                ?: run {
-                    return lookupIntentHandlerFromAnnotation<ListEvents> { result ->
-                        when (result) {
-                            is Result.Content -> result.intentHandler.onListDeletedEventRequest(alexaRequest)
-                            is Result.None -> unsupportedIntent()
-                            is Result.Error -> throw result.exception
-                        }
+            ?: run {
+                return lookupIntentHandlerFromAnnotation<ListEvents> { result ->
+                    when (result) {
+                        is Result.Content -> result.intentHandler.onListDeletedEventRequest(alexaRequest)
+                        is Result.None -> unsupportedIntent()
+                        is Result.Error -> throw result.exception
                     }
                 }
+            }
     }
 
     override fun handleListItemsCreatedEventRequest(alexaRequest: AlexaRequest<ListItemsCreatedEventRequest>): AlexaResponse {
         logger.info("=========================== ListItemsCreatedEventRequest =========================")
         return intentHandlerInstances[ListEvents::class]?.onListItemsCreatedEventRequest(alexaRequest)
-                ?: run {
-                    return lookupIntentHandlerFromAnnotation<ListEvents> { result ->
-                        when (result) {
-                            is Result.Content -> result.intentHandler.onListItemsCreatedEventRequest(alexaRequest)
-                            is Result.None -> unsupportedIntent()
-                            is Result.Error -> throw result.exception
-                        }
+            ?: run {
+                return lookupIntentHandlerFromAnnotation<ListEvents> { result ->
+                    when (result) {
+                        is Result.Content -> result.intentHandler.onListItemsCreatedEventRequest(alexaRequest)
+                        is Result.None -> unsupportedIntent()
+                        is Result.Error -> throw result.exception
                     }
                 }
+            }
     }
 
     override fun handleListItemsUpdatedEventRequest(alexaRequest: AlexaRequest<ListItemsUpdatedEventRequest>): AlexaResponse {
         logger.info("=========================== ListItemsUpdatedEventRequest =========================")
         return intentHandlerInstances[ListEvents::class]?.onListItemsUpdatedEventRequest(alexaRequest)
-                ?: run {
-                    return lookupIntentHandlerFromAnnotation<ListEvents> { result ->
-                        when (result) {
-                            is Result.Content -> result.intentHandler.onListItemsUpdatedEventRequest(alexaRequest)
-                            is Result.None -> unsupportedIntent()
-                            is Result.Error -> throw result.exception
-                        }
+            ?: run {
+                return lookupIntentHandlerFromAnnotation<ListEvents> { result ->
+                    when (result) {
+                        is Result.Content -> result.intentHandler.onListItemsUpdatedEventRequest(alexaRequest)
+                        is Result.None -> unsupportedIntent()
+                        is Result.Error -> throw result.exception
                     }
                 }
+            }
     }
 
     override fun handleListItemsDeletedEventRequest(alexaRequest: AlexaRequest<ListItemsDeletedEventRequest>): AlexaResponse {
         logger.info("=========================== ListItemsDeletedEventRequest =========================")
         return intentHandlerInstances[ListEvents::class]?.onListItemsDeletedEventRequest(alexaRequest)
-                ?: run {
-                    return lookupIntentHandlerFromAnnotation<ListEvents> { result ->
-                        when (result) {
-                            is Result.Content -> result.intentHandler.onListItemsDeletedEventRequest(alexaRequest)
-                            is Result.None -> unsupportedIntent()
-                            is Result.Error -> throw result.exception
-                        }
+            ?: run {
+                return lookupIntentHandlerFromAnnotation<ListEvents> { result ->
+                    when (result) {
+                        is Result.Content -> result.intentHandler.onListItemsDeletedEventRequest(alexaRequest)
+                        is Result.None -> unsupportedIntent()
+                        is Result.Error -> throw result.exception
                     }
                 }
+            }
     }
 
     private inline fun <reified T : Annotation> lookupIntentHandlerFromAnnotation(callback: (Result) -> AlexaResponse): AlexaResponse {
@@ -291,17 +298,28 @@ open class DefaultSpeechHandler : SpeechHandler {
         }
     }
 
-    private fun generateResponse(intentHandler: IntentHandler, request: AlexaRequest<*>, alexaResponse: AlexaResponse): AlexaResponse {
+    private fun generateResponse(
+        intentHandler: IntentHandler,
+        request: AlexaRequest<*>,
+        alexaResponse: AlexaResponse
+    ): AlexaResponse {
         return if (intentHandler.isIntentContextLocked(request) && alexaResponse.sessionAttributes[INTENT_CONTEXT] == null) {
-            alexaResponse.copy(sessionAttributes = alexaResponse.sessionAttributes + Pair(INTENT_CONTEXT, intentHandler::class.java.simpleName))
+            alexaResponse.copy(
+                sessionAttributes = alexaResponse.sessionAttributes + Pair(
+                    INTENT_CONTEXT,
+                    intentHandler::class.java.simpleName
+                )
+            )
         } else {
             alexaResponse
         }
     }
 
     private fun unknownIntentException(intentName: String): AlexaResponse {
-        throw IllegalArgumentException("It was not possible to map intent $intentName to a Class. " +
-                "Please make sure that the Intent class is annotated with @Intent or check intent package location")
+        throw IllegalArgumentException(
+            "It was not possible to map intent $intentName to a Class. " +
+                    "Please make sure that the Intent class is annotated with @Intent or check intent package location"
+        )
     }
 
     private fun illegalAnnotationArgument(annotation: String): IllegalAnnotationException {
@@ -311,8 +329,8 @@ open class DefaultSpeechHandler : SpeechHandler {
     @Suppress("unchecked_cast")
     private fun loadIntentHandlerClasses(): List<KClass<out IntentHandler>> {
         return loadIntentClassesFromPackage()
-                .filter { clazz -> clazz.superclasses.find { superclazz -> superclazz.simpleName == IntentHandler::class.java.simpleName } != null }
-                .cast()
+            .filter { clazz -> clazz.superclasses.find { superclazz -> superclazz.simpleName == IntentHandler::class.java.simpleName } != null }
+            .cast()
     }
 
     /**
@@ -321,13 +339,12 @@ open class DefaultSpeechHandler : SpeechHandler {
      */
     private fun mapClassesWithIntentAnnotation(): Map<Set<String>, KClass<out IntentHandler>> {
         return findAnnotatedClasses(intentHandlerClasses, Intent::class)
-                .map { annotatedClass ->
-                    val intent = annotatedClass.findAnnotation<Intent>()!!
-                    val mapsTo = setOf(*intent.mapsTo, annotatedClass.simpleName!!)
-                    mapsTo to annotatedClass
-                }.toMap()
+            .map { annotatedClass ->
+                val intent = annotatedClass.findAnnotation<Intent>()!!
+                val mapsTo = setOf(*intent.mapsTo, annotatedClass.simpleName!!)
+                mapsTo to annotatedClass
+            }.toMap()
     }
-
 
     /**
      * Retrieves an instance of a given intentName, if no such instance exists, it will be created, put into the hash
@@ -343,12 +360,9 @@ open class DefaultSpeechHandler : SpeechHandler {
         }
     }
 
-
     private fun getIntentHandlerOf(kclazz: KClass<out IntentHandler>) =
-            intentHandlerInstances.getOrPut(kclazz) { kclazz.createInstance() }
+        intentHandlerInstances.getOrPut(kclazz) { kclazz.createInstance() }
 
-
-    // Sealed
     sealed class Result {
         object None : Result()
         data class Error(val exception: Exception) : Result()

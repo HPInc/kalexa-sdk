@@ -8,10 +8,10 @@ import com.hp.kalexa.core.util.IntentUtil
 import com.hp.kalexa.core.util.Util
 import com.hp.kalexa.model.Context
 import com.hp.kalexa.model.Session
+import com.hp.kalexa.model.exception.IllegalAnnotationException
 import com.hp.kalexa.model.request.*
 import com.hp.kalexa.model.request.event.*
 import com.hp.kalexa.model.response.AlexaResponse
-import com.sun.xml.internal.txw2.IllegalAnnotationException
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.objectMockk
