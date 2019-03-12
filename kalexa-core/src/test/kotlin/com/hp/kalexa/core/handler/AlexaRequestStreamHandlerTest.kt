@@ -1,6 +1,7 @@
 package com.hp.kalexa.core.handler
 
 import com.amazonaws.services.lambda.runtime.Context
+import com.hp.kalexa.core.handler.lambda.AlexaRequestStreamHandler
 import io.mockk.every
 import io.mockk.mockk
 import org.jetbrains.spek.api.Spek

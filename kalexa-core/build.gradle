@@ -1,9 +1,29 @@
+apply plugin: 'org.junit.platform.gradle.plugin'
+
+junitPlatform {
+    filters {
+        engines {
+            include 'spek'
+        }
+    }
+}
 
 dependencies {
-    compile "com.amazonaws:aws-lambda-java-core:1.1.0"
-    compile group: 'com.amazonaws', name: 'aws-lambda-java-log4j', version: '1.0.0'
+    api project(':kalexa-model')
+
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    compile "com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_version"
+
+    compile "com.amazonaws:aws-lambda-java-core:1.2.0"
+    compile group: 'com.amazonaws', name: 'aws-lambda-java-log4j2', version: '1.1.0'
+
     compile group: 'commons-io', name: 'commons-io', version: '2.5'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.1'
     compile group: 'com.google.guava', name: 'guava', version: '27.0.1-jre'
-    compile project(':kalexa-model')
+
+    testCompile "org.jetbrains.spek:spek-api:$spek_version"
+    testCompile "org.jetbrains.spek:spek-junit-platform-engine:$spek_version"
+    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    testCompile "io.mockk:mockk:$mockk_version"
 }

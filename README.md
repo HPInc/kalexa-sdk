@@ -3,8 +3,6 @@ The Kalexa SDK is a very simple library that makes easier for developers to work
 This library aims to simplify the skill creation without writing boiler-plate code.
 It's also possible to use Java and add kalexa-sdk as dependency.
 
-Currently the SDK is optimized to Amazon Lambda, but it's also compatible to an instance on EC2, locally or any other host.
-
 ## Usage:
 You need to add this lib as dependency in your project.
 Since it is not in a repository yet, you need to clone this repo and build it:
@@ -23,7 +21,12 @@ Then, in your project:
 ##### Gradle
 add dependency to build.gradle
 ```
-compile "com.hp.kalexa:kalexa-sdk:0.0.1" 
+compile "com.hp.kalexa:kalexa-sdk:0.1.0" 
+```
+or
+```
+compile "com.hp.kalexa:kalexa-core:0.1.0" 
+compile "com.hp.kalexa:kalexa-model:0.1.0" 
 ```
 
 ##### Maven
@@ -32,43 +35,60 @@ add dependency to pom.xml
 <dependency>
     <groupId>com.hp.kalexa</groupId>
     <artifactId>kalexa-sdk</artifactId>
-    <version>0.0.1</version>
+    <version>0.1.0</version>
+</dependency>
+```
+or
+```
+<dependency>
+    <groupId>com.hp.kalexa</groupId>
+    <artifactId>kalexa-core</artifactId>
+    <version>0.1.0</version>
+</dependency>
+<dependency>
+    <groupId>com.hp.kalexa</groupId>
+    <artifactId>kalexa-model</artifactId>
+    <version>0.1.0</version>
 </dependency>
 ```
 
 ## HOW TO USE IT
 
 #### Entry Point:
-You just need to extend class ``AlexaRequestStreamHandler``and nothing more.
+For `AWS Lambda`: You just need to extend class `AlexaRequestStreamHandler`.
+
+For `Web Application`: You may instantiate `AlexaWebApplication` class and call `process` method which takes the payload as `String`or `ByteArray` as parameter.
 
 ##### Environment variables:
-There are three environment variables that you must export on your lambda before running the skill.
+You must export three environment variables on your application before running the skill.
 
 `APPLICATION_ID`:  Corresponds to the skill id that you created on the Alexa Skills Kit Developer Console.
 
 `INTENT_PACKAGE`: Package location where your Intent classes are located.
 
-`SKILL_NAME`: Skill name
+`SKILL_NAME`: The name of the skill.
 
 #### Create Intent:
 
-There are three simple things that you need to follow in order to fulfill the requirements to run your skill:
+There are three simple things that you need to follow in order to fulfill the requirements of creating an Intent:
 
-- Extend `IntentHandler` abstract class
+- Implement `IntentHandler` interface.
 - Override `IntentHandler` callback methods. 
-- Annotate with the supported annotations: `LaunchIntent`,  `RecoverIntentContext`,  `FallbackIntent`,  `HelpIntent`,  `Intent`, `FulfillerIntent`.
+- Annotate with the desired annotation: `Intent`, `LaunchIntent`, `FallbackIntent`,  `HelpIntent`, `FulfillerIntent`.
 
-So, the way it works is basically a combination of `IntentHandler` callbacks and the Annotations. 
+So, the way it works is basically a combination of the `IntentHandler` callbacks and the Annotations. 
 
 For instance: When annotating a class with`@LaunchIntent` you must override the callback method `onLaunchIntent`. 
-So when a SessionRequest comes from Alexa to your skill, `Kalexa-SDK` will map the Launch Request to the class annotated with `@LaunchRequest` and `onLaunchIntent` of that class will be called.
+So when a SessionRequest comes from Alexa to your skill, `Kalexa-SDK` will map the Launch Request to the class annotated with `@LaunchRequest` and the `onLaunchIntent` of that class will be called.
+
+##### Supported Annotations and callback methods:
 
  - `@LaunchIntent` and  `onLaunchIntent` - Handles the LaunchIntent event.
- - `@RecoverIntentContext` and `onUnknownIntentContext` - When a BuiltInIntent comes without a context, you may annotate with `@RecoverIntentContext` to handle the error and respond gracefully.
- - `@FallbackIntent` and `onFallbackIntent` - Handles the AMAZON.FallbackIntent
+ - `@Intent` and `onIntentRequest` - Probably the most used annotation since it's where you will handle all of your Intents. When an Intent is mapped to your Intent class the `onIntentRequest` will be called. You can also map more than one Intent per class using the `mapsTo` annotation property.
+ - `@FallbackIntent` and `onFallbackIntent` - Handles the BuiltIn intent AMAZON.FallbackIntent
  - `@HelpIntent` and `onHelpIntent` - Handles the AMAZON.HelpIntent
  - `@FulfillerIntent` and `onConnectionsRequest` - Handles the Skill request from another existent Skill. 
- - `@Intent` and `onIntentRequest` - Probably the most important annotation since it's where you will handle all of your Intents. It's basically the entry point of Intents. When an Intent is mapped to your Intent class the `onIntentRequest` will be called. You can also map more than one Intent to an Intent class using the `mapsTo` annotation property.
+ - `@RecoverIntentContext` and `onUnknownIntentContext` - When a BuiltInIntent comes without a context, you may annotate with `@RecoverIntentContext` to handle the error and respond gracefully.
 
 Kotlin Code:
  ```

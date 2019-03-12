@@ -1,0 +1,3 @@
+dependencies {
+    compile project(':kalexa-core'), project(':kalexa-model')
+}

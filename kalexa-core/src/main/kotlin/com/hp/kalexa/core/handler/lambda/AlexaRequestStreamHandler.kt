@@ -1,7 +1,10 @@
-package com.hp.kalexa.core.handler
+package com.hp.kalexa.core.handler.lambda
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler
+import com.hp.kalexa.core.handler.DefaultSpeechHandler
+import com.hp.kalexa.core.handler.SpeechHandler
+import com.hp.kalexa.core.handler.SpeechRequestHandler
 import org.apache.commons.io.IOUtils
 import org.apache.logging.log4j.LogManager
 import java.io.InputStream

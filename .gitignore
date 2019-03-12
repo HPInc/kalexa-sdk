@@ -1,0 +1,6 @@
+.idea/
+kalexa-core/build/
+kalexa-model/build/
+kalexa-sdk/build/
+*.iml
+out
