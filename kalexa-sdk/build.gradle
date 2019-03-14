@@ -1,3 +1,8 @@
+/*
+ * Copyright 2018 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
 dependencies {
     compile project(':kalexa-core'), project(':kalexa-model')
 }

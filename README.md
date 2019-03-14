@@ -263,4 +263,4 @@ UI directives: `RenderTemplateDirective` and populate with its Templates.
 
 ## License
 
-MIT -- see [LICENSE](LICENSE)
+MIT -- see [LICENSE](LICENSE.md)

@@ -1,3 +1,8 @@
+/*
+ * Copyright 2018 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
 package com.hp.kalexa.model.payload
 
 import com.fasterxml.jackson.annotation.JsonCreator

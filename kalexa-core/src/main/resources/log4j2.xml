@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2018 HP Development Company, L.P.
+  ~ SPDX-License-Identifier: MIT
+  -->
+
 <Configuration packages="com.amazonaws.services.lambda.runtime.log4j2">
     <Appenders>
         <Lambda name="Lambda">

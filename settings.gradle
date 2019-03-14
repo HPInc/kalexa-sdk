@@ -1,1 +1,6 @@
+/*
+ * Copyright 2018 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
 include 'kalexa-core', 'kalexa-model', 'kalexa-sdk'
