@@ -10,4 +10,3 @@ import com.hp.kalexa.model.interfaces.video.VideoItem
 
 @JsonTypeName("VideoApp.Launch")
 class LaunchDirective(var videoItem: VideoItem? = null) : Directive()
-

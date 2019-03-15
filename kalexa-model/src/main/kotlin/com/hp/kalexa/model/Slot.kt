@@ -8,10 +8,12 @@ package com.hp.kalexa.model
 import com.hp.kalexa.model.entityresolution.Resolutions
 import com.hp.kalexa.model.entityresolution.StatusCode
 
-data class Slot(val name: String,
-                val value: String? = null,
-                val confirmationStatus: SlotConfirmationStatus,
-                val resolutions: Resolutions? = null) {
+data class Slot(
+    val name: String,
+    val value: String? = null,
+    val confirmationStatus: SlotConfirmationStatus,
+    val resolutions: Resolutions? = null
+) {
 
     /**
      * Read a given slot and returns the value only if ER matches successfully
@@ -25,4 +27,3 @@ data class Slot(val name: String,
         }
     }
 }
-

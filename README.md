@@ -1,3 +1,6 @@
+[![Kotlin](https://img.shields.io/badge/Kotlin-1.3.21-blue.svg)](https://kotlinlang.org/)
+[![ktlint](https://img.shields.io/badge/code%20style-%E2%9D%A4-FF4081.svg)](https://ktlint.github.io/)
+
 # kalexa-sdk
 The Kalexa SDK is a very simple library that makes easier for developers to work with Amazon Alexa Skill using Kotlin Language.
 This library aims to simplify the skill creation without writing boiler-plate code.

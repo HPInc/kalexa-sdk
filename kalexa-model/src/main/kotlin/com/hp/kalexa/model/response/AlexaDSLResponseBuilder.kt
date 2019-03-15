@@ -6,9 +6,29 @@
 package com.hp.kalexa.model.response
 
 import com.hp.kalexa.model.ConnectionsStatus
-import com.hp.kalexa.model.directive.*
-import com.hp.kalexa.model.interfaces.display.*
+import com.hp.kalexa.model.directive.ConfirmIntentDirective
+import com.hp.kalexa.model.directive.ConfirmSlotDirective
+import com.hp.kalexa.model.directive.DelegateDirective
+import com.hp.kalexa.model.directive.Directive
+import com.hp.kalexa.model.directive.HintDirective
+import com.hp.kalexa.model.directive.LaunchDirective
+import com.hp.kalexa.model.directive.RenderTemplateDirective
+import com.hp.kalexa.model.directive.SendRequestDirective
+import com.hp.kalexa.model.directive.SendResponseDirective
+import com.hp.kalexa.model.interfaces.display.BodyTemplate1
+import com.hp.kalexa.model.interfaces.display.BodyTemplate2
+import com.hp.kalexa.model.interfaces.display.BodyTemplate3
+import com.hp.kalexa.model.interfaces.display.BodyTemplate6
+import com.hp.kalexa.model.interfaces.display.BodyTemplate7
 import com.hp.kalexa.model.interfaces.display.Image
+import com.hp.kalexa.model.interfaces.display.ListItem
+import com.hp.kalexa.model.interfaces.display.ListTemplate1
+import com.hp.kalexa.model.interfaces.display.ListTemplate2
+import com.hp.kalexa.model.interfaces.display.PlainText
+import com.hp.kalexa.model.interfaces.display.PlainTextHint
+import com.hp.kalexa.model.interfaces.display.RichText
+import com.hp.kalexa.model.interfaces.display.Template
+import com.hp.kalexa.model.interfaces.display.TextContent
 import com.hp.kalexa.model.interfaces.video.VideoItem
 import com.hp.kalexa.model.payload.NameType
 import com.hp.kalexa.model.payload.Payload
@@ -17,13 +37,18 @@ import com.hp.kalexa.model.payload.print.PrintImageRequest
 import com.hp.kalexa.model.payload.print.PrintPDFRequest
 import com.hp.kalexa.model.payload.print.PrintWebPageRequest
 import com.hp.kalexa.model.response.annotation.AlexaResponseDsl
-import com.hp.kalexa.model.ui.*
+import com.hp.kalexa.model.ui.Card
+import com.hp.kalexa.model.ui.OutputSpeech
+import com.hp.kalexa.model.ui.PlainTextOutputSpeech
+import com.hp.kalexa.model.ui.Reprompt
+import com.hp.kalexa.model.ui.SimpleCard
+import com.hp.kalexa.model.ui.SsmlOutputSpeech
+import com.hp.kalexa.model.ui.StandardCard
 
 fun alexaResponse(block: AlexaDSLResponseBuilder.() -> Unit): AlexaResponse = AlexaDSLResponseBuilder().apply(block).build()
 fun textContent(block: (TextContent.() -> Unit)) = TextContent().apply(block)
 fun plainText(block: (PlainText.() -> String)) = PlainText().apply { text = block() }
 fun richText(block: (RichText.() -> String)) = RichText().apply { text = block() }
-
 
 @AlexaResponseDsl
 class AlexaDSLResponseBuilder {
@@ -88,7 +113,6 @@ class ResponseBuilder {
         speechletResponse.directives = directives
         speechletResponse.shouldEndSession = shouldEndSession
         return speechletResponse
-
     }
 }
 
@@ -278,7 +302,6 @@ class Directives : ArrayList<Directive>() {
 
         fun build(): SendResponseDirective = SendResponseDirective(status, payload)
     }
-
 
     @AlexaResponseDsl
     class ConnectionsStatusBuilder {

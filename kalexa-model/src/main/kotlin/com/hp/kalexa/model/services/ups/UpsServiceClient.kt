@@ -105,5 +105,4 @@ class UpsServiceClient(private val client: ApiClient = ApiClient()) : UpsService
     companion object {
         internal const val API_ENDPOINT = "https://api.amazonalexa.com"
     }
-
 }

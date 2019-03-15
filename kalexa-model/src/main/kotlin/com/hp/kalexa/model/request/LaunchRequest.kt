@@ -10,7 +10,8 @@ import com.hp.kalexa.model.json.LocalDateTimeDeserializer
 import java.time.LocalDateTime
 
 class LaunchRequest(
-        requestId: String,
-        locale: String,
-        @JsonDeserialize(using = LocalDateTimeDeserializer::class)
-        timestamp: LocalDateTime) : Request(requestId, locale, timestamp)
+    requestId: String,
+    locale: String,
+    @JsonDeserialize(using = LocalDateTimeDeserializer::class)
+    timestamp: LocalDateTime
+) : Request(requestId, locale, timestamp)

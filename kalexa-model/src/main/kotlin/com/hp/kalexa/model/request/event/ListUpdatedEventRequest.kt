@@ -14,12 +14,13 @@ import java.time.LocalDateTime
 
 @JsonTypeName("AlexaHouseholdListEvent.ListUpdated")
 class ListUpdatedEventRequest(
-        requestId: String,
-        locale: String = "",
-        @JsonDeserialize(using = LocalDateTimeDeserializer::class)
-        timestamp: LocalDateTime,
-        @JsonDeserialize(using = LocalDateTimeDeserializer::class)
-        eventCreationTime: LocalDateTime,
-        @JsonDeserialize(using = LocalDateTimeDeserializer::class)
-        eventPublishingTime: LocalDateTime,
-        var body: ListBody) : EventRequest(requestId, locale, timestamp, eventCreationTime, eventPublishingTime)
+    requestId: String,
+    locale: String = "",
+    @JsonDeserialize(using = LocalDateTimeDeserializer::class)
+    timestamp: LocalDateTime,
+    @JsonDeserialize(using = LocalDateTimeDeserializer::class)
+    eventCreationTime: LocalDateTime,
+    @JsonDeserialize(using = LocalDateTimeDeserializer::class)
+    eventPublishingTime: LocalDateTime,
+    var body: ListBody
+) : EventRequest(requestId, locale, timestamp, eventCreationTime, eventPublishingTime)

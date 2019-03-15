@@ -10,4 +10,3 @@ import com.hp.kalexa.model.Intent
 
 @JsonTypeName("Dialog.ConfirmIntent")
 data class ConfirmIntentDirective(val updatedIntent: Intent? = null) : Directive()
-

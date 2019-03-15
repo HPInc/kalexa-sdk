@@ -21,10 +21,11 @@ import com.hp.kalexa.model.payload.print.PrintWebPageRequest
         JsonSubTypes.Type(value = PrintPDFRequest::class, name = "PrintPDFRequest"),
         JsonSubTypes.Type(value = PrintImageRequest::class, name = "PrintImageRequest"))
 abstract class Payload(
-        @field:JsonProperty("@version")
-        val version: String,
-        @field:JsonProperty("context")
-        val context: Context? = null) {
+    @field:JsonProperty("@version")
+    val version: String,
+    @field:JsonProperty("context")
+    val context: Context? = null
+) {
 
     companion object {
         inline fun <reified T : Payload> newRequest(block: T.() -> Unit): Payload {

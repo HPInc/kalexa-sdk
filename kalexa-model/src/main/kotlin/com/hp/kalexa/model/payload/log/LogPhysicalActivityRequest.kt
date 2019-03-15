@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonTypeName
 import com.hp.kalexa.model.payload.Payload
 
-//class PhysicalActivity(var description: String = "",
+// class PhysicalActivity(var description: String = "",
 //                       @JsonSerialize(using = LocalDateTimeSerializer::class)
 //                       var startTime: LocalDateTime = LocalDateTime.now(),
 //                       var duration: Float = 0.0f,
@@ -31,11 +31,12 @@ import com.hp.kalexa.model.payload.Payload
 //        fun distance(distance: Float) = apply { this.distance = distance }
 //        fun build() = PhysicalActivity(description, startTime, duration, distance)
 //    }
-//}
+// }
 
 @JsonTypeName("LogPhysicalActivityRequest")
 class LogPhysicalActivityRequest(
 //        @JsonProperty("PhysicalActitivy")
 //        val physicalActivity: PhysicalActivity,
-        @JsonProperty("@version")
-        version: String = "1.0") : Payload(version)
+    @JsonProperty("@version")
+    version: String = "1.0"
+) : Payload(version)

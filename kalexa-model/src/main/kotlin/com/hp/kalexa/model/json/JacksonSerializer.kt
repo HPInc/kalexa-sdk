@@ -37,7 +37,6 @@ object JacksonSerializer {
         } catch (e: IOException) {
             throw KalexaSDKException("Something went wrong while serializing an object", e)
         }
-
     }
 
     fun <T> serialize(`object`: T, outputStream: OutputStream) {
@@ -46,7 +45,6 @@ object JacksonSerializer {
         } catch (e: IOException) {
             throw KalexaSDKException("Something went wrong while serializing an object")
         }
-
     }
 
     fun <T> deserialize(s: String, aClass: Class<T>): T {

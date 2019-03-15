@@ -29,4 +29,3 @@ enum class IntentConfirmationStatus(private val value: String) {
         }
     }
 }
-

@@ -3,19 +3,19 @@
  * SPDX-License-Identifier: MIT
  */
 
-//package com.hp.kalexa.core
+// package com.hp.kalexa.core
 //
-//import com.google.common.reflect.ClassPath
-//import com.hp.kalexa.core.annotation.Intent
-//import com.hp.kalexa.core.intent.IntentHandler
-//import com.hp.kalexa.core.util.Util
-//import kotlin.reflect.KClass
-//import kotlin.reflect.full.declaredFunctions
-//import kotlin.reflect.full.findAnnotation
-//import kotlin.reflect.full.superclasses
+// import com.google.common.reflect.ClassPath
+// import com.hp.kalexa.core.annotation.Intent
+// import com.hp.kalexa.core.intent.IntentHandler
+// import com.hp.kalexa.core.util.Util
+// import kotlin.reflect.KClass
+// import kotlin.reflect.full.declaredFunctions
+// import kotlin.reflect.full.findAnnotation
+// import kotlin.reflect.full.superclasses
 //
 //
-//fun main(args: Array<String>) {
+// fun main(args: Array<String>) {
 //    val classes = ClassPath.from(Thread.currentThread().contextClassLoader).getTopLevelClasses("com.hp.kalexa.core.model")
 //    val klazzes = classes.map { it.load().kotlin }
 //            .filter { it.superclasses.find { it.simpleName == IntentHandler::class.java.simpleName } != null }
@@ -31,4 +31,4 @@
 //                }
 //            }.flatten()
 //    println(klazzes + intentsAnnotationPairList)
-//}
+// }

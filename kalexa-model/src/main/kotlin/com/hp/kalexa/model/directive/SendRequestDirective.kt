@@ -11,6 +11,7 @@ import com.hp.kalexa.model.payload.Payload
 
 @JsonTypeName("Connections.SendRequest")
 class SendRequestDirective(
-        val name: NameType,
-        val payload: Payload,
-        val token: String) : Directive()
+    val name: NameType,
+    val payload: Payload,
+    val token: String
+) : Directive()

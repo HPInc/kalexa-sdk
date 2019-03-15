@@ -23,4 +23,3 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
         JsonSubTypes.Type(value = SendResponseDirective::class, name = "Connections.SendResponse"),
         JsonSubTypes.Type(value = ConfirmIntentDirective::class, name = "Dialog.ConfirmIntent"))
 abstract class Directive
-

@@ -16,7 +16,15 @@ import com.hp.kalexa.model.interfaces.display.PlainTextHint
 import com.hp.kalexa.model.interfaces.display.Template
 import com.hp.kalexa.model.interfaces.video.Metadata
 import com.hp.kalexa.model.interfaces.video.VideoItem
-import com.hp.kalexa.model.ui.*
+import com.hp.kalexa.model.ui.AskForPermissionsConsentCard
+import com.hp.kalexa.model.ui.Card
+import com.hp.kalexa.model.ui.LinkAccountCard
+import com.hp.kalexa.model.ui.OutputSpeech
+import com.hp.kalexa.model.ui.PlainTextOutputSpeech
+import com.hp.kalexa.model.ui.Reprompt
+import com.hp.kalexa.model.ui.SimpleCard
+import com.hp.kalexa.model.ui.SsmlOutputSpeech
+import com.hp.kalexa.model.ui.StandardCard
 
 data class AlexaResponse(
     val response: Response = Response(),

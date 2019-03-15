@@ -42,5 +42,4 @@ class DeviceAddressServiceClient(private val client: ApiClient = ApiClient()) : 
     companion object {
         internal const val API_ENDPOINT = "https://api.amazonalexa.com"
     }
-
 }

@@ -12,12 +12,12 @@ import com.hp.kalexa.model.interfaces.geolocation.Geolocation
 import com.hp.kalexa.model.interfaces.video.VideoApp
 
 data class SupportedInterfaces(
-        @JsonProperty("AudioPlayer")
-        val audioPlayer: AudioPlayer? = null,
-        @JsonProperty("Display")
-        val display: Display? = null,
-        @JsonProperty("VideoApp")
-        val videoApp: VideoApp? = null,
-        @JsonProperty("Geolocation")
-        val geolocation: Geolocation? = null
+    @JsonProperty("AudioPlayer")
+    val audioPlayer: AudioPlayer? = null,
+    @JsonProperty("Display")
+    val display: Display? = null,
+    @JsonProperty("VideoApp")
+    val videoApp: VideoApp? = null,
+    @JsonProperty("Geolocation")
+    val geolocation: Geolocation? = null
 )

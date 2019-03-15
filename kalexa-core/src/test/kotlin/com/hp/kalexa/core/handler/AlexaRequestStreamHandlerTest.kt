@@ -38,7 +38,5 @@ object AlexaRequestStreamHandlerTest : Spek({
                 assertEquals(expectedMsg, outputStream.toString())
             }
         }
-
-
     }
 })

@@ -31,4 +31,3 @@ enum class ListItemState(private val value: String) {
         }
     }
 }
-

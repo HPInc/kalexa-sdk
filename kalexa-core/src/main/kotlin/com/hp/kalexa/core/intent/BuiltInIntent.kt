@@ -5,7 +5,6 @@
 
 package com.hp.kalexa.core.intent
 
-
 enum class BuiltInIntent(val rawValue: String) {
     CANCEL_INTENT("AMAZON.CancelIntent"),
     HELP_INTENT("AMAZON.HelpIntent"),
@@ -34,5 +33,4 @@ enum class BuiltInIntent(val rawValue: String) {
             return BuiltInIntent.values().find { it.toString() == intent }
         }
     }
-
 }

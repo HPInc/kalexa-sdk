@@ -10,4 +10,3 @@ import com.hp.kalexa.model.Intent
 
 @JsonTypeName("Dialog.Delegate")
 data class DelegateDirective(val updatedIntent: Intent? = null) : Directive()
-

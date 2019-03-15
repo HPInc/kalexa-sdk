@@ -7,7 +7,6 @@ package com.hp.kalexa.model
 
 import com.fasterxml.jackson.annotation.JsonCreator
 
-
 enum class PermissionStatus(private val value: String) {
 
     GRANTED("GRANTED"),

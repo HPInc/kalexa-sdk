@@ -5,7 +5,13 @@
 
 package com.hp.kalexa.core.handler
 
-import com.hp.kalexa.core.annotation.*
+import com.hp.kalexa.core.annotation.FallbackIntent
+import com.hp.kalexa.core.annotation.FulfillerIntent
+import com.hp.kalexa.core.annotation.HelpIntent
+import com.hp.kalexa.core.annotation.Intent
+import com.hp.kalexa.core.annotation.LaunchIntent
+import com.hp.kalexa.core.annotation.ListEvents
+import com.hp.kalexa.core.annotation.RecoverIntentContext
 import com.hp.kalexa.core.extension.cast
 import com.hp.kalexa.core.handler.SpeechHandler.Companion.INTENT_CONTEXT
 import com.hp.kalexa.core.intent.BuiltInIntent
@@ -19,8 +25,20 @@ import com.hp.kalexa.core.util.Util.getIntentPackage
 import com.hp.kalexa.core.util.Util.loadIntentClassesFromPackage
 import com.hp.kalexa.model.exception.IllegalAnnotationException
 import com.hp.kalexa.model.extension.attribute
-import com.hp.kalexa.model.request.*
-import com.hp.kalexa.model.request.event.*
+import com.hp.kalexa.model.request.AlexaRequest
+import com.hp.kalexa.model.request.ConnectionsRequest
+import com.hp.kalexa.model.request.ConnectionsResponseRequest
+import com.hp.kalexa.model.request.ElementSelectedRequest
+import com.hp.kalexa.model.request.IntentRequest
+import com.hp.kalexa.model.request.LaunchRequest
+import com.hp.kalexa.model.request.SessionEndedRequest
+import com.hp.kalexa.model.request.SessionStartedRequest
+import com.hp.kalexa.model.request.event.ListCreatedEventRequest
+import com.hp.kalexa.model.request.event.ListDeletedEventRequest
+import com.hp.kalexa.model.request.event.ListItemsCreatedEventRequest
+import com.hp.kalexa.model.request.event.ListItemsDeletedEventRequest
+import com.hp.kalexa.model.request.event.ListItemsUpdatedEventRequest
+import com.hp.kalexa.model.request.event.ListUpdatedEventRequest
 import com.hp.kalexa.model.response.AlexaResponse
 import com.hp.kalexa.model.response.alexaResponse
 import org.apache.logging.log4j.LogManager
@@ -28,7 +46,6 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.superclasses
-
 
 open class DefaultSpeechHandler : SpeechHandler {
     private val logger = LogManager.getLogger(DefaultSpeechHandler::class.java)
@@ -146,7 +163,6 @@ open class DefaultSpeechHandler : SpeechHandler {
         }
         val alexaResponse = intentHandler.onBuiltInIntent(builtInIntent, alexaRequest)
         return generateResponse(intentHandler, alexaRequest, alexaResponse)
-
     }
 
     override fun handleElementSelectedRequest(alexaRequest: AlexaRequest<ElementSelectedRequest>): AlexaResponse {

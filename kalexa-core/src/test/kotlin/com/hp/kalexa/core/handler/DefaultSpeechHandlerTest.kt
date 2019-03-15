@@ -5,7 +5,12 @@
 
 package com.hp.kalexa.core.handler
 
-import com.hp.kalexa.core.annotation.*
+import com.hp.kalexa.core.annotation.FallbackIntent
+import com.hp.kalexa.core.annotation.FulfillerIntent
+import com.hp.kalexa.core.annotation.HelpIntent
+import com.hp.kalexa.core.annotation.LaunchIntent
+import com.hp.kalexa.core.annotation.ListEvents
+import com.hp.kalexa.core.annotation.RecoverIntentContext
 import com.hp.kalexa.core.intent.BuiltInIntent
 import com.hp.kalexa.core.intent.IntentHandler
 import com.hp.kalexa.core.model.FakeIntent
@@ -14,12 +19,23 @@ import com.hp.kalexa.core.util.Util
 import com.hp.kalexa.model.Context
 import com.hp.kalexa.model.Session
 import com.hp.kalexa.model.exception.IllegalAnnotationException
-import com.hp.kalexa.model.request.*
-import com.hp.kalexa.model.request.event.*
+import com.hp.kalexa.model.request.AlexaRequest
+import com.hp.kalexa.model.request.ConnectionsRequest
+import com.hp.kalexa.model.request.ConnectionsResponseRequest
+import com.hp.kalexa.model.request.ElementSelectedRequest
+import com.hp.kalexa.model.request.IntentRequest
+import com.hp.kalexa.model.request.LaunchRequest
+import com.hp.kalexa.model.request.SessionStartedRequest
+import com.hp.kalexa.model.request.event.ListCreatedEventRequest
+import com.hp.kalexa.model.request.event.ListDeletedEventRequest
+import com.hp.kalexa.model.request.event.ListItemsCreatedEventRequest
+import com.hp.kalexa.model.request.event.ListItemsDeletedEventRequest
+import com.hp.kalexa.model.request.event.ListItemsUpdatedEventRequest
+import com.hp.kalexa.model.request.event.ListUpdatedEventRequest
 import com.hp.kalexa.model.response.AlexaResponse
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.objectMockk
+import io.mockk.mockkObject
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.context
 import org.jetbrains.spek.api.dsl.describe
@@ -33,7 +49,7 @@ object DefaultSpeechHandlerTest : Spek({
 
     describe("a Default speech handler class") {
         val defaultSpeechHandler by memoized { DefaultSpeechHandler() }
-        objectMockk(Util).mock()
+        mockkObject(Util)
         every { Util.getIntentPackage() } returns "com.hp.kalexa.core.model"
 
         describe("When handleSessionStarted method is called") {
@@ -113,8 +129,7 @@ object DefaultSpeechHandlerTest : Spek({
                     every { intentRequestEnvelope.request.intent.name } returns "FakeIntent"
                     it("should call onIntentRequest method") {
                         val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
-                        assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a hello from FakeIntent"},"card":{"type":"Simple","title":"Hello world","content":"This is a content coming from FakeIntent"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}"""
-                                , response.toJson())
+                        assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a hello from FakeIntent"},"card":{"type":"Simple","title":"Hello world","content":"This is a content coming from FakeIntent"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""", response.toJson())
                     }
                 }
                 on("Non existent Custom Intent") {

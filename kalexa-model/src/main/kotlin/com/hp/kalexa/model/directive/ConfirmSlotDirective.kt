@@ -10,6 +10,6 @@ import com.hp.kalexa.model.Intent
 
 @JsonTypeName("Dialog.ConfirmSlot")
 data class ConfirmSlotDirective(
-        val updatedIntent: Intent? = null,
-        val slotToConfirm: String? = null) : Directive()
-
+    val updatedIntent: Intent? = null,
+    val slotToConfirm: String? = null
+) : Directive()

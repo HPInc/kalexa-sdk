@@ -7,7 +7,6 @@ package com.hp.kalexa.model.services.ups
 
 import com.fasterxml.jackson.annotation.JsonCreator
 
-
 enum class DistanceUnit(private val value: String) {
 
     METRIC("METRIC"),

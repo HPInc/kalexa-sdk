@@ -9,7 +9,12 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.hp.kalexa.model.json.LocalDateTimeDeserializer
-import com.hp.kalexa.model.request.event.*
+import com.hp.kalexa.model.request.event.ListCreatedEventRequest
+import com.hp.kalexa.model.request.event.ListDeletedEventRequest
+import com.hp.kalexa.model.request.event.ListItemsCreatedEventRequest
+import com.hp.kalexa.model.request.event.ListItemsDeletedEventRequest
+import com.hp.kalexa.model.request.event.ListItemsUpdatedEventRequest
+import com.hp.kalexa.model.request.event.ListUpdatedEventRequest
 import java.time.LocalDateTime
 
 @JsonTypeInfo(
@@ -24,11 +29,12 @@ import java.time.LocalDateTime
         JsonSubTypes.Type(value = ListItemsUpdatedEventRequest::class, name = "AlexaHouseholdListEvent.ItemsUpdated"),
         JsonSubTypes.Type(value = ListItemsDeletedEventRequest::class, name = "AlexaHouseholdListEvent.ItemsDeleted"))
 abstract class EventRequest(
-        requestId: String,
-        locale: String = "",
-        @JsonDeserialize(using = LocalDateTimeDeserializer::class)
-        timestamp: LocalDateTime,
-        @JsonDeserialize(using = LocalDateTimeDeserializer::class)
-        val eventCreationTime: LocalDateTime,
-        @JsonDeserialize(using = LocalDateTimeDeserializer::class)
-        val eventPublishingTime: LocalDateTime) : Request(requestId, locale, timestamp)
+    requestId: String,
+    locale: String = "",
+    @JsonDeserialize(using = LocalDateTimeDeserializer::class)
+    timestamp: LocalDateTime,
+    @JsonDeserialize(using = LocalDateTimeDeserializer::class)
+    val eventCreationTime: LocalDateTime,
+    @JsonDeserialize(using = LocalDateTimeDeserializer::class)
+    val eventPublishingTime: LocalDateTime
+) : Request(requestId, locale, timestamp)

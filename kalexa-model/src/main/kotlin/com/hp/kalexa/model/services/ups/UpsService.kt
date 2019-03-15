@@ -7,7 +7,6 @@ package com.hp.kalexa.model.services.ups
 
 import com.hp.kalexa.model.services.ServiceException
 
-
 interface UpsService {
     @Throws(ServiceException::class)
     fun getProfileEmail(token: String): String

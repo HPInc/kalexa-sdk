@@ -10,5 +10,6 @@ import com.hp.kalexa.model.Intent
 
 @JsonTypeName("Dialog.ElicitSlot")
 class ElicitSlotDirective(
-        val updatedIntent: Intent? = null,
-        val slotToElicit: String? = null) : Directive()
+    val updatedIntent: Intent? = null,
+    val slotToElicit: String? = null
+) : Directive()

@@ -10,9 +10,10 @@ import com.hp.kalexa.model.json.LocalDateTimeDeserializer
 import java.time.LocalDateTime
 
 class SessionEndedRequest(
-        requestId: String,
-        locale: String,
-        @JsonDeserialize(using = LocalDateTimeDeserializer::class)
-        timestamp: LocalDateTime,
-        val reason: SessionEndedReason?,
-        val error: SessionEndedError?) : Request(requestId, locale, timestamp)
+    requestId: String,
+    locale: String,
+    @JsonDeserialize(using = LocalDateTimeDeserializer::class)
+    timestamp: LocalDateTime,
+    val reason: SessionEndedReason?,
+    val error: SessionEndedError?
+) : Request(requestId, locale, timestamp)

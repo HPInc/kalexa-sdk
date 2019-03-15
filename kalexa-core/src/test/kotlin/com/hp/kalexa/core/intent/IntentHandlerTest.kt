@@ -8,7 +8,11 @@ package com.hp.kalexa.core.intent
 import com.hp.kalexa.core.handler.SpeechHandler
 import com.hp.kalexa.core.model.DummyIntent
 import com.hp.kalexa.core.util.IntentUtil
-import com.hp.kalexa.model.*
+import com.hp.kalexa.model.Context
+import com.hp.kalexa.model.Device
+import com.hp.kalexa.model.Session
+import com.hp.kalexa.model.SupportedInterfaces
+import com.hp.kalexa.model.System
 import com.hp.kalexa.model.interfaces.display.Display
 import com.hp.kalexa.model.request.AlexaRequest
 import com.hp.kalexa.model.request.IntentRequest
@@ -88,31 +92,26 @@ class IntentHandlerTest : Spek({
                 val response = dummyIntent.onBuiltInIntent(BuiltInIntent.YES_INTENT, envelope)
                 assertEquals(IntentUtil.retryIntent(mutableMapOf("retry" to 1)).toJson(),
                         response.toJson())
-
             }
             it("should call onNoIntent default response callback through onBuiltInIntent ") {
                 val response = dummyIntent.onBuiltInIntent(BuiltInIntent.NO_INTENT, envelope)
                 assertEquals(IntentUtil.finish().toJson(),
                         response.toJson())
-
             }
             it("should call onStopIntent default response callback through onBuiltInIntent ") {
                 val response = dummyIntent.onBuiltInIntent(BuiltInIntent.STOP_INTENT, envelope)
                 assertEquals(IntentUtil.goodbye().toJson(),
                         response.toJson())
-
             }
             it("should call onHelpIntent default response callback through onBuiltInIntent ") {
                 val response = dummyIntent.onBuiltInIntent(BuiltInIntent.HELP_INTENT, envelope)
                 assertEquals(IntentUtil.helpIntent().toJson(),
                         response.toJson())
-
             }
             it("should call onCancelIntent default response callback through onBuiltInIntent ") {
                 val response = dummyIntent.onBuiltInIntent(BuiltInIntent.CANCEL_INTENT, envelope)
                 assertEquals(IntentUtil.finish().toJson(),
                         response.toJson())
-
             }
         }
         on("No Intent") {

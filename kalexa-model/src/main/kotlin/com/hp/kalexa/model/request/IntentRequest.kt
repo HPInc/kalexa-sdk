@@ -12,10 +12,10 @@ import com.hp.kalexa.model.json.LocalDateTimeDeserializer
 import java.time.LocalDateTime
 
 class IntentRequest(
-        requestId: String,
-        locale: String,
-        @JsonDeserialize(using = LocalDateTimeDeserializer::class)
-        timestamp: LocalDateTime,
-        val intent: Intent,
-        val dialogState: DialogState?) : Request(requestId, locale, timestamp)
-
+    requestId: String,
+    locale: String,
+    @JsonDeserialize(using = LocalDateTimeDeserializer::class)
+    timestamp: LocalDateTime,
+    val intent: Intent,
+    val dialogState: DialogState?
+) : Request(requestId, locale, timestamp)

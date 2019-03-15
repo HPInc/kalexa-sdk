@@ -13,8 +13,18 @@ import com.hp.kalexa.core.util.IntentUtil.helpIntent
 import com.hp.kalexa.core.util.IntentUtil.retryIntent
 import com.hp.kalexa.core.util.IntentUtil.unsupportedIntent
 import com.hp.kalexa.core.util.Util
-import com.hp.kalexa.model.request.*
-import com.hp.kalexa.model.request.event.*
+import com.hp.kalexa.model.request.AlexaRequest
+import com.hp.kalexa.model.request.ConnectionsRequest
+import com.hp.kalexa.model.request.ConnectionsResponseRequest
+import com.hp.kalexa.model.request.ElementSelectedRequest
+import com.hp.kalexa.model.request.IntentRequest
+import com.hp.kalexa.model.request.LaunchRequest
+import com.hp.kalexa.model.request.event.ListCreatedEventRequest
+import com.hp.kalexa.model.request.event.ListDeletedEventRequest
+import com.hp.kalexa.model.request.event.ListItemsCreatedEventRequest
+import com.hp.kalexa.model.request.event.ListItemsDeletedEventRequest
+import com.hp.kalexa.model.request.event.ListItemsUpdatedEventRequest
+import com.hp.kalexa.model.request.event.ListUpdatedEventRequest
 import com.hp.kalexa.model.response.AlexaResponse
 
 interface IntentHandler {
@@ -136,7 +146,6 @@ interface IntentHandler {
 
     fun isIntentContextLocked(alexaRequest: AlexaRequest<*>) = alexaRequest.session?.attributes?.get(INTENT_CONTEXT) != null
 
-
     fun hasDisplay(alexaRequest: AlexaRequest<*>) = alexaRequest.context.hasDisplay()
 
     fun onListItemsUpdatedEventRequest(alexaRequest: AlexaRequest<ListItemsUpdatedEventRequest>): AlexaResponse {
@@ -162,5 +171,4 @@ interface IntentHandler {
     fun onListCreatedEventRequest(alexaRequest: AlexaRequest<ListCreatedEventRequest>): AlexaResponse {
         return AlexaResponse.emptyResponse()
     }
-
 }

@@ -29,4 +29,3 @@ enum class SlotConfirmationStatus(private val value: String) {
         }
     }
 }
-

@@ -15,7 +15,6 @@ import org.apache.logging.log4j.LogManager
 import java.io.InputStream
 import java.io.OutputStream
 
-
 open class AlexaRequestStreamHandler(speechHandler: SpeechHandler = DefaultSpeechHandler()) : RequestStreamHandler {
     private val logger = LogManager.getLogger(AlexaRequestStreamHandler::class.java)
 

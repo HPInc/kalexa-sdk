@@ -7,12 +7,24 @@ package com.hp.kalexa.core.handler
 
 import com.hp.kalexa.core.util.Util
 import com.hp.kalexa.model.json.JacksonSerializer
-import com.hp.kalexa.model.request.*
-import com.hp.kalexa.model.request.event.*
+import com.hp.kalexa.model.request.AlexaRequest
+import com.hp.kalexa.model.request.ConnectionsRequest
+import com.hp.kalexa.model.request.ConnectionsResponseRequest
+import com.hp.kalexa.model.request.ElementSelectedRequest
+import com.hp.kalexa.model.request.IntentRequest
+import com.hp.kalexa.model.request.LaunchRequest
+import com.hp.kalexa.model.request.SessionEndedRequest
+import com.hp.kalexa.model.request.SessionStartedRequest
+import com.hp.kalexa.model.request.event.ListCreatedEventRequest
+import com.hp.kalexa.model.request.event.ListDeletedEventRequest
+import com.hp.kalexa.model.request.event.ListItemsCreatedEventRequest
+import com.hp.kalexa.model.request.event.ListItemsDeletedEventRequest
+import com.hp.kalexa.model.request.event.ListItemsUpdatedEventRequest
+import com.hp.kalexa.model.request.event.ListUpdatedEventRequest
 import com.hp.kalexa.model.response.AlexaResponse
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.objectMockk
+import io.mockk.mockkObject
 import org.apache.logging.log4j.LogManager
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.context
@@ -43,8 +55,8 @@ object SpeechRequestHandlerTest : Spek({
                 every { handleListItemsUpdatedEventRequest(any()) } returns alexaResponse
                 every { handleListItemsDeletedEventRequest(any()) } returns alexaResponse
             }
-            objectMockk(JacksonSerializer).mock()
-            objectMockk(Util).mock()
+            mockkObject(JacksonSerializer)
+            mockkObject(Util)
             lateinit var speechRequestHandler: SpeechRequestHandler
             beforeEachTest {
                 speechRequestHandler = SpeechRequestHandler(speechHandler)
@@ -57,7 +69,12 @@ object SpeechRequestHandlerTest : Spek({
                         every { request } returns mockk<SessionStartedRequest>()
                         every { session?.application?.applicationId } returns "123456"
                     }
-                    every { JacksonSerializer.deserialize(any<ByteArray>(), AlexaRequest::class.java) } returns sessionStartedEnvelope
+                    every {
+                        JacksonSerializer.deserialize(
+                            any<ByteArray>(),
+                            AlexaRequest::class.java
+                        )
+                    } returns sessionStartedEnvelope
                     val expected = "SessionStartedRequest"
                     every { alexaResponse.toJson() } returns expected
                     val response = speechRequestHandler.process("Lorem ipsum dolor sit amet".toByteArray())
@@ -68,7 +85,12 @@ object SpeechRequestHandlerTest : Spek({
                         every { request } returns mockk<LaunchRequest>()
                         every { session?.application?.applicationId } returns "123456"
                     }
-                    every { JacksonSerializer.deserialize(any<ByteArray>(), AlexaRequest::class.java) } returns launchRequestEnvelope
+                    every {
+                        JacksonSerializer.deserialize(
+                            any<ByteArray>(),
+                            AlexaRequest::class.java
+                        )
+                    } returns launchRequestEnvelope
                     val expected = "LaunchRequest"
                     every { alexaResponse.toJson() } returns expected
                     val response = speechRequestHandler.process("Lorem ipsum dolor sit amet".toByteArray())
@@ -79,7 +101,12 @@ object SpeechRequestHandlerTest : Spek({
                         every { request } returns mockk<IntentRequest>()
                         every { session?.application?.applicationId } returns "123456"
                     }
-                    every { JacksonSerializer.deserialize(any<ByteArray>(), AlexaRequest::class.java) } returns intentRequestEnvelope
+                    every {
+                        JacksonSerializer.deserialize(
+                            any<ByteArray>(),
+                            AlexaRequest::class.java
+                        )
+                    } returns intentRequestEnvelope
                     val expected = "IntentRequest"
                     every { alexaResponse.toJson() } returns expected
                     val response = speechRequestHandler.process("Lorem ipsum dolor sit amet".toByteArray())
@@ -90,7 +117,12 @@ object SpeechRequestHandlerTest : Spek({
                         every { request } returns mockk<ConnectionsResponseRequest>()
                         every { session?.application?.applicationId } returns "123456"
                     }
-                    every { JacksonSerializer.deserialize(any<ByteArray>(), AlexaRequest::class.java) } returns connectionsResponseEnvelope
+                    every {
+                        JacksonSerializer.deserialize(
+                            any<ByteArray>(),
+                            AlexaRequest::class.java
+                        )
+                    } returns connectionsResponseEnvelope
                     val expected = "ConnectionsResponseRequest"
                     every { alexaResponse.toJson() } returns expected
                     val response = speechRequestHandler.process("Lorem ipsum dolor sit amet".toByteArray())
@@ -101,7 +133,12 @@ object SpeechRequestHandlerTest : Spek({
                         every { request } returns mockk<ConnectionsRequest>()
                         every { session?.application?.applicationId } returns "123456"
                     }
-                    every { JacksonSerializer.deserialize(any<ByteArray>(), AlexaRequest::class.java) } returns connectionsRequestEnvelope
+                    every {
+                        JacksonSerializer.deserialize(
+                            any<ByteArray>(),
+                            AlexaRequest::class.java
+                        )
+                    } returns connectionsRequestEnvelope
                     val expected = "ConnectionsRequest"
                     every { alexaResponse.toJson() } returns expected
                     val response = speechRequestHandler.process("Lorem ipsum dolor sit amet".toByteArray())
@@ -112,7 +149,12 @@ object SpeechRequestHandlerTest : Spek({
                         every { request } returns mockk<SessionEndedRequest>()
                         every { session?.application?.applicationId } returns "123456"
                     }
-                    every { JacksonSerializer.deserialize(any<ByteArray>(), AlexaRequest::class.java) } returns sessionEndedEnvelope
+                    every {
+                        JacksonSerializer.deserialize(
+                            any<ByteArray>(),
+                            AlexaRequest::class.java
+                        )
+                    } returns sessionEndedEnvelope
                     val expected = "SessionEndedRequest"
                     every { alexaResponse.toJson() } returns expected
                     val response = speechRequestHandler.process("Lorem ipsum dolor sit amet".toByteArray())
@@ -211,7 +253,8 @@ object SpeechRequestHandlerTest : Spek({
             }
         }
         context("When validateApplicationId is called by process method") {
-            val json = "{\"response\":{\"outputSpeech\":{\"type\":\"PlainText\",\"text\":\"Lorem ipsum dolor sit amet\"}}"
+            val json =
+                "{\"response\":{\"outputSpeech\":{\"type\":\"PlainText\",\"text\":\"Lorem ipsum dolor sit amet\"}}"
             val response = mockk<AlexaResponse> {
                 every { toJson() } returns json
             }
@@ -223,8 +266,8 @@ object SpeechRequestHandlerTest : Spek({
             val handler = mockk<SpeechHandler> {
                 every { handleLaunchRequest(requestEnvelope) } returns response
             }
-            objectMockk(JacksonSerializer).mock()
-            objectMockk(Util).mock()
+            mockkObject(JacksonSerializer)
+            mockkObject(Util)
             val speechRequestHandler = SpeechRequestHandler(handler)
 
             on("Application Id in not defined in environment variable") {
@@ -238,7 +281,12 @@ object SpeechRequestHandlerTest : Spek({
                 every { Util.getApplicationID() } returns "123456"
                 it("should process the requestEnvelope without errors") {
                     logger.debug(requestEnvelope.request)
-                    every { JacksonSerializer.deserialize(any<ByteArray>(), AlexaRequest::class.java) } returns requestEnvelope
+                    every {
+                        JacksonSerializer.deserialize(
+                            any<ByteArray>(),
+                            AlexaRequest::class.java
+                        )
+                    } returns requestEnvelope
                     val resp = speechRequestHandler.process("Lorem ipsum dolor sit amet".toByteArray())
                     assertEquals(json, resp)
                 }
@@ -256,7 +304,12 @@ object SpeechRequestHandlerTest : Spek({
                 every { requestEnvelope.context.system.application.applicationId } returns "123456"
                 every { Util.getApplicationID() } returns "123456"
                 it("should process the requestEnvelope without errors") {
-                    every { JacksonSerializer.deserialize(any<ByteArray>(), AlexaRequest::class.java) } returns requestEnvelope
+                    every {
+                        JacksonSerializer.deserialize(
+                            any<ByteArray>(),
+                            AlexaRequest::class.java
+                        )
+                    } returns requestEnvelope
                     val resp = speechRequestHandler.process("Lorem ipsum dolor sit amet".toByteArray())
                     assertEquals(json, resp)
                 }
@@ -275,7 +328,12 @@ object SpeechRequestHandlerTest : Spek({
                 every { requestEnvelope.session?.application?.applicationId } returns null
                 every { requestEnvelope.context.system.application.applicationId } returns null
                 every { Util.getApplicationID() } returns "123456"
-                every { JacksonSerializer.deserialize(any<ByteArray>(), AlexaRequest::class.java) } returns requestEnvelope
+                every {
+                    JacksonSerializer.deserialize(
+                        any<ByteArray>(),
+                        AlexaRequest::class.java
+                    )
+                } returns requestEnvelope
                 it("should throw IllegalArgumentException") {
                     assertFailsWith(exceptionClass = IllegalArgumentException::class) { speechRequestHandler.process("Lorem ipsum dolor sit amet".toByteArray()) }
                 }

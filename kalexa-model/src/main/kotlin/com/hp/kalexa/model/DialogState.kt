@@ -30,4 +30,3 @@ enum class DialogState(private val value: String) {
         }
     }
 }
-

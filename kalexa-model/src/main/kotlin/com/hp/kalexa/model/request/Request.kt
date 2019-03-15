@@ -24,7 +24,9 @@ import java.time.LocalDateTime
         JsonSubTypes.Type(value = ElementSelectedRequest::class, name = "Display.ElementSelected"),
         JsonSubTypes.Type(value = LaunchRequest::class, name = "LaunchRequest"),
         JsonSubTypes.Type(value = EventRequest::class))
-abstract class Request(val requestId: String,
-                       val locale: String,
-                       @JsonDeserialize(using = LocalDateTimeDeserializer::class)
-                       val timestamp: LocalDateTime)
+abstract class Request(
+    val requestId: String,
+    val locale: String,
+    @JsonDeserialize(using = LocalDateTimeDeserializer::class)
+    val timestamp: LocalDateTime
+)

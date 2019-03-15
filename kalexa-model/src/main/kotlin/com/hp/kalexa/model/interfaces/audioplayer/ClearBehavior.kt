@@ -29,4 +29,3 @@ enum class ClearBehavior(private val value: String) {
         }
     }
 }
-

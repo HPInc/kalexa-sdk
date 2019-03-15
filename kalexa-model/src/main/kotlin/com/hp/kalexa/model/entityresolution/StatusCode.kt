@@ -31,4 +31,3 @@ enum class StatusCode(private val value: String) {
         }
     }
 }
-

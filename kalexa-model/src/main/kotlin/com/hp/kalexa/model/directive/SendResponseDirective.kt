@@ -10,5 +10,6 @@ import com.hp.kalexa.model.ConnectionsStatus
 
 @JsonTypeName("Connections.SendResponse")
 class SendResponseDirective(
-        val status: ConnectionsStatus,
-        val payload: Map<String, Any>?) : Directive()
+    val status: ConnectionsStatus,
+    val payload: Map<String, Any>?
+) : Directive()

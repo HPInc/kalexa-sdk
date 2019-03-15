@@ -32,4 +32,3 @@ enum class ImageSize(private val value: String) {
         }
     }
 }
-

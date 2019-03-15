@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 
-
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type", visible = true)
 @JsonSubTypes(
         JsonSubTypes.Type(value = LinkAccountCard::class, name = "LinkAccount"),
@@ -18,7 +17,6 @@ import com.fasterxml.jackson.annotation.JsonTypeName
         JsonSubTypes.Type(value = SimpleCard::class, name = "Simple"))
 abstract class Card
 
-
 @JsonTypeName("LinkAccount")
 class LinkAccountCard : Card()
 
@@ -26,10 +24,14 @@ class LinkAccountCard : Card()
 data class AskForPermissionsConsentCard(val permissions: List<String>? = emptyList()) : Card()
 
 @JsonTypeName("Simple")
-data class SimpleCard(var title: String = "",
-                      var content: String = "") : Card()
+data class SimpleCard(
+    var title: String = "",
+    var content: String = ""
+) : Card()
 
 @JsonTypeName("Standard")
-data class StandardCard(var title: String = "",
-                        var text: String = "",
-                        var image: Image? = null) : Card()
+data class StandardCard(
+    var title: String = "",
+    var text: String = "",
+    var image: Image? = null
+) : Card()
