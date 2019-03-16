@@ -19,7 +19,10 @@ import com.hp.kalexa.model.response.alexaResponse
  */
 object IntentUtil {
 
-    internal fun defaultBuiltInResponse(builtInIntent: BuiltInIntent, attributes: MutableMap<String, Any>?): AlexaResponse {
+    internal fun defaultBuiltInResponse(
+        builtInIntent: BuiltInIntent,
+        attributes: MutableMap<String, Any>?
+    ): AlexaResponse {
         return when (builtInIntent) {
             BuiltInIntent.CANCEL_INTENT -> finish()
             BuiltInIntent.STOP_INTENT -> finish()
@@ -125,14 +128,18 @@ object IntentUtil {
         }
     }
 
-    @Deprecated(message = "This method has been incorporated into Context class.",
-            replaceWith = ReplaceWith(expression = "context.hasDisplay()",
-                    imports = ["com.hp.kalexa.model.Context"]))
+    @Deprecated(
+        message = "This method has been incorporated into Context class.",
+        replaceWith = ReplaceWith(
+            expression = "context.hasDisplay()",
+            imports = ["com.hp.kalexa.model.Context"]
+        )
+    )
     fun hasDisplay(context: Context): Boolean {
         val supportedInterfaces = context.system.device?.supportedInterfaces
         val display = supportedInterfaces?.display
         return display?.templateVersion.equals("1.0") &&
-                display?.markupVersion.equals("1.0")
+            display?.markupVersion.equals("1.0")
     }
 
     /**
@@ -140,9 +147,13 @@ object IntentUtil {
      * @param Slot to be read
      * @return value from the given slot
      */
-    @Deprecated(message = "This method has been incorporated into Slot class.",
-            replaceWith = ReplaceWith(expression = "slot.resolvedValue()",
-                    imports = ["com.hp.kalexa.model.Slot"]))
+    @Deprecated(
+        message = "This method has been incorporated into Slot class.",
+        replaceWith = ReplaceWith(
+            expression = "slot.resolvedValue()",
+            imports = ["com.hp.kalexa.model.Slot"]
+        )
+    )
     fun readSlot(slot: Slot?): String? {
         val resolution = slot?.resolutions?.resolutionsPerAuthority?.first()
         return resolution?.status?.code?.let {

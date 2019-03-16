@@ -67,4 +67,9 @@ class ApiClient {
         val response = connection.inputStream.bufferedReader().use { it.readText() }
         return ApiClientResponse(connection.responseCode, response)
     }
+
+    companion object {
+        val HTTP_OK_CODE = 200
+        val SUCCESS_CODE_RANGE = 200..299
+    }
 }

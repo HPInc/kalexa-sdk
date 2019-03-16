@@ -39,9 +39,9 @@ object JacksonSerializer {
         }
     }
 
-    fun <T> serialize(`object`: T, outputStream: OutputStream) {
+    fun <T> serialize(obj: T, outputStream: OutputStream) {
         try {
-            OBJECT_MAPPER.writeValue(outputStream, `object`)
+            OBJECT_MAPPER.writeValue(outputStream, obj)
         } catch (e: IOException) {
             throw KalexaSDKException("Something went wrong while serializing an object")
         }

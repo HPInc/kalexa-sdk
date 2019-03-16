@@ -33,7 +33,7 @@ data class AlexaResponse(
 ) {
 
     companion object {
-        private val OBJECT_MAPPER = jacksonObjectMapper()
+        private val objectMapper = jacksonObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(DeserializationFeature.READ_ENUMS_USING_TO_STRING, true)
             .setSerializationInclusion(JsonInclude.Include.NON_NULL)
@@ -44,8 +44,8 @@ data class AlexaResponse(
         fun emptyResponse() = AlexaResponse()
     }
 
-    fun toJsonByteArray(): ByteArray = OBJECT_MAPPER.writeValueAsBytes(this)
-    fun toJson(): String = OBJECT_MAPPER.writeValueAsString(this)
+    fun toJsonByteArray(): ByteArray = objectMapper.writeValueAsBytes(this)
+    fun toJson(): String = objectMapper.writeValueAsString(this)
 
     class Builder {
         private var sessionAttributes: Map<String, Any?> = emptyMap()

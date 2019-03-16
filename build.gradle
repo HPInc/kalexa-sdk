@@ -14,16 +14,22 @@ ext {
 buildscript {
     repositories {
         mavenCentral()
+        jcenter()
+        maven {
+            url = 'https://plugins.gradle.org/m2/'
+        }
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.21"
         classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.0'
+        classpath "gradle.plugin.io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.0.0.RC9.2"
     }
 }
 
 subprojects {
     apply plugin: 'kotlin'
     apply plugin: 'maven'
+    apply plugin: 'io.gitlab.arturbosch.detekt'
 
     repositories {
         jcenter()
@@ -53,6 +59,11 @@ subprojects {
         main = "com.github.shyiko.ktlint.Main"
         classpath = configurations.ktlint
         args "-F", "src/**/*.kt"
+    }
+
+    detekt {
+        input = files("src/main/kotlin")
+        filters = ".*/resources/.*,.*/build/.*"
     }
 
     compileKotlin {

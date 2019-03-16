@@ -5,8 +5,7 @@
 
 package com.hp.kalexa.model.services.ups
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.hp.kalexa.model.json.JacksonSerializer
 import com.hp.kalexa.model.services.ApiClient
 import com.hp.kalexa.model.services.ApiClientResponse
 import com.hp.kalexa.model.services.ServiceException
@@ -14,8 +13,6 @@ import com.hp.kalexa.model.services.toTypedObject
 import java.io.IOException
 
 class UpsServiceClient(private val client: ApiClient = ApiClient()) : UpsService {
-    @PublishedApi
-    internal val mapper: ObjectMapper = jacksonObjectMapper()
 
     override fun getProfileEmail(token: String): String {
         val uri = "$API_ENDPOINT/v2/accounts/~current/settings/Profile.email"
@@ -89,14 +86,14 @@ class UpsServiceClient(private val client: ApiClient = ApiClient()) : UpsService
 
     private fun getRequestHeaders(token: String): Map<String, String> {
         return mapOf(
-                "Authorization" to "Bearer $token",
-                "Content-Type" to "application/json"
+            "Authorization" to "Bearer $token",
+            "Content-Type" to "application/json"
         )
     }
 
     private inline fun <reified T> handleResponse(response: ApiClientResponse): T {
-        return if (response.responseCode in 200..299) {
-            mapper.readValue(response.responseBody, T::class.java)
+        return if (response.responseCode in ApiClient.SUCCESS_CODE_RANGE) {
+            JacksonSerializer.deserialize(response.responseBody, T::class.java)
         } else {
             throw ServiceException(response.responseBody)
         }

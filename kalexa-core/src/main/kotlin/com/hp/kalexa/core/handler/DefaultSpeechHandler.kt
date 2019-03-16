@@ -177,6 +177,7 @@ open class DefaultSpeechHandler : SpeechHandler {
     }
 
     override fun handleSessionEndedRequest(alexaRequest: AlexaRequest<SessionEndedRequest>): AlexaResponse {
+        logger.info("=========================== SessionEndedRequest =========================")
         return if (alexaRequest.request.error != null && alexaRequest.request.reason != null) {
             alexaResponse {
                 response {
@@ -195,7 +196,9 @@ open class DefaultSpeechHandler : SpeechHandler {
         }
     }
 
-    override fun handleConnectionsResponseRequest(alexaRequest: AlexaRequest<ConnectionsResponseRequest>): AlexaResponse {
+    override fun handleConnectionsResponseRequest(
+        alexaRequest: AlexaRequest<ConnectionsResponseRequest>
+    ): AlexaResponse {
         logger.info("=========================== Connections.Response =========================")
         val intent = alexaRequest.request.token.split("\\|").first()
         val intentHandler = getIntentHandlerOf(intent)
@@ -260,7 +263,9 @@ open class DefaultSpeechHandler : SpeechHandler {
             }
     }
 
-    override fun handleListItemsCreatedEventRequest(alexaRequest: AlexaRequest<ListItemsCreatedEventRequest>): AlexaResponse {
+    override fun handleListItemsCreatedEventRequest(
+        alexaRequest: AlexaRequest<ListItemsCreatedEventRequest>
+    ): AlexaResponse {
         logger.info("=========================== ListItemsCreatedEventRequest =========================")
         return intentHandlerInstances[ListEvents::class]?.onListItemsCreatedEventRequest(alexaRequest)
             ?: run {
@@ -274,7 +279,9 @@ open class DefaultSpeechHandler : SpeechHandler {
             }
     }
 
-    override fun handleListItemsUpdatedEventRequest(alexaRequest: AlexaRequest<ListItemsUpdatedEventRequest>): AlexaResponse {
+    override fun handleListItemsUpdatedEventRequest(
+        alexaRequest: AlexaRequest<ListItemsUpdatedEventRequest>
+    ): AlexaResponse {
         logger.info("=========================== ListItemsUpdatedEventRequest =========================")
         return intentHandlerInstances[ListEvents::class]?.onListItemsUpdatedEventRequest(alexaRequest)
             ?: run {
@@ -288,7 +295,9 @@ open class DefaultSpeechHandler : SpeechHandler {
             }
     }
 
-    override fun handleListItemsDeletedEventRequest(alexaRequest: AlexaRequest<ListItemsDeletedEventRequest>): AlexaResponse {
+    override fun handleListItemsDeletedEventRequest(
+        alexaRequest: AlexaRequest<ListItemsDeletedEventRequest>
+    ): AlexaResponse {
         logger.info("=========================== ListItemsDeletedEventRequest =========================")
         return intentHandlerInstances[ListEvents::class]?.onListItemsDeletedEventRequest(alexaRequest)
             ?: run {
@@ -302,7 +311,9 @@ open class DefaultSpeechHandler : SpeechHandler {
             }
     }
 
-    private inline fun <reified T : Annotation> lookupIntentHandlerFromAnnotation(callback: (Result) -> AlexaResponse): AlexaResponse {
+    private inline fun <reified T : Annotation> lookupIntentHandlerFromAnnotation(
+        callback: (Result) -> AlexaResponse
+    ): AlexaResponse {
         val annotationName = T::class.simpleName!!
         val classes = findAnnotatedClasses(intentHandlerClasses, T::class)
         logger.debug("Detected ${classes.size} intent classes with $annotationName annotation.")
@@ -324,7 +335,9 @@ open class DefaultSpeechHandler : SpeechHandler {
         request: AlexaRequest<*>,
         alexaResponse: AlexaResponse
     ): AlexaResponse {
-        return if (intentHandler.isIntentContextLocked(request) && alexaResponse.sessionAttributes[INTENT_CONTEXT] == null) {
+        return if (intentHandler.isIntentContextLocked(request) &&
+            alexaResponse.sessionAttributes[INTENT_CONTEXT] == null
+        ) {
             alexaResponse.copy(
                 sessionAttributes = alexaResponse.sessionAttributes + Pair(
                     INTENT_CONTEXT,
@@ -339,7 +352,7 @@ open class DefaultSpeechHandler : SpeechHandler {
     private fun unknownIntentException(intentName: String): AlexaResponse {
         throw IllegalArgumentException(
             "It was not possible to map intent $intentName to a Class. " +
-                    "Please make sure that the Intent class is annotated with @Intent or check intent package location"
+                "Please make sure that the Intent class is annotated with @Intent or check intent package location"
         )
     }
 
@@ -350,19 +363,24 @@ open class DefaultSpeechHandler : SpeechHandler {
     @Suppress("unchecked_cast")
     private fun loadIntentHandlerClasses(): List<KClass<out IntentHandler>> {
         return loadIntentClassesFromPackage()
-            .filter { clazz -> clazz.superclasses.find { superclazz -> superclazz.simpleName == IntentHandler::class.java.simpleName } != null }
+            .filter { clazz ->
+                clazz.superclasses.find { superclazz ->
+                    superclazz.simpleName == IntentHandler::class.java.simpleName
+                } != null
+            }
             .cast()
     }
 
     /**
      * Look @Intent annotation up
-     * @return Map of Kclasses. The Array of mapsTo corresponds to the key and the value is the kClass that has the annotation.
+     * @return Map of Kclasses. The Array of mapsTo corresponds to the key and the value is the kClass
+     * that has the annotation.
      */
     private fun mapClassesWithIntentAnnotation(): Map<Set<String>, KClass<out IntentHandler>> {
         return findAnnotatedClasses(intentHandlerClasses, Intent::class)
             .map { annotatedClass ->
                 val intent = annotatedClass.findAnnotation<Intent>()!!
-                val mapsTo = setOf(*intent.mapsTo, annotatedClass.simpleName!!)
+                val mapsTo = intent.mapsTo.toSet() + annotatedClass.simpleName!!
                 mapsTo to annotatedClass
             }.toMap()
     }

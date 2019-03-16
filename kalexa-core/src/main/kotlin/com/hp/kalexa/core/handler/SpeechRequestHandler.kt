@@ -43,10 +43,9 @@ class SpeechRequestHandler(private val speechHandler: SpeechHandler) {
             logger.error("Application ID not defined in environment variable.")
             return false
         }
-        alexaRequest.session?.application?.applicationId?.let {
-            return applicationId == it
-        }
-        return alexaRequest.context.system.application.applicationId?.let {
+        return alexaRequest.session?.application?.applicationId?.let {
+            applicationId == it
+        } ?: alexaRequest.context.system.application.applicationId?.let {
             applicationId == it
         } ?: false
     }
@@ -75,11 +74,14 @@ class SpeechRequestHandler(private val speechHandler: SpeechHandler) {
             is ListDeletedEventRequest ->
                 speechHandler.handleListDeletedEventRequest(alexaRequest as AlexaRequest<ListDeletedEventRequest>)
             is ListItemsCreatedEventRequest ->
-                speechHandler.handleListItemsCreatedEventRequest(alexaRequest as AlexaRequest<ListItemsCreatedEventRequest>)
+                speechHandler.handleListItemsCreatedEventRequest(
+                    alexaRequest as AlexaRequest<ListItemsCreatedEventRequest>)
             is ListItemsUpdatedEventRequest ->
-                speechHandler.handleListItemsUpdatedEventRequest(alexaRequest as AlexaRequest<ListItemsUpdatedEventRequest>)
+                speechHandler.handleListItemsUpdatedEventRequest(
+                    alexaRequest as AlexaRequest<ListItemsUpdatedEventRequest>)
             is ListItemsDeletedEventRequest ->
-                speechHandler.handleListItemsDeletedEventRequest(alexaRequest as AlexaRequest<ListItemsDeletedEventRequest>)
+                speechHandler.handleListItemsDeletedEventRequest(
+                    alexaRequest as AlexaRequest<ListItemsDeletedEventRequest>)
             else -> AlexaResponse.emptyResponse()
         }
         return alexaResponse.toJson()

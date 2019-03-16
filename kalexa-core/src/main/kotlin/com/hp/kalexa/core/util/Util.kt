@@ -18,10 +18,13 @@ object Util {
     fun getApplicationID(): String? = System.getenv("APPLICATION_ID")
 
     fun getIntentPackage() = System.getenv("INTENT_PACKAGE")
-            ?: throw IllegalArgumentException("You must define INTENT_PACKAGE environment variable")
+        ?: throw IllegalArgumentException("You must define INTENT_PACKAGE environment variable")
 
     @Suppress("unchecked_cast")
-    fun <T : Annotation> findAnnotatedMethod(intentClasses: Map<String, KClass<out IntentHandler>>, annotation: KClass<T>): List<KFunction<*>> {
+    fun <T : Annotation> findAnnotatedMethod(
+        intentClasses: Map<String, KClass<out IntentHandler>>,
+        annotation: KClass<T>
+    ): List<KFunction<*>> {
         val functions = intentClasses.map { entry ->
             entry.value.declaredFunctions.find {
                 it.findAnnotation(annotation) != null
@@ -31,7 +34,11 @@ object Util {
     }
 
     @Suppress("unchecked_cast")
-    fun <T : Annotation> findAnnotatedMethod(intentClasses: Map<String, KClass<out IntentHandler>>, annotation: KClass<T>, methodName: String): Map<String, KClass<out IntentHandler>> {
+    fun <T : Annotation> findAnnotatedMethod(
+        intentClasses: Map<String, KClass<out IntentHandler>>,
+        annotation: KClass<T>,
+        methodName: String
+    ): Map<String, KClass<out IntentHandler>> {
         return intentClasses.filter {
             it.value.declaredFunctions.find {
                 it.findAnnotation(annotation) != null && it.name == methodName
@@ -39,13 +46,20 @@ object Util {
         }
     }
 
-    fun <T : Annotation> findAnnotatedClasses(intentClasses: List<KClass<out IntentHandler>>, annotation: KClass<T>): List<KClass<out IntentHandler>> {
+    fun <T : Annotation> findAnnotatedClasses(
+        intentClasses: List<KClass<out IntentHandler>>,
+        annotation: KClass<T>
+    ): List<KClass<out IntentHandler>> {
         return intentClasses.filter {
             it.findAnnotation(annotation) != null
         }
     }
 
-    fun <T : Annotation> getMethodAnnotation(clazz: KClass<out Any>, methodName: String, annotation: KClass<T>): Annotation? {
+    fun <T : Annotation> getMethodAnnotation(
+        clazz: KClass<out Any>,
+        methodName: String,
+        annotation: KClass<T>
+    ): Annotation? {
         val kFunction = clazz.declaredFunctions.find { it.name == methodName }
         return kFunction?.findAnnotation(annotation)
     }
@@ -56,7 +70,7 @@ object Util {
 
     fun loadIntentClassesFromPackage(): List<KClass<out Any>> {
         return ClassPath.from(Thread.currentThread().contextClassLoader)
-                .getTopLevelClasses(getIntentPackage())
-                .map { it.load().kotlin }
+            .getTopLevelClasses(getIntentPackage())
+            .map { it.load().kotlin }
     }
 }

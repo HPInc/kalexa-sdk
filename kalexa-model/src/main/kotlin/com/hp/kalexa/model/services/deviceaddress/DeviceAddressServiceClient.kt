@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-package com.hp.kalexa.model.services.deviceAddress
+package com.hp.kalexa.model.services.deviceaddress
 
 import com.hp.kalexa.model.services.ApiClient
 import com.hp.kalexa.model.services.ServiceException

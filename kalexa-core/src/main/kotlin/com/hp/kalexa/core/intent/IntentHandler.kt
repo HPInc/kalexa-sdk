@@ -45,15 +45,19 @@ interface IntentHandler {
     fun onIntentRequest(alexaRequest: AlexaRequest<IntentRequest>) = AlexaResponse.emptyResponse()
 
     /**
-     * Handles Connections Response Request coming from Alexa. This is the result from a fulfiller skill when using skill connections
+     * Handles Connections Response Request coming from Alexa. This is the result from a fulfiller skill
+     * when using skill connections
      */
-    fun onConnectionsResponse(alexaRequest: AlexaRequest<ConnectionsResponseRequest>): AlexaResponse = AlexaResponse.emptyResponse()
+    fun onConnectionsResponse(alexaRequest: AlexaRequest<ConnectionsResponseRequest>): AlexaResponse =
+        AlexaResponse.emptyResponse()
 
     /**
-     * Handles Connections Request coming from Alexa. This is the request from a requester skill when using skill connections
+     * Handles Connections Request coming from Alexa. This is the request from a requester skill when using
+     * skill connections.
      * Should be used combined with @Fulfiller annotation
      */
-    fun onConnectionsRequest(alexaRequest: AlexaRequest<ConnectionsRequest>): AlexaResponse = AlexaResponse.emptyResponse()
+    fun onConnectionsRequest(alexaRequest: AlexaRequest<ConnectionsRequest>): AlexaResponse =
+        AlexaResponse.emptyResponse()
 
     /**
      * Handles The Built In Intents coming from Alexa.
@@ -144,7 +148,8 @@ interface IntentHandler {
         alexaRequest.session?.attributes?.remove(INTENT_CONTEXT)
     }
 
-    fun isIntentContextLocked(alexaRequest: AlexaRequest<*>) = alexaRequest.session?.attributes?.get(INTENT_CONTEXT) != null
+    fun isIntentContextLocked(alexaRequest: AlexaRequest<*>) =
+        alexaRequest.session?.attributes?.get(INTENT_CONTEXT) != null
 
     fun hasDisplay(alexaRequest: AlexaRequest<*>) = alexaRequest.context.hasDisplay()
 

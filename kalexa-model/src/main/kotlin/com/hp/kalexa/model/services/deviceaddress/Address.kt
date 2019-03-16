@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-package com.hp.kalexa.model.services.deviceAddress
+package com.hp.kalexa.model.services.deviceaddress
 
 data class Address(
     val addressLine1: String? = null,

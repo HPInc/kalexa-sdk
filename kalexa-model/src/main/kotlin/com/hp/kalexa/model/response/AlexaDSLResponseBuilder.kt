@@ -45,7 +45,9 @@ import com.hp.kalexa.model.ui.SimpleCard
 import com.hp.kalexa.model.ui.SsmlOutputSpeech
 import com.hp.kalexa.model.ui.StandardCard
 
-fun alexaResponse(block: AlexaDSLResponseBuilder.() -> Unit): AlexaResponse = AlexaDSLResponseBuilder().apply(block).build()
+fun alexaResponse(block: AlexaDSLResponseBuilder.() -> Unit): AlexaResponse =
+    AlexaDSLResponseBuilder().apply(block).build()
+
 fun textContent(block: (TextContent.() -> Unit)) = TextContent().apply(block)
 fun plainText(block: (PlainText.() -> String)) = PlainText().apply { text = block() }
 fun richText(block: (RichText.() -> String)) = RichText().apply { text = block() }

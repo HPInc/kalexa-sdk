@@ -8,7 +8,7 @@ package com.hp.kalexa.model.services
 import com.hp.kalexa.model.json.JacksonSerializer
 
 inline fun <reified T> ApiClientResponse.toTypedObject(): T {
-    return if (responseCode in 200..299) {
+    return if (responseCode in ApiClient.SUCCESS_CODE_RANGE) {
         if (responseBody.isNotEmpty()) {
             JacksonSerializer.OBJECT_MAPPER.readValue(responseBody, T::class.java)
         } else {
