@@ -6,6 +6,9 @@
 package com.hp.kalexa.model.response
 
 import com.hp.kalexa.model.ConnectionsStatus
+import com.hp.kalexa.model.canfulfill.CanFulfillIntent
+import com.hp.kalexa.model.canfulfill.CanFulfillIntentValues
+import com.hp.kalexa.model.canfulfill.CanFulfillSlot
 import com.hp.kalexa.model.directive.ConfirmIntentDirective
 import com.hp.kalexa.model.directive.ConfirmSlotDirective
 import com.hp.kalexa.model.directive.DelegateDirective
@@ -78,6 +81,7 @@ class ResponseBuilder {
     private val directives = mutableListOf<Directive>()
     var shouldEndSession: Boolean? = true
     private var reprompt: Reprompt? = null
+    var canFulfillIntent: CanFulfillIntent? = null
 
     fun speech(block: PlainTextOutputSpeech.() -> String) {
         outputSpeech = PlainTextOutputSpeech().apply { text = block() }
@@ -103,6 +107,10 @@ class ResponseBuilder {
         reprompt = Reprompt().apply { outputSpeech = block() }
     }
 
+    fun canFulfillIntent(block: CanFulfillIntentBuilder.() -> Unit) {
+        canFulfillIntent = CanFulfillIntentBuilder().apply { block() }.build()
+    }
+
     fun directives(block: Directives.() -> Unit) {
         directives.addAll(Directives().apply { block() })
     }
@@ -114,8 +122,17 @@ class ResponseBuilder {
         speechletResponse.reprompt = reprompt
         speechletResponse.directives = directives
         speechletResponse.shouldEndSession = shouldEndSession
+        speechletResponse.canFulfillIntent = canFulfillIntent
         return speechletResponse
     }
+}
+
+@AlexaResponseDsl
+class CanFulfillIntentBuilder {
+    var canFulfill: CanFulfillIntentValues? = null
+    var slots: Map<String, CanFulfillSlot>? = mutableMapOf()
+
+    fun build(): CanFulfillIntent = CanFulfillIntent(canFulfill, slots)
 }
 
 @AlexaResponseDsl

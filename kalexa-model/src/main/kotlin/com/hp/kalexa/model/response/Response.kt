@@ -5,6 +5,7 @@
 
 package com.hp.kalexa.model.response
 
+import com.hp.kalexa.model.canfulfill.CanFulfillIntent
 import com.hp.kalexa.model.directive.Directive
 import com.hp.kalexa.model.ui.Card
 import com.hp.kalexa.model.ui.OutputSpeech
@@ -15,5 +16,6 @@ data class Response(
     var card: Card? = null,
     var reprompt: Reprompt? = null,
     var directives: List<Directive>? = emptyList(),
-    var shouldEndSession: Boolean? = null
+    var shouldEndSession: Boolean? = null,
+    var canFulfillIntent: CanFulfillIntent? = null
 )
