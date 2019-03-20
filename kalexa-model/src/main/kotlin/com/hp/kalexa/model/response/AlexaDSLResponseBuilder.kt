@@ -9,6 +9,8 @@ import com.hp.kalexa.model.ConnectionsStatus
 import com.hp.kalexa.model.canfulfill.CanFulfillIntent
 import com.hp.kalexa.model.canfulfill.CanFulfillIntentValues
 import com.hp.kalexa.model.canfulfill.CanFulfillSlot
+import com.hp.kalexa.model.canfulfill.CanFulfillSlotValues
+import com.hp.kalexa.model.canfulfill.CanUnderstandSlotValues
 import com.hp.kalexa.model.directive.ConfirmIntentDirective
 import com.hp.kalexa.model.directive.ConfirmSlotDirective
 import com.hp.kalexa.model.directive.DelegateDirective
