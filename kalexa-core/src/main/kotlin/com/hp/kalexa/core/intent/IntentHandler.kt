@@ -74,6 +74,10 @@ interface IntentHandler {
         }
     }
 
+    /**
+     * Handles CanFulfill Request coming from Alexa
+     * This request verifies if the skill can understand and fulfill the intent request and slots.
+     */
     fun onCanFulfillIntent(alexaRequest: AlexaRequest<CanFulfillIntentRequest>): AlexaResponse =
         AlexaResponse.emptyResponse()
 
