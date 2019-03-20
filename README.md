@@ -92,6 +92,7 @@ So when a SessionRequest comes from Alexa to your skill, `Kalexa-SDK` will map t
  - `@HelpIntent` and `onHelpIntent` - Handles the AMAZON.HelpIntent
  - `@FulfillerIntent` and `onConnectionsRequest` - Handles the Skill request from another existent Skill. 
  - `@RecoverIntentContext` and `onUnknownIntentContext` - When a BuiltInIntent comes without a context, you may annotate with `@RecoverIntentContext` to handle the error and respond gracefully.
+ - `@CanFulfillIntentRequest` and `onCanFulfillIntent` - Handles the CanFulfill. This request verifies if the skill can understand and fulfill the intent request and slots.
 
 Kotlin Code:
  ```
@@ -155,11 +156,11 @@ If you're working with Display interface, you will probably want to handle touch
 `Kalexa-SDK` will use `|` as separator to split the token string in more than one values. But keep in mind that the first value HAS to be the Intent that you want to execute `onElementSelected` method.
 For example: `{"token": "MyIntentName|Value|SomeOtherValue}`
 
-It's possible to verify if the device has screen support checking if supportedInterfaces from the context object has templateVersion and markupVersion value or by simply calling `IntentUtil.hasDisplay(context)`
+It's possible to verify whether the device has screen support by checking if supportedInterfaces from the context object has templateVersion and markupVersion value or by simply calling `context.hasDisplay()`
 
 #### Skill Connections Support
 `Kalexa-SDK` also supports Skill Connector feature. 
-Your skill can act as a `Fulfiller` or as a `Requestor`
+Your skill can act as a `Fulfiller` or as a `Requester`
 Currently, it only supports Image, PDF and WebPage types. 
 ##### Fulfiller:
 If your skill acts as a Fulfiller, you need to annotate your class with `@Fulfiller` and override `onConnectionsRequest` callback method. In this case, after processing the request, you have to answer back to Alexa using the `SendResponseDirective` directive.
@@ -260,7 +261,35 @@ Kalexa-sdk supports most of the directives.
 
 Dialog directives such `DelegateDirective`, `ElicitSlotDirective` and `ConfirmIntentDirective` directives.
 
-UI directives: `RenderTemplateDirective` and populate with its Templates.
+UI directives: `RenderTemplateDirective` and populate with its Templates.  
+With Kotlin, using DSL, it's possible to iterate over a list of items and generate a list item for each element:
+
+`Kotlin code`
+```
+directives {
+    renderTemplateDirective {
+        listTemplate2 {
+            title = "Images/PDFs"
+            listItems {
+                links.forEach { link ->
+                    val file = File(link)
+                    listItem {
+                        image = if (file.extension != "pdf") {
+                            Image(sources = listOf(ImageInstance(link)))
+                        } else {
+                            Image(sources = listOf(ImageInstance(files[0])))
+                        }
+                        textContent {
+                            primaryText = plainText { file.nameWithoutExtension }
+                        }
+                        token = "Token"
+                    }
+                }
+            }
+        }
+    }
+}
+```
 
 
 
