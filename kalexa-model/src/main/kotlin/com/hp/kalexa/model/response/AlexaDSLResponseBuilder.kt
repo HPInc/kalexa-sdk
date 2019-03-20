@@ -130,9 +130,28 @@ class ResponseBuilder {
 @AlexaResponseDsl
 class CanFulfillIntentBuilder {
     var canFulfill: CanFulfillIntentValues? = null
-    var slots: Map<String, CanFulfillSlot>? = mutableMapOf()
+    private var slots: Map<String, CanFulfillSlot> = mutableMapOf()
+
+    fun slots(block: SlotsBuilder.() -> Unit) {
+        slots = SlotsBuilder().apply { block() }
+    }
 
     fun build(): CanFulfillIntent = CanFulfillIntent(canFulfill, slots)
+}
+
+@AlexaResponseDsl
+class SlotsBuilder : HashMap<String, CanFulfillSlot>() {
+    fun slot(block: SlotBuilder.() -> Unit) {
+        val slotbuilder = SlotBuilder().apply { block() }
+        put(slotbuilder.name, CanFulfillSlot(slotbuilder.canUnderstand, slotbuilder.canFulfill))
+    }
+}
+
+@AlexaResponseDsl
+class SlotBuilder {
+    var name: String = ""
+    var canFulfill: CanFulfillSlotValues? = null
+    var canUnderstand: CanUnderstandSlotValues? = null
 }
 
 @AlexaResponseDsl

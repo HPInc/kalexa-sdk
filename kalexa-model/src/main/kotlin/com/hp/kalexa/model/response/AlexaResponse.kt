@@ -65,6 +65,7 @@ data class AlexaResponse(
             response.reprompt = reprompt
             response.directives = directiveList
             response.shouldEndSession = shouldEndSession
+            response.canFulfillIntent = canFulfillIntent
             return AlexaResponse(version = version, response = response, sessionAttributes = sessionAttributes)
         }
 
