@@ -17,5 +17,5 @@ class CanFulfillIntentRequest(
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
     timestamp: LocalDateTime,
     val dialogState: DialogState? = null,
-    val intent: Intent? = null
+    val intent: Intent
 ) : Request(requestId, locale, timestamp)

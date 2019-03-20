@@ -14,6 +14,7 @@ import com.hp.kalexa.core.util.IntentUtil.retryIntent
 import com.hp.kalexa.core.util.IntentUtil.unsupportedIntent
 import com.hp.kalexa.core.util.Util
 import com.hp.kalexa.model.request.AlexaRequest
+import com.hp.kalexa.model.request.CanFulfillIntentRequest
 import com.hp.kalexa.model.request.ConnectionsRequest
 import com.hp.kalexa.model.request.ConnectionsResponseRequest
 import com.hp.kalexa.model.request.ElementSelectedRequest
@@ -72,6 +73,9 @@ interface IntentHandler {
             else -> onDefaultBuiltInIntent(alexaRequest)
         }
     }
+
+    fun onCanFulfillIntent(alexaRequest: AlexaRequest<CanFulfillIntentRequest>): AlexaResponse =
+        AlexaResponse.emptyResponse()
 
     /**
      * Handles element selected coming from Alexa. Basically when the user touches the screen

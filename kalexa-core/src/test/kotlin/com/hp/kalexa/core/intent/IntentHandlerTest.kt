@@ -217,6 +217,14 @@ class IntentHandlerTest : Spek({
             }
         }
 
+        on("onCanFulfillIntent") {
+            it("should return default response") {
+                val response = dummyIntent.onCanFulfillIntent(mockk())
+                assertEquals(AlexaResponse.emptyResponse().toJson(),
+                    response.toJson())
+            }
+        }
+
         on("lockIntentContext") {
             it("should return true") {
                 val response = mutableMapOf<String, Any>()
