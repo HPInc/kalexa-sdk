@@ -208,16 +208,16 @@ open class DefaultSpeechHandler : SpeechHandler {
         return intentHandler?.let {
             val alexaResponse = it.onConnectionsResponse(alexaRequest)
             generateResponse(it, alexaRequest, alexaResponse)
-        } ?: return intentHandlerInstances[ConnectionsResponseIntent::class]?.onConnectionsResponse(alexaRequest)
-            ?: run {
-                return lookupIntentHandlerFromAnnotation<ConnectionsResponseIntent> { result ->
-                    when (result) {
-                        is Result.Content -> result.intentHandler.onConnectionsResponse(alexaRequest)
-                        is Result.None -> unsupportedIntent()
-                        is Result.Error -> throw result.exception
-                    }
+        } ?: intentHandlerInstances[ConnectionsResponseIntent::class]?.onConnectionsResponse(alexaRequest)
+        ?: run {
+            lookupIntentHandlerFromAnnotation<ConnectionsResponseIntent> { result ->
+                when (result) {
+                    is Result.Content -> result.intentHandler.onConnectionsResponse(alexaRequest)
+                    is Result.None -> unsupportedIntent()
+                    is Result.Error -> throw result.exception
                 }
             }
+        }
     }
 
     override fun handleCanFulfillIntentRequest(alexaRequest: AlexaRequest<CanFulfillIntentRequest>): AlexaResponse {

@@ -337,14 +337,6 @@ object DefaultSpeechHandlerTest : Spek({
                     assertEquals("{\"response\":{\"directives\":[]},\"sessionAttributes\":{},\"version\":\"1.0\"}", response.toJson())
                 }
             }
-            on("Connections response is mapped to an unknown intent") {
-                every { request.token } returns "UnknownIntent"
-                it("should throw IllegalArgumentException") {
-                    assertFailsWith(exceptionClass = IllegalArgumentException::class) {
-                        defaultSpeechHandler.handleConnectionsResponseRequest(connectionsResponseRequest)
-                    }
-                }
-            }
         }
 
         describe("When handleConnectionsRequest method is called") {
