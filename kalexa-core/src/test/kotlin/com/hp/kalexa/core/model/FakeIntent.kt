@@ -6,7 +6,7 @@
 package com.hp.kalexa.core.model
 
 import com.hp.kalexa.core.annotation.FallbackIntent
-import com.hp.kalexa.core.annotation.FulfillerIntent
+import com.hp.kalexa.core.annotation.Provider
 import com.hp.kalexa.core.annotation.HelpIntent
 import com.hp.kalexa.core.annotation.Intent
 import com.hp.kalexa.core.annotation.LaunchIntent
@@ -31,7 +31,7 @@ import com.hp.kalexa.model.response.alexaResponse
 @Intent(mapsTo = ["FirstIntent", "SecondIntent", "ThirdIntent"])
 @FallbackIntent
 @RecoverIntentContext
-@FulfillerIntent
+@Provider
 @HelpIntent
 @ListEvents
 class FakeIntent : IntentHandler {

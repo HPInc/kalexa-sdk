@@ -77,7 +77,7 @@ There are three simple things that you need to follow in order to fulfill the re
 
 - Implement `IntentHandler` interface.
 - Override `IntentHandler` callback methods. 
-- Annotate with the desired annotation: `Intent`, `LaunchIntent`, `FallbackIntent`,  `HelpIntent`, `FulfillerIntent`.
+- Annotate with the desired annotation: `Intent`, `LaunchIntent`, `FallbackIntent`,  `HelpIntent`, `Provider` and `Requester`.
 
 So, the way it works is basically a combination of the `IntentHandler` callbacks and the Annotations. 
 
@@ -90,7 +90,8 @@ So when a SessionRequest comes from Alexa to your skill, `Kalexa-SDK` will map t
  - `@Intent` and `onIntentRequest` - Probably the most used annotation since it's where you will handle all of your Intents. When an Intent is mapped to your Intent class the `onIntentRequest` will be called. You can also map more than one Intent per class using the `mapsTo` annotation property.
  - `@FallbackIntent` and `onFallbackIntent` - Handles the BuiltIn intent AMAZON.FallbackIntent
  - `@HelpIntent` and `onHelpIntent` - Handles the AMAZON.HelpIntent
- - `@FulfillerIntent` and `onConnectionsRequest` - Handles the Skill request from another existent Skill. 
+ - `@Provider` and `onConnectionsRequest` - Handles the Skill request from another existent Skill. 
+ - `@Requester` and `onConnectionsResponse` - Handles the Skill response from another existent Skill. 
  - `@RecoverIntentContext` and `onUnknownIntentContext` - When a BuiltInIntent comes without a context, you may annotate with `@RecoverIntentContext` to handle the error and respond gracefully.
  - `@CanFulfillIntentRequest` and `onCanFulfillIntent` - Handles the CanFulfill. This request verifies if the skill can understand and fulfill the intent request and slots.
 
@@ -160,10 +161,10 @@ It's possible to verify whether the device has screen support by checking if sup
 
 #### Skill Connections Support
 `Kalexa-SDK` also supports Skill Connector feature. 
-Your skill can act as a `Fulfiller` or as a `Requester`
+Your skill can act as a `Provider` or as a `Requester`
 Currently, it only supports Image, PDF and WebPage types. 
-##### Fulfiller:
-If your skill acts as a Fulfiller, you need to annotate your class with `@Fulfiller` and override `onConnectionsRequest` callback method. In this case, after processing the request, you have to answer back to Alexa using the `SendResponseDirective` directive.
+##### Provider:
+If your skill acts as a Provider, you need to annotate your class with `@Provider` and override `onConnectionsRequest` callback method. In this case, after processing the request, you have to answer back to Alexa using the `SendResponseDirective` directive.
 
 `Kotlin Code:`
 ```
@@ -228,7 +229,7 @@ And then expect the response to be on `onConnectionsResponse` method
                 .build();
     }
  ```
-Note that token argument passed to `SendRequestDirective` should be the Intent that you want to be called when Alexa sends the response from the Fulfiller. `Kalexa-SDK` uses `|` as separator to split the token string in more values. But keep in mind that the first value has to be the Intent that you want to execute the `onConnectionsResponse` method.
+Note that token argument passed to `SendRequestDirective` should be the Intent that you want to be called when Alexa sends the response from the Provider. `Kalexa-SDK` uses `|` as separator to split the token string in more values. But keep in mind that the first value has to be the Intent that you want to execute the `onConnectionsResponse` method.
 For example: `{"token": "MyIntentName|Value|SomeOtherValue}`
  #### Response:
 Kalexa-sdk has two types of responses.

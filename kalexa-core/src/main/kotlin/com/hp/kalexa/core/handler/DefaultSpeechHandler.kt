@@ -6,9 +6,9 @@
 package com.hp.kalexa.core.handler
 
 import com.hp.kalexa.core.annotation.CanFulfillIntent
-import com.hp.kalexa.core.annotation.ConnectionsResponseIntent
+import com.hp.kalexa.core.annotation.Requester
 import com.hp.kalexa.core.annotation.FallbackIntent
-import com.hp.kalexa.core.annotation.FulfillerIntent
+import com.hp.kalexa.core.annotation.Provider
 import com.hp.kalexa.core.annotation.HelpIntent
 import com.hp.kalexa.core.annotation.Intent
 import com.hp.kalexa.core.annotation.LaunchIntent
@@ -208,9 +208,9 @@ open class DefaultSpeechHandler : SpeechHandler {
         return intentHandler?.let {
             val alexaResponse = it.onConnectionsResponse(alexaRequest)
             generateResponse(it, alexaRequest, alexaResponse)
-        } ?: intentHandlerInstances[ConnectionsResponseIntent::class]?.onConnectionsResponse(alexaRequest)
+        } ?: intentHandlerInstances[Requester::class]?.onConnectionsResponse(alexaRequest)
         ?: run {
-            lookupIntentHandlerFromAnnotation<ConnectionsResponseIntent> { result ->
+            lookupIntentHandlerFromAnnotation<Requester> { result ->
                 when (result) {
                     is Result.Content -> result.intentHandler.onConnectionsResponse(alexaRequest)
                     is Result.None -> unsupportedIntent()
@@ -235,8 +235,8 @@ open class DefaultSpeechHandler : SpeechHandler {
 
     override fun handleConnectionsRequest(alexaRequest: AlexaRequest<ConnectionsRequest>): AlexaResponse {
         logger.info("=========================== ConnectionsRequest =========================")
-        return intentHandlerInstances[FulfillerIntent::class]?.onConnectionsRequest(alexaRequest) ?: run {
-            return lookupIntentHandlerFromAnnotation<FulfillerIntent> { result ->
+        return intentHandlerInstances[Provider::class]?.onConnectionsRequest(alexaRequest) ?: run {
+            return lookupIntentHandlerFromAnnotation<Provider> { result ->
                 when (result) {
                     is Result.Content -> result.intentHandler.onConnectionsRequest(alexaRequest)
                     is Result.None -> unsupportedIntent()

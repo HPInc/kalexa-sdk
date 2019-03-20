@@ -21,10 +21,10 @@ annotation class HelpIntent
 annotation class Intent(val mapsTo: Array<String> = [])
 
 @Target(AnnotationTarget.CLASS)
-annotation class FulfillerIntent
+annotation class Provider
 
 @Target(AnnotationTarget.CLASS)
-annotation class ConnectionsResponseIntent
+annotation class Requester
 
 @Target(AnnotationTarget.CLASS)
 annotation class CanFulfillIntent
