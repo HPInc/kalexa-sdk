@@ -6,6 +6,7 @@
 package com.hp.kalexa.core.handler
 
 import com.hp.kalexa.core.annotation.CanFulfillIntent
+import com.hp.kalexa.core.annotation.ConnectionsResponseIntent
 import com.hp.kalexa.core.annotation.FallbackIntent
 import com.hp.kalexa.core.annotation.FulfillerIntent
 import com.hp.kalexa.core.annotation.HelpIntent
@@ -202,12 +203,21 @@ open class DefaultSpeechHandler : SpeechHandler {
         alexaRequest: AlexaRequest<ConnectionsResponseRequest>
     ): AlexaResponse {
         logger.info("=========================== Connections.Response =========================")
-        val intent = alexaRequest.request.token.split("\\|").first()
+        val intent = alexaRequest.request.token.split("\\|").firstOrNull() ?: ""
         val intentHandler = getIntentHandlerOf(intent)
         return intentHandler?.let {
             val alexaResponse = it.onConnectionsResponse(alexaRequest)
             generateResponse(it, alexaRequest, alexaResponse)
-        } ?: unknownIntentException(intent)
+        } ?: return intentHandlerInstances[ConnectionsResponseIntent::class]?.onConnectionsResponse(alexaRequest)
+            ?: run {
+                return lookupIntentHandlerFromAnnotation<ConnectionsResponseIntent> { result ->
+                    when (result) {
+                        is Result.Content -> result.intentHandler.onConnectionsResponse(alexaRequest)
+                        is Result.None -> unsupportedIntent()
+                        is Result.Error -> throw result.exception
+                    }
+                }
+            }
     }
 
     override fun handleCanFulfillIntentRequest(alexaRequest: AlexaRequest<CanFulfillIntentRequest>): AlexaResponse {

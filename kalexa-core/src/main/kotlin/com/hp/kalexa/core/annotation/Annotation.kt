@@ -24,6 +24,9 @@ annotation class Intent(val mapsTo: Array<String> = [])
 annotation class FulfillerIntent
 
 @Target(AnnotationTarget.CLASS)
+annotation class ConnectionsResponseIntent
+
+@Target(AnnotationTarget.CLASS)
 annotation class CanFulfillIntent
 
 @Target(AnnotationTarget.CLASS)
