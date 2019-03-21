@@ -346,7 +346,7 @@ object DefaultSpeechHandlerTest : Spek({
                 every { Util.findAnnotatedClasses(any(), Requester::class) } returns emptyList()
                 it("should call default onConnectionsResponse method") {
                     val response = defaultSpeechHandler.handleConnectionsResponseRequest(connectionsResponseRequest)
-                    assertEquals(IntentUtil.unsupportedIntent().toJson(),
+                    assertEquals(AlexaResponse.emptyResponse().toJson(),
                         response.toJson())
                 }
             }
