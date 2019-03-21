@@ -207,7 +207,7 @@ open class DefaultSpeechHandler : SpeechHandler {
             lookupIntentHandlerFromAnnotation<Requester> { result ->
                 when (result) {
                     is Result.Content -> result.intentHandler.onConnectionsResponse(alexaRequest)
-                    is Result.None -> unsupportedIntent()
+                    is Result.None -> AlexaResponse.emptyResponse()
                     is Result.Error -> throw result.exception
                 }
             }
@@ -220,7 +220,7 @@ open class DefaultSpeechHandler : SpeechHandler {
             return lookupIntentHandlerFromAnnotation<CanFulfillIntent> { result ->
                 when (result) {
                     is Result.Content -> result.intentHandler.onCanFulfillIntent(alexaRequest)
-                    is Result.None -> unsupportedIntent()
+                    is Result.None -> AlexaResponse.emptyResponse()
                     is Result.Error -> throw result.exception
                 }
             }
