@@ -155,14 +155,14 @@ If you're working with Display interface, you will probably want to handle touch
 `Kalexa-SDK` will try to map the intent from `INTENT_CONTEXT` key in session attributes if no such context exists, Kalexa-SDK will look for the Token key in item list object of the request and use its value as the Intent to call its `onElementSelected` method.
 
 `Kalexa-SDK` will use `|` as separator to split the token string in more than one values. But keep in mind that the first value HAS to be the Intent that you want to execute `onElementSelected` method.
-For example: `{"token": "MyIntentName|Value|SomeOtherValue}`
+For example: `{"token": "MyIntentName|Value|SomeOtherValue"}`
 
 It's possible to verify whether the device has screen support by checking if supportedInterfaces from the context object has templateVersion and markupVersion value or by simply calling `context.hasDisplay()`
 
 #### Skill Connections Support
-`Kalexa-SDK` also supports Skill Connector feature. 
+`Kalexa-SDK` also supports Skill Connections feature. 
 Your skill can act as a `Provider` or as a `Requester`
-Currently, it only supports Image, PDF and WebPage types. 
+Currently, it only supports *PRINT* connection type. 
 ##### Provider:
 If your skill acts as a Provider, you need to annotate your class with `@Provider` and override `onConnectionsRequest` callback method. In this case, after processing the request, you have to answer back to Alexa using the `SendResponseDirective` directive.
 
@@ -229,10 +229,9 @@ And then expect the response to be on `onConnectionsResponse` method
                 .build();
     }
  ```
-Note that token argument passed to `SendRequestDirective` should be the Intent that you want to be called when Alexa sends the response from the Provider. `Kalexa-SDK` uses `|` as separator to split the token string in more values. But keep in mind that the first value has to be the Intent that you want to execute the `onConnectionsResponse` method.
-For example: `{"token": "MyIntentName|Value|SomeOtherValue}`
+Note that you must annotate your class with `@Requester` so the `onConnectionsResponse` callback can be called properly. 
  #### Response:
-Kalexa-sdk has two types of responses.
+For Kotlin, Kalexa-sdk has two types of response `Builder` and `DSL`, for Java you can respond using `Builder`.
 ##### Java:
 AlexaBuilder builds the response gracefully to send back to Alexa:
 ```
