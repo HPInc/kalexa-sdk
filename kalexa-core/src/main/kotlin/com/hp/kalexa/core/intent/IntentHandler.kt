@@ -48,7 +48,7 @@ interface IntentHandler {
     /**
      * Handles Connections Response Request coming from Alexa. This is the result from a Provider skill
      * when using skill connections
-     * Can be combined with @Requester annotation otherwise it'll be the specified Intent class in the token
+     * Should be used combined with @Provider annotation
      */
     fun onConnectionsResponse(alexaRequest: AlexaRequest<ConnectionsResponseRequest>): AlexaResponse =
         AlexaResponse.emptyResponse()

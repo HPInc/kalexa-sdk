@@ -11,6 +11,7 @@ import com.hp.kalexa.core.annotation.HelpIntent
 import com.hp.kalexa.core.annotation.LaunchIntent
 import com.hp.kalexa.core.annotation.ListEvents
 import com.hp.kalexa.core.annotation.RecoverIntentContext
+import com.hp.kalexa.core.annotation.Requester
 import com.hp.kalexa.core.intent.BuiltInIntent
 import com.hp.kalexa.core.intent.IntentHandler
 import com.hp.kalexa.core.model.FakeIntent
@@ -317,6 +318,7 @@ object DefaultSpeechHandlerTest : Spek({
             beforeEachTest {
                 fakeIntent = mockk<FakeIntent>()
                 attributesSession.clear()
+                every { Util.findAnnotatedClasses(any(), Requester::class) } returns listOf(fakeIntent::class)
                 every { Util.loadIntentClassesFromPackage() } returns listOf(fakeIntent::class)
                 every { Util.getIntentPackage() } returns "package.with.intent"
                 session = mockk {
@@ -331,10 +333,31 @@ object DefaultSpeechHandlerTest : Spek({
                 every { connectionsResponseRequest.context } returns context
                 every { connectionsResponseRequest.version } returns "1.0"
             }
-            on("Connections Response ") {
-                val response = defaultSpeechHandler.handleConnectionsResponseRequest(connectionsResponseRequest)
-                it("should use value of token to call FakeIntent.onConnectionsResponse and return an empty response") {
-                    assertEquals("{\"response\":{\"directives\":[]},\"sessionAttributes\":{},\"version\":\"1.0\"}", response.toJson())
+
+            on("Intent with @Requester annotation") {
+                it("should call onConnectionsResponse method") {
+                    val response = defaultSpeechHandler.handleConnectionsResponseRequest(connectionsResponseRequest)
+                    assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a onConnectionsResponse from FakeIntent"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""",
+                        response.toJson())
+                }
+            }
+            on("Intent without @Requester annotation") {
+                every { Util.loadIntentClassesFromPackage() } returns emptyList()
+                every { Util.findAnnotatedClasses(any(), Requester::class) } returns emptyList()
+                it("should call default onConnectionsResponse method") {
+                    val response = defaultSpeechHandler.handleConnectionsResponseRequest(connectionsResponseRequest)
+                    assertEquals(IntentUtil.unsupportedIntent().toJson(),
+                        response.toJson())
+                }
+            }
+            on("Intent with more than one @Requester annotation") {
+                val intentHandler = mockk<KClass<out IntentHandler>>()
+                val intentHandler2 = mockk<KClass<out IntentHandler>>()
+                every { Util.findAnnotatedClasses(any(), Requester::class) } returns listOf(intentHandler, intentHandler2)
+                it("should throw illegal annotation argument") {
+                    assertFailsWith(exceptionClass = IllegalAnnotationException::class) {
+                        defaultSpeechHandler.handleConnectionsResponseRequest(connectionsResponseRequest)
+                    }
                 }
             }
         }

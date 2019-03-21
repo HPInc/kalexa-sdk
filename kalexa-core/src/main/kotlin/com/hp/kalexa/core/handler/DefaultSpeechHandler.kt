@@ -203,13 +203,7 @@ open class DefaultSpeechHandler : SpeechHandler {
         alexaRequest: AlexaRequest<ConnectionsResponseRequest>
     ): AlexaResponse {
         logger.info("=========================== Connections.Response =========================")
-        val intent = alexaRequest.request.token.split("\\|").firstOrNull() ?: ""
-        val intentHandler = getIntentHandlerOf(intent)
-        return intentHandler?.let {
-            val alexaResponse = it.onConnectionsResponse(alexaRequest)
-            generateResponse(it, alexaRequest, alexaResponse)
-        } ?: intentHandlerInstances[Requester::class]?.onConnectionsResponse(alexaRequest)
-        ?: run {
+        return intentHandlerInstances[Requester::class]?.onConnectionsResponse(alexaRequest) ?: run {
             lookupIntentHandlerFromAnnotation<Requester> { result ->
                 when (result) {
                     is Result.Content -> result.intentHandler.onConnectionsResponse(alexaRequest)
