@@ -8,6 +8,7 @@ package com.hp.kalexa.core.handler
 import com.hp.kalexa.core.util.Util
 import com.hp.kalexa.model.json.JacksonSerializer
 import com.hp.kalexa.model.request.AlexaRequest
+import com.hp.kalexa.model.request.CanFulfillIntentRequest
 import com.hp.kalexa.model.request.ConnectionsRequest
 import com.hp.kalexa.model.request.ConnectionsResponseRequest
 import com.hp.kalexa.model.request.ElementSelectedRequest
@@ -63,6 +64,8 @@ class SpeechRequestHandler(private val speechHandler: SpeechHandler) {
                 speechHandler.handleConnectionsResponseRequest(alexaRequest as AlexaRequest<ConnectionsResponseRequest>)
             is ConnectionsRequest ->
                 speechHandler.handleConnectionsRequest(alexaRequest as AlexaRequest<ConnectionsRequest>)
+            is CanFulfillIntentRequest ->
+                speechHandler.handleCanFulfillIntentRequest(alexaRequest as AlexaRequest<CanFulfillIntentRequest>)
             is SessionEndedRequest ->
                 speechHandler.handleSessionEndedRequest(alexaRequest as AlexaRequest<SessionEndedRequest>)
             is ElementSelectedRequest ->
