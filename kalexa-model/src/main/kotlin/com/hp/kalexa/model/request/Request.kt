@@ -12,18 +12,21 @@ import com.hp.kalexa.model.json.LocalDateTimeDeserializer
 import java.time.LocalDateTime
 
 @JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.PROPERTY,
-        property = "type")
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "type"
+)
 @JsonSubTypes(
-        JsonSubTypes.Type(value = SessionStartedRequest::class, name = "SessionStartedRequest"),
-        JsonSubTypes.Type(value = SessionEndedRequest::class, name = "SessionEndedRequest"),
-        JsonSubTypes.Type(value = ConnectionsResponseRequest::class, name = "Connections.Response"),
-        JsonSubTypes.Type(value = ConnectionsRequest::class, name = "Connections.Request"),
-        JsonSubTypes.Type(value = IntentRequest::class, name = "IntentRequest"),
-        JsonSubTypes.Type(value = ElementSelectedRequest::class, name = "Display.ElementSelected"),
-        JsonSubTypes.Type(value = LaunchRequest::class, name = "LaunchRequest"),
-        JsonSubTypes.Type(value = EventRequest::class))
+    JsonSubTypes.Type(value = SessionStartedRequest::class, name = "SessionStartedRequest"),
+    JsonSubTypes.Type(value = SessionEndedRequest::class, name = "SessionEndedRequest"),
+    JsonSubTypes.Type(value = ConnectionsResponseRequest::class, name = "Connections.Response"),
+    JsonSubTypes.Type(value = ConnectionsRequest::class, name = "Connections.Request"),
+    JsonSubTypes.Type(value = IntentRequest::class, name = "IntentRequest"),
+    JsonSubTypes.Type(value = ElementSelectedRequest::class, name = "Display.ElementSelected"),
+    JsonSubTypes.Type(value = LaunchRequest::class, name = "LaunchRequest"),
+    JsonSubTypes.Type(value = EventRequest::class),
+    JsonSubTypes.Type(value = CanFulfillIntentRequest::class, name = "CanFulfillIntentRequest")
+)
 abstract class Request(
     val requestId: String,
     val locale: String,

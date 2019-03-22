@@ -11,7 +11,7 @@ import com.hp.kalexa.model.entityresolution.StatusCode
 data class Slot(
     val name: String,
     val value: String? = null,
-    val confirmationStatus: SlotConfirmationStatus,
+    val confirmationStatus: SlotConfirmationStatus = SlotConfirmationStatus.NONE,
     val resolutions: Resolutions? = null
 ) {
 

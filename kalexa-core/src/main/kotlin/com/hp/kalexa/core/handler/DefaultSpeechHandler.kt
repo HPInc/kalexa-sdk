@@ -5,8 +5,10 @@
 
 package com.hp.kalexa.core.handler
 
+import com.hp.kalexa.core.annotation.CanFulfillIntent
+import com.hp.kalexa.core.annotation.Requester
 import com.hp.kalexa.core.annotation.FallbackIntent
-import com.hp.kalexa.core.annotation.FulfillerIntent
+import com.hp.kalexa.core.annotation.Provider
 import com.hp.kalexa.core.annotation.HelpIntent
 import com.hp.kalexa.core.annotation.Intent
 import com.hp.kalexa.core.annotation.LaunchIntent
@@ -26,6 +28,7 @@ import com.hp.kalexa.core.util.Util.loadIntentClassesFromPackage
 import com.hp.kalexa.model.exception.IllegalAnnotationException
 import com.hp.kalexa.model.extension.attribute
 import com.hp.kalexa.model.request.AlexaRequest
+import com.hp.kalexa.model.request.CanFulfillIntentRequest
 import com.hp.kalexa.model.request.ConnectionsRequest
 import com.hp.kalexa.model.request.ConnectionsResponseRequest
 import com.hp.kalexa.model.request.ElementSelectedRequest
@@ -200,18 +203,34 @@ open class DefaultSpeechHandler : SpeechHandler {
         alexaRequest: AlexaRequest<ConnectionsResponseRequest>
     ): AlexaResponse {
         logger.info("=========================== Connections.Response =========================")
-        val intent = alexaRequest.request.token.split("\\|").first()
-        val intentHandler = getIntentHandlerOf(intent)
-        return intentHandler?.let {
-            val alexaResponse = it.onConnectionsResponse(alexaRequest)
-            generateResponse(it, alexaRequest, alexaResponse)
-        } ?: unknownIntentException(intent)
+        return intentHandlerInstances[Requester::class]?.onConnectionsResponse(alexaRequest) ?: run {
+            lookupIntentHandlerFromAnnotation<Requester> { result ->
+                when (result) {
+                    is Result.Content -> result.intentHandler.onConnectionsResponse(alexaRequest)
+                    is Result.None -> AlexaResponse.emptyResponse()
+                    is Result.Error -> throw result.exception
+                }
+            }
+        }
+    }
+
+    override fun handleCanFulfillIntentRequest(alexaRequest: AlexaRequest<CanFulfillIntentRequest>): AlexaResponse {
+        logger.info("=========================== CanFulfillIntentRequest =========================")
+        return intentHandlerInstances[CanFulfillIntent::class]?.onCanFulfillIntent(alexaRequest) ?: run {
+            return lookupIntentHandlerFromAnnotation<CanFulfillIntent> { result ->
+                when (result) {
+                    is Result.Content -> result.intentHandler.onCanFulfillIntent(alexaRequest)
+                    is Result.None -> AlexaResponse.emptyResponse()
+                    is Result.Error -> throw result.exception
+                }
+            }
+        }
     }
 
     override fun handleConnectionsRequest(alexaRequest: AlexaRequest<ConnectionsRequest>): AlexaResponse {
         logger.info("=========================== ConnectionsRequest =========================")
-        return intentHandlerInstances[FulfillerIntent::class]?.onConnectionsRequest(alexaRequest) ?: run {
-            return lookupIntentHandlerFromAnnotation<FulfillerIntent> { result ->
+        return intentHandlerInstances[Provider::class]?.onConnectionsRequest(alexaRequest) ?: run {
+            return lookupIntentHandlerFromAnnotation<Provider> { result ->
                 when (result) {
                     is Result.Content -> result.intentHandler.onConnectionsRequest(alexaRequest)
                     is Result.None -> unsupportedIntent()
@@ -324,7 +343,6 @@ open class DefaultSpeechHandler : SpeechHandler {
                 val kclazz = classes.first()
                 logger.debug("Class with $annotationName annotation: ${kclazz.simpleName}")
                 val intentHandler = getIntentHandlerOf(kclazz)
-                intentHandlerInstances[T::class] = intentHandler
                 callback(Result.Content(intentHandler))
             }
         }

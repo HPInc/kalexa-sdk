@@ -28,7 +28,8 @@ buildscript {
 
 subprojects {
     apply plugin: 'kotlin'
-    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
+    apply plugin: 'signing'
     apply plugin: 'io.gitlab.arturbosch.detekt'
 
     repositories {
@@ -72,7 +73,136 @@ subprojects {
     compileTestKotlin {
         kotlinOptions.jvmTarget = "1.8"
     }
-
     version = rootProject.ext.kalexa_version
     group = 'com.hp.kalexa'
+
+    task sourceJar(type: Jar) {
+        classifier "sources"
+        from sourceSets.main.allJava
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier "javadoc"
+        from javadoc.destinationDir
+    }
+
+    artifacts {
+        archives jar
+        archives sourceJar
+        archives javadocJar
+    }
+
+    signing {
+        sign configurations.archives
+    }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                customizePom(pom)
+                groupId 'com.hp.kalexa'
+                artifactId project.name
+
+                from components.java
+
+                // create the sign pom artifact
+                pom.withXml {
+                    def pomFile = file("${project.buildDir}/generated-pom.xml")
+                    writeTo(pomFile)
+                    def pomAscFile = signing.sign(pomFile).signatureFiles[0]
+                    artifact(pomAscFile) {
+                        classifier = null
+                        extension = 'pom.asc'
+                    }
+                }
+
+                artifact(sourceJar) {
+                    classifier = 'sources'
+                }
+                artifact(javadocJar) {
+                    classifier = 'javadoc'
+                }
+
+                // create the signed artifacts
+                project.tasks.signArchives.signatureFiles.each {
+                    artifact(it) {
+                        def matcher = it.file =~ /-(sources|javadoc)\.jar\.asc$/
+                        if (matcher.find()) {
+                            classifier = matcher.group(1)
+                        } else {
+                            classifier = null
+                        }
+                        extension = 'jar.asc'
+                    }
+                }
+            }
+        }
+        repositories {
+            maven {
+                url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+                credentials {
+                    username sonatypeUsername
+                    password sonatypePassword
+                }
+            }
+        }
+    }
+
+    model {
+        tasks.generatePomFileForMavenJavaPublication {
+            destination = file("$buildDir/generated-pom.xml")
+        }
+        tasks.publishMavenJavaPublicationToMavenLocal {
+            dependsOn project.tasks.signArchives
+        }
+        tasks.publishMavenJavaPublicationToMavenRepository {
+            dependsOn project.tasks.signArchives
+        }
+    }
+}
+
+def customizePom(pom) {
+    pom.withXml {
+        def root = asNode()
+
+        // eliminate test-scoped dependencies (no need in maven central POMs)
+        root.dependencies.removeAll { dep ->
+            dep.scope == "test"
+        }
+
+        // add all items necessary for maven central publication
+        root.children().last() + {
+            resolveStrategy = Closure.DELEGATE_FIRST
+
+            description 'The Kalexa SDK is a very simple library that makes easier for developers to work with Amazon Alexa Skill using Kotlin Language.'
+            name 'Kalexa-sdk'
+            url 'https://github.com/HPInc/kalexa-sdk'
+            organization {
+                name 'HP Development Company, L.P.'
+                url 'https://github.com/HPInc'
+            }
+            issueManagement {
+                system 'GitHub'
+                url 'https://github.com/HPInc/kalexa-sdk/issues'
+            }
+            licenses {
+                license {
+                    name 'MIT'
+                    url 'https://github.com/HPInc/kalexa-sdk/blob/master/LICENSE.md'
+                    distribution 'repo'
+                }
+            }
+            scm {
+                url 'https://github.com/HPInc/kalexa-sdk'
+                connection 'scm:git:git://github.com/HPInc/kalexa-sdk.git'
+                developerConnection 'scm:git:ssh://git@github.com:HPInc/kalexa-sdk.git'
+            }
+            developers {
+                developer {
+                    name 'Marcelo Correa'
+                    email 'marcelorcorrea@hp.com'
+                }
+            }
+        }
+    }
 }

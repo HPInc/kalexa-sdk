@@ -6,16 +6,18 @@
 package com.hp.kalexa.core.model
 
 import com.hp.kalexa.core.annotation.FallbackIntent
-import com.hp.kalexa.core.annotation.FulfillerIntent
+import com.hp.kalexa.core.annotation.Provider
 import com.hp.kalexa.core.annotation.HelpIntent
 import com.hp.kalexa.core.annotation.Intent
 import com.hp.kalexa.core.annotation.LaunchIntent
 import com.hp.kalexa.core.annotation.ListEvents
 import com.hp.kalexa.core.annotation.RecoverIntentContext
+import com.hp.kalexa.core.annotation.Requester
 import com.hp.kalexa.core.intent.BuiltInIntent
 import com.hp.kalexa.core.intent.IntentHandler
 import com.hp.kalexa.model.request.AlexaRequest
 import com.hp.kalexa.model.request.ConnectionsRequest
+import com.hp.kalexa.model.request.ConnectionsResponseRequest
 import com.hp.kalexa.model.request.IntentRequest
 import com.hp.kalexa.model.request.LaunchRequest
 import com.hp.kalexa.model.request.event.ListCreatedEventRequest
@@ -31,9 +33,10 @@ import com.hp.kalexa.model.response.alexaResponse
 @Intent(mapsTo = ["FirstIntent", "SecondIntent", "ThirdIntent"])
 @FallbackIntent
 @RecoverIntentContext
-@FulfillerIntent
+@Provider
 @HelpIntent
 @ListEvents
+@Requester
 class FakeIntent : IntentHandler {
     override fun onLaunchIntent(alexaRequest: AlexaRequest<LaunchRequest>): AlexaResponse {
         return alexaResponse {
@@ -75,6 +78,14 @@ class FakeIntent : IntentHandler {
         return alexaResponse {
             response {
                 speech { "This is a onConnectionsRequest from FakeIntent" }
+            }
+        }
+    }
+
+    override fun onConnectionsResponse(alexaRequest: AlexaRequest<ConnectionsResponseRequest>): AlexaResponse {
+        return alexaResponse {
+            response {
+                speech { "This is a onConnectionsResponse from FakeIntent" }
             }
         }
     }

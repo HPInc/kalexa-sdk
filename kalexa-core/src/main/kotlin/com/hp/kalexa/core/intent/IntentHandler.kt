@@ -14,6 +14,7 @@ import com.hp.kalexa.core.util.IntentUtil.retryIntent
 import com.hp.kalexa.core.util.IntentUtil.unsupportedIntent
 import com.hp.kalexa.core.util.Util
 import com.hp.kalexa.model.request.AlexaRequest
+import com.hp.kalexa.model.request.CanFulfillIntentRequest
 import com.hp.kalexa.model.request.ConnectionsRequest
 import com.hp.kalexa.model.request.ConnectionsResponseRequest
 import com.hp.kalexa.model.request.ElementSelectedRequest
@@ -45,8 +46,9 @@ interface IntentHandler {
     fun onIntentRequest(alexaRequest: AlexaRequest<IntentRequest>) = AlexaResponse.emptyResponse()
 
     /**
-     * Handles Connections Response Request coming from Alexa. This is the result from a fulfiller skill
+     * Handles Connections Response Request coming from Alexa. This is the result from a Provider skill
      * when using skill connections
+     * Should be used combined with @Provider annotation
      */
     fun onConnectionsResponse(alexaRequest: AlexaRequest<ConnectionsResponseRequest>): AlexaResponse =
         AlexaResponse.emptyResponse()
@@ -54,7 +56,7 @@ interface IntentHandler {
     /**
      * Handles Connections Request coming from Alexa. This is the request from a requester skill when using
      * skill connections.
-     * Should be used combined with @Fulfiller annotation
+     * Should be used combined with @Provider annotation
      */
     fun onConnectionsRequest(alexaRequest: AlexaRequest<ConnectionsRequest>): AlexaResponse =
         AlexaResponse.emptyResponse()
@@ -72,6 +74,13 @@ interface IntentHandler {
             else -> onDefaultBuiltInIntent(alexaRequest)
         }
     }
+
+    /**
+     * Handles CanFulfill Request coming from Alexa
+     * This request verifies if the skill can understand and fulfill the intent request and slots.
+     */
+    fun onCanFulfillIntent(alexaRequest: AlexaRequest<CanFulfillIntentRequest>): AlexaResponse =
+        AlexaResponse.emptyResponse()
 
     /**
      * Handles element selected coming from Alexa. Basically when the user touches the screen

@@ -8,6 +8,7 @@ package com.hp.kalexa.model.response
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.hp.kalexa.model.canfulfill.CanFulfillIntent
 import com.hp.kalexa.model.directive.Directive
 import com.hp.kalexa.model.directive.HintDirective
 import com.hp.kalexa.model.directive.LaunchDirective
@@ -55,6 +56,7 @@ data class AlexaResponse(
         private val directiveList = mutableListOf<Directive>()
         private var shouldEndSession: Boolean? = true
         private var reprompt: Reprompt? = null
+        private var canFulfillIntent: CanFulfillIntent? = null
 
         fun build(): AlexaResponse {
             val response = Response()
@@ -63,6 +65,7 @@ data class AlexaResponse(
             response.reprompt = reprompt
             response.directives = directiveList
             response.shouldEndSession = shouldEndSession
+            response.canFulfillIntent = canFulfillIntent
             return AlexaResponse(version = version, response = response, sessionAttributes = sessionAttributes)
         }
 
@@ -129,6 +132,11 @@ data class AlexaResponse(
 
         fun shouldEndSession(shouldEndSession: Boolean?): Builder {
             this.shouldEndSession = shouldEndSession
+            return this
+        }
+
+        fun canFulfillIntent(canFulfillIntent: CanFulfillIntent): Builder {
+            this.canFulfillIntent = canFulfillIntent
             return this
         }
 

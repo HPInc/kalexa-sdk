@@ -5,6 +5,7 @@
 
 package com.hp.kalexa.model.request
 
+import com.hp.kalexa.model.JsonRequests.CAN_FULFILL_INTENT_REQUEST
 import com.hp.kalexa.model.JsonRequests.DISPLAY_SELECTED_REQUEST
 import com.hp.kalexa.model.JsonRequests.ERROR_LINK_RESULT
 import com.hp.kalexa.model.JsonRequests.INTENT_REQUEST_JSON
@@ -100,6 +101,22 @@ class AlexaRequestEnvelopeTest : Spek({
             val customElementSelectedRequest = envelope.request as ElementSelectedRequest
             it("should have a token attribute in the request") {
                 assertEquals("TeamsIntent\\|Internacional", customElementSelectedRequest.token)
+            }
+        }
+
+        on("CanFulfillIntentRequest") {
+            val envelope = JacksonSerializer.deserialize(CAN_FULFILL_INTENT_REQUEST, AlexaRequest::class.java)
+            it("should be CanFulfillIntentRequest type") {
+                assert(envelope.request is CanFulfillIntentRequest)
+            }
+            val canFulfillIntentRequest = envelope.request as CanFulfillIntentRequest
+            it("should have intent name PlaySound") {
+                assertEquals("PlaySound", canFulfillIntentRequest.intent.name)
+            }
+            it("should have a crickets value in Sound slot") {
+                assertEquals(1, canFulfillIntentRequest.intent.slots.size)
+                val slot = canFulfillIntentRequest.intent.getSlot("Sound")
+                assertEquals("crickets", slot?.value)
             }
         }
     }

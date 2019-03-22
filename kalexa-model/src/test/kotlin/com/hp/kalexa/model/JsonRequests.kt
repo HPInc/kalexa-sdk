@@ -327,4 +327,56 @@ object JsonRequests {
         }
     }
 }"""
+    const val CAN_FULFILL_INTENT_REQUEST = """{
+            "version": "1.0",
+            "session": {
+                "new": false,
+                "sessionId": "amzn1.echo-api.session.3231e1ff-65d1-40b0-af7a-f42c01da4673",
+                "application": {
+                    "applicationId": "amzn1.ask.skill.f400c9e3-37c6-44e5-9e58-3c5b9bd2c74e"
+                },
+                "attributes": {
+                    "action": "MailingLabelIntent"
+                },
+                "user": {
+                    "userId": "amzn1.ask.account.AH65RHGH2MXZJ5UMTSPZIRJK7BTSDV5MYLPD5CQOMSSD3CVMONORSWYLG3HT3HVLJNPD2KTW626W5K7ZWGJTH6YIG6SSG4WQ2UO2MDTB3LYEUM4P6VPXNYPQJLPIERS354K5X6SBEIUQZP7Y6BOOG4RDJIZB6BN35UER4RWLA2IFIHZWTPFV3FZDBTTRQ6RVNMYL4O2TLPDRWKQ"
+                }
+            },
+            "context": {
+                "AudioPlayer": {
+                    "playerActivity": "IDLE"
+                },
+                "System": {
+                    "application": {
+                        "applicationId": "amzn1.ask.skill.f400c9e3-37c6-44e5-9e58-3c5b9bd2c74e"
+                    },
+                    "user": {
+                        "userId": "amzn1.ask.account.AH65RHGH2MXZJ5UMTSPZIRJK7BTSDV5MYLPD5CQOMSSD3CVMONORSWYLG3HT3HVLJNPD2KTW626W5K7ZWGJTH6YIG6SSG4WQ2UO2MDTB3LYEUM4P6VPXNYPQJLPIERS354K5X6SBEIUQZP7Y6BOOG4RDJIZB6BN35UER4RWLA2IFIHZWTPFV3FZDBTTRQ6RVNMYL4O2TLPDRWKQ"
+                    },
+                    "device": {
+                        "deviceId": "amzn1.ask.device.AF53A3NPQZTFPSJBCPSWRSS3PYJ4EYF2Y3P3TJ5T4U7WSCLRQ3G6JNEGCAAK5YJB6H2PYGM3B65U7XZ7WGOUTIEMN4ER3WU6BRAJRVVPJNVHXDTR75QH5BZF7GKD4TZR3OQ36GSL5JZH67PFC74GM7RIYKOQ",
+                        "supportedInterfaces": {
+                            "AudioPlayer": {}
+                        }
+                    },
+                    "apiEndpoint": "https://api.amazonalexa.com",
+                    "apiAccessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IjEifQ.eyJhdWQiOiJodHRwczovL2FwaS5hbWF6b25hbGV4YS5jb20iLCJpc3MiOiJBbGV4YVNraWxsS2l0Iiwic3ViIjoiYW16bjEuYXNrLnNraWxsLmY0MDBjOWUzLTM3YzYtNDRlNS05ZTU4LTNjNWI5YmQyYzc0ZSIsImV4cCI6MTUxOTMxNzE1NCwiaWF0IjoxNTE5MzEzNTU0LCJuYmYiOjE1MTkzMTM1NTQsInByaXZhdGVDbGFpbXMiOnsiY29uc2VudFRva2VuIjpudWxsLCJkZXZpY2VJZCI6ImFtem4xLmFzay5kZXZpY2UuQUY1M0EzTlBRWlRGUFNKQkNQU1dSU1MzUFlKNEVZRjJZM1AzVEo1VDRVN1dTQ0xSUTNHNkpORUdDQUFLNVlKQjZIMlBZR00zQjY1VTdYWjdXR09VVElFTU40RVIzV1U2QlJBSlJWVlBKTlZIWERUUjc1UUg1QlpGN0dLRDRUWlIzT1EzNkdTTDVKWkg2N1BGQzc0R003UklZS09RIiwidXNlcklkIjoiYW16bjEuYXNrLmFjY291bnQuQUg2NVJIR0gyTVhaSjVVTVRTUFpJUkpLN0JUU0RWNU1ZTFBENUNRT01TU0QzQ1ZNT05PUlNXWUxHM0hUM0hWTEpOUEQyS1RXNjI2VzVLN1pXR0pUSDZZSUc2U1NHNFdRMlVPMk1EVEIzTFlFVU00UDZWUFhOWVBRSkxQSUVSUzM1NEs1WDZTQkVJVVFaUDdZNkJPT0c0UkRKSVpCNkJOMzVVRVI0UldMQTJJRklIWldUUEZWM0ZaREJUVFJRNlJWTk1ZTDRPMlRMUERSV0tRIn19.brwoDjQZCptUDMpvptN9eAcXPcgInJnpDQxyI1qpQoW7StKXMP62wDyKNzqo9mE2l5uJeWdLIzD2ArZa1UrmU4VDAvXJo7ZDNtsnCHMh3gMUoWVisbnL5FwtKUYZ9nnNAjPbJ-NQLh65XNJqrb_TlFtuxUzNPUV63N0Dssn4rRfsjDKpocvCVodbIJSScoIH08LyWR97SI80R5qzOVNrBfdUccRSiihm4yptnE3OARPjhPqbCNk5C5IkMOF2ljZgBeg54SZOPT3HuxbTJChXYtxRMJvFvLQLjHVzCI3B7lE4ABiAwlxt2DeoZMKdkPaeZFAJMF2JX3gh7n83sPoaJw"
+                }
+            },
+            "request": {
+                "type": "CanFulfillIntentRequest",
+                "requestId": "b795c1d2-2577-4afb-a4f6-0d995fd54a98",
+                "intent": {
+                    "name": "PlaySound",
+                    "slots": {
+                        "Sound": {
+                            "name": "Sound",
+                            "value": "crickets"
+                        }
+                    }
+                },
+                "locale": "en-US",
+                "timestamp": "2018-02-22T15:00:37Z"
+            }
+        }"""
 }
