@@ -49,7 +49,7 @@ import kotlin.test.assertFailsWith
 object DefaultSpeechHandlerTest : Spek({
 
     describe("a Default speech handler class") {
-        lateinit var  defaultSpeechHandler: DefaultSpeechHandler
+        lateinit var defaultSpeechHandler: DefaultSpeechHandler
         beforeEachTest {
             mockkObject(Util)
             every { Util.getIntentPackage() } returns "com.hp.kalexa.core.model"
