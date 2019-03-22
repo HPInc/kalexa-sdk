@@ -49,9 +49,12 @@ import kotlin.test.assertFailsWith
 object DefaultSpeechHandlerTest : Spek({
 
     describe("a Default speech handler class") {
-        val defaultSpeechHandler by memoized { DefaultSpeechHandler() }
-        mockkObject(Util)
-        every { Util.getIntentPackage() } returns "com.hp.kalexa.core.model"
+        lateinit var  defaultSpeechHandler: DefaultSpeechHandler
+        beforeEachTest {
+            mockkObject(Util)
+            every { Util.getIntentPackage() } returns "com.hp.kalexa.core.model"
+            defaultSpeechHandler = DefaultSpeechHandler()
+        }
 
         describe("When handleSessionStarted method is called") {
             val envelope = mockk<AlexaRequest<SessionStartedRequest>>()
@@ -77,6 +80,7 @@ object DefaultSpeechHandlerTest : Spek({
             on("Intent without LaunchIntent annotation") {
                 it("should return a default Launch response") {
                     every { Util.getIntentPackage() } returns "package.with.no.intent"
+                    defaultSpeechHandler = DefaultSpeechHandler()
                     val alexaResponse = defaultSpeechHandler.handleLaunchRequest(customLaunchRequestEnvelope)
                     assertEquals(IntentUtil.defaultGreetings().toJson(), alexaResponse.toJson())
                 }
@@ -241,6 +245,7 @@ object DefaultSpeechHandlerTest : Spek({
                     on("Intent without @RecoverIntentContext annotation") {
                         every { intentRequestEnvelope.request.intent.name } returns BuiltInIntent.YES_INTENT.rawValue
                         every { Util.loadIntentClassesFromPackage() } returns emptyList()
+                        defaultSpeechHandler = DefaultSpeechHandler()
                         it("should should call default unknownIntentContext response") {
                             val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                             assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"I'm sorry, I couldn't understand what you have said. Could you say it again?"},"directives":[],"shouldEndSession":false},"sessionAttributes":{"retry":1},"version":"1.0"}""",
