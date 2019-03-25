@@ -110,19 +110,6 @@ open class DefaultSpeechHandler : SpeechHandler {
         ) { intentHandler -> intentHandler.onCanFulfillIntent(alexaRequest) }
     }
 
-    private fun handleBaseIntentRequest(
-        alexaRequest: AlexaRequest<BaseIntentRequest>,
-        classes: Map<Set<String>, KClass<out IntentHandler>> = intentMap,
-        intentName: String? = null,
-        callback: (IntentHandler) -> AlexaResponse
-    ): AlexaResponse {
-        val name = intentName ?: alexaRequest.request.intent.name
-        val intentHandler = getIntentHandlerOf(name, classes)
-        return intentHandler?.let { handler ->
-            generateResponse(handler, alexaRequest, callback(handler))
-        } ?: unknownIntentException(name)
-    }
-
     private fun fallbackIntent(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
         logger.info("=========================== Fallback Intent =========================")
         return intentHandlerInstances[FallbackIntent::class]?.onFallbackIntent(alexaRequest)
@@ -340,6 +327,19 @@ open class DefaultSpeechHandler : SpeechHandler {
             }
     }
 
+    private fun handleBaseIntentRequest(
+        alexaRequest: AlexaRequest<BaseIntentRequest>,
+        classes: Map<Set<String>, KClass<out IntentHandler>> = intentMap,
+        intentName: String? = null,
+        callback: (IntentHandler) -> AlexaResponse
+    ): AlexaResponse {
+        val name = intentName ?: alexaRequest.request.intent.name
+        val intentHandler = getIntentHandlerOf(name, classes)
+        return intentHandler?.let { handler ->
+            generateResponse(handler, alexaRequest, callback(handler))
+        } ?: unknownIntentException(name)
+    }
+
     /**
      * Gets all the Intent Handlers that have a given annotation. It's not possible to get more than one Intent Handler.
      * @param T The Annotation to be loaded all the intent handler classes
@@ -389,6 +389,9 @@ open class DefaultSpeechHandler : SpeechHandler {
         }
     }
 
+    /**
+     * Throws a IllegalArgumentException
+     */
     private fun unknownIntentException(intentName: String): AlexaResponse {
         throw IllegalArgumentException(
             "It was not possible to map intent $intentName to a Class. " +
@@ -396,6 +399,9 @@ open class DefaultSpeechHandler : SpeechHandler {
         )
     }
 
+    /**
+     * Throws a IllegalAnnotationException
+     */
     private fun illegalAnnotationArgument(annotation: String): IllegalAnnotationException {
         return IllegalAnnotationException("The skill can only have one @$annotation method.")
     }
@@ -436,6 +442,8 @@ open class DefaultSpeechHandler : SpeechHandler {
     /**
      * Checks if any of the entry keys from the classes map is equal to the given intent name, if so, it will return
      * a instance of the corresponding intent handler.
+     * @param intentName to be retrieved
+     * @param classes map containing all the annotated classes
      */
     private fun getIntentHandlerOf(
         intentName: String,
@@ -451,8 +459,6 @@ open class DefaultSpeechHandler : SpeechHandler {
     /**
      * Retrieves an instance of a given intentName, if no such instance exists, it will be created, put it into the hash
      * and return it
-     * @param intentName
-     * @param classes map containing all the annotated classes
      * @return an instance of the intentName
      */
     private fun getIntentHandlerOf(kclazz: KClass<out IntentHandler>) =

@@ -9,8 +9,6 @@ import com.google.common.reflect.ClassPath
 import com.hp.kalexa.core.extension.findAnnotation
 import com.hp.kalexa.core.intent.IntentHandler
 import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
-import kotlin.reflect.full.declaredFunctions
 
 object Util {
     fun getSkillName() = System.getenv("SKILL_NAME") ?: "This Skill"
