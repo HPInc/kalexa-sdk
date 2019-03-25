@@ -6,14 +6,14 @@
 package com.hp.kalexa.core.handler
 
 import com.hp.kalexa.core.annotation.CanFulfillIntent
-import com.hp.kalexa.core.annotation.Requester
 import com.hp.kalexa.core.annotation.FallbackIntent
-import com.hp.kalexa.core.annotation.Provider
 import com.hp.kalexa.core.annotation.HelpIntent
 import com.hp.kalexa.core.annotation.Intent
 import com.hp.kalexa.core.annotation.LaunchIntent
 import com.hp.kalexa.core.annotation.ListEvents
+import com.hp.kalexa.core.annotation.Provider
 import com.hp.kalexa.core.annotation.RecoverIntentContext
+import com.hp.kalexa.core.annotation.Requester
 import com.hp.kalexa.core.extension.cast
 import com.hp.kalexa.core.handler.SpeechHandler.Companion.INTENT_CONTEXT
 import com.hp.kalexa.core.intent.BuiltInIntent
@@ -28,6 +28,7 @@ import com.hp.kalexa.core.util.Util.loadIntentClassesFromPackage
 import com.hp.kalexa.model.exception.IllegalAnnotationException
 import com.hp.kalexa.model.extension.attribute
 import com.hp.kalexa.model.request.AlexaRequest
+import com.hp.kalexa.model.request.BaseIntentRequest
 import com.hp.kalexa.model.request.CanFulfillIntentRequest
 import com.hp.kalexa.model.request.ConnectionsRequest
 import com.hp.kalexa.model.request.ConnectionsResponseRequest
@@ -54,7 +55,8 @@ open class DefaultSpeechHandler : SpeechHandler {
     private val logger = LogManager.getLogger(DefaultSpeechHandler::class.java)
 
     private val intentHandlerClasses: List<KClass<out IntentHandler>> = loadIntentHandlerClasses()
-    private val intentClasses: Map<Set<String>, KClass<out IntentHandler>> = mapClassesWithIntentAnnotation()
+    private val intentMap: Map<Set<String>, KClass<out IntentHandler>> = mapIntentHandlers<Intent>()
+    private val canFulfillMap: Map<Set<String>, KClass<out IntentHandler>> = mapIntentHandlers<CanFulfillIntent>()
     private val intentHandlerInstances = mutableMapOf<KClass<out Any>, IntentHandler>()
 
     override fun handleSessionStartedRequest(alexaRequest: AlexaRequest<SessionStartedRequest>) =
@@ -93,11 +95,32 @@ open class DefaultSpeechHandler : SpeechHandler {
     }
 
     private fun customIntent(intentName: String, alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
-        val intentHandler = getIntentHandlerOf(intentName)
+        return handleBaseIntentRequest(alexaRequest, intentName = intentName) { intentHandler ->
+            intentHandler.onIntentRequest(
+                alexaRequest
+            )
+        }
+    }
+
+    override fun handleCanFulfillIntentRequest(alexaRequest: AlexaRequest<CanFulfillIntentRequest>): AlexaResponse {
+        logger.info("=========================== CanFulfillIntentRequest =========================")
+        return handleBaseIntentRequest(
+            alexaRequest,
+            canFulfillMap
+        ) { intentHandler -> intentHandler.onCanFulfillIntent(alexaRequest) }
+    }
+
+    private fun handleBaseIntentRequest(
+        alexaRequest: AlexaRequest<BaseIntentRequest>,
+        classes: Map<Set<String>, KClass<out IntentHandler>> = intentMap,
+        intentName: String? = null,
+        callback: (IntentHandler) -> AlexaResponse
+    ): AlexaResponse {
+        val name = intentName ?: alexaRequest.request.intent.name
+        val intentHandler = getIntentHandlerOf(name, classes)
         return intentHandler?.let { handler ->
-            val alexaResponse = handler.onIntentRequest(alexaRequest)
-            generateResponse(handler, alexaRequest, alexaResponse)
-        } ?: unknownIntentException(intentName)
+            generateResponse(handler, alexaRequest, callback(handler))
+        } ?: unknownIntentException(name)
     }
 
     private fun fallbackIntent(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
@@ -157,7 +180,7 @@ open class DefaultSpeechHandler : SpeechHandler {
         builtInIntent: BuiltInIntent,
         alexaRequest: AlexaRequest<IntentRequest>
     ): AlexaResponse {
-        val intentHandler = getIntentHandlerOf(intentName) ?: run {
+        val intentHandler = getIntentHandlerOf(intentName, intentMap) ?: run {
             intentHandlerInstances.keys
                 .find { it.simpleName == intentName }
                 ?.cast<KClass<out IntentHandler>?>()
@@ -172,7 +195,7 @@ open class DefaultSpeechHandler : SpeechHandler {
         logger.info("=========================== ElementSelectedRequest =========================")
         val intentName = alexaRequest.session?.attribute<String>(INTENT_CONTEXT)
             ?: alexaRequest.request.token.split("\\|".toRegex()).first()
-        val intentHandler = getIntentHandlerOf(intentName)
+        val intentHandler = getIntentHandlerOf(intentName, intentMap)
         return intentHandler?.let {
             val alexaResponse = it.onElementSelected(alexaRequest)
             generateResponse(it, alexaRequest, alexaResponse)
@@ -207,19 +230,6 @@ open class DefaultSpeechHandler : SpeechHandler {
             lookupIntentHandlerFromAnnotation<Requester> { result ->
                 when (result) {
                     is Result.Content -> result.intentHandler.onConnectionsResponse(alexaRequest)
-                    is Result.None -> AlexaResponse.emptyResponse()
-                    is Result.Error -> throw result.exception
-                }
-            }
-        }
-    }
-
-    override fun handleCanFulfillIntentRequest(alexaRequest: AlexaRequest<CanFulfillIntentRequest>): AlexaResponse {
-        logger.info("=========================== CanFulfillIntentRequest =========================")
-        return intentHandlerInstances[CanFulfillIntent::class]?.onCanFulfillIntent(alexaRequest) ?: run {
-            return lookupIntentHandlerFromAnnotation<CanFulfillIntent> { result ->
-                when (result) {
-                    is Result.Content -> result.intentHandler.onCanFulfillIntent(alexaRequest)
                     is Result.None -> AlexaResponse.emptyResponse()
                     is Result.Error -> throw result.exception
                 }
@@ -330,6 +340,13 @@ open class DefaultSpeechHandler : SpeechHandler {
             }
     }
 
+    /**
+     * Gets all the Intent Handlers that have a given annotation. It's not possible to get more than one Intent Handler.
+     * @param T The Annotation to be loaded all the intent handler classes
+     * @param callback to execute after getting all the intent handlers
+     * @return Alexa Response which should be returned by the callback function.
+     * @throws IllegalAnnotationException when more than one intent handler with a given annotation is found.
+     */
     private inline fun <reified T : Annotation> lookupIntentHandlerFromAnnotation(
         callback: (Result) -> AlexaResponse
     ): AlexaResponse {
@@ -348,6 +365,11 @@ open class DefaultSpeechHandler : SpeechHandler {
         }
     }
 
+    /**
+     * Generates the Alexa response based on the INTENT_CONTEXT. If INTENT_CONTEXT is enabled,
+     * then it will add the intent context value (which is the class name of the current intent handler)
+     * to the session attributes.
+     */
     private fun generateResponse(
         intentHandler: IntentHandler,
         request: AlexaRequest<*>,
@@ -378,6 +400,9 @@ open class DefaultSpeechHandler : SpeechHandler {
         return IllegalAnnotationException("The skill can only have one @$annotation method.")
     }
 
+    /**
+     * Loads all IntentHandler classes from the INTENT_PACKAGE environment variable.
+     */
     @Suppress("unchecked_cast")
     private fun loadIntentHandlerClasses(): List<KClass<out IntentHandler>> {
         return loadIntentClassesFromPackage()
@@ -390,33 +415,46 @@ open class DefaultSpeechHandler : SpeechHandler {
     }
 
     /**
-     * Look @Intent annotation up
-     * @return Map of Kclasses. The Array of mapsTo corresponds to the key and the value is the kClass
-     * that has the annotation.
+     * Look a given annotation up
+     * @return Map of Kclasses. The Array of mapsTo corresponds to the key and kClass is the value
      */
-    private fun mapClassesWithIntentAnnotation(): Map<Set<String>, KClass<out IntentHandler>> {
-        return findAnnotatedClasses(intentHandlerClasses, Intent::class)
+    private inline fun <reified T : Annotation> mapIntentHandlers(): Map<Set<String>, KClass<out IntentHandler>> {
+        return findAnnotatedClasses(intentHandlerClasses, T::class)
             .map { annotatedClass ->
-                val intent = annotatedClass.findAnnotation<Intent>()!!
-                val mapsTo = intent.mapsTo.toSet() + annotatedClass.simpleName!!
+                val annotation = annotatedClass.findAnnotation<T>()!!
+                val mapsTo = when (annotation) {
+                    is Intent -> annotation.cast<Intent>().mapsTo.toSet() + annotatedClass.simpleName!!
+                    is CanFulfillIntent -> annotation.cast<CanFulfillIntent>().mapsTo.toSet() +
+                        annotatedClass.simpleName!!
+                    else -> emptySet()
+                }
+
                 mapsTo to annotatedClass
             }.toMap()
     }
 
     /**
-     * Retrieves an instance of a given intentName, if no such instance exists, it will be created, put into the hash
-     * and return it
-     * @param intentName
-     * @return an instance of the intentName
+     * Checks if any of the entry keys from the classes map is equal to the given intent name, if so, it will return
+     * a instance of the corresponding intent handler.
      */
-    private fun getIntentHandlerOf(intentName: String): IntentHandler? {
-        return intentClasses.entries.find {
+    private fun getIntentHandlerOf(
+        intentName: String,
+        classes: Map<Set<String>, KClass<out IntentHandler>>
+    ): IntentHandler? {
+        return classes.entries.find {
             it.key.contains(intentName)
         }?.let {
             getIntentHandlerOf(it.value)
         }
     }
 
+    /**
+     * Retrieves an instance of a given intentName, if no such instance exists, it will be created, put it into the hash
+     * and return it
+     * @param intentName
+     * @param classes map containing all the annotated classes
+     * @return an instance of the intentName
+     */
     private fun getIntentHandlerOf(kclazz: KClass<out IntentHandler>) =
         intentHandlerInstances.getOrPut(kclazz) { kclazz.createInstance() }
 
