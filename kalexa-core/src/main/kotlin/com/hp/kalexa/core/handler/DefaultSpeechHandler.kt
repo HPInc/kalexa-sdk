@@ -430,7 +430,7 @@ open class DefaultSpeechHandler : SpeechHandler {
                 val annotation = annotatedClass.findAnnotation<T>()!!
                 val mapsTo = when (annotation) {
                     is Intent -> annotation.cast<Intent>().mapsTo.toSet() + annotatedClass.simpleName!!
-                    is CanFulfillIntent -> annotation.cast<CanFulfillIntent>().mapsTo.toSet() +
+                    is CanFulfillIntent -> annotation.cast<CanFulfillIntent>().intents.toSet() +
                         annotatedClass.simpleName!!
                     else -> emptySet()
                 }
