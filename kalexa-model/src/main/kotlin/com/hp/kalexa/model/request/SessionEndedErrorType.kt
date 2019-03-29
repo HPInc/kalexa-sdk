@@ -11,7 +11,8 @@ enum class SessionEndedErrorType(private val value: String) {
 
     INVALID_RESPONSE("INVALID_RESPONSE"),
     DEVICE_COMMUNICATION_ERROR("DEVICE_COMMUNICATION_ERROR"),
-    INTERNAL_SERVICE_ERROR("INTERNAL_SERVICE_ERROR");
+    INTERNAL_SERVICE_ERROR("INTERNAL_SERVICE_ERROR"),
+    ENDPOINT_TIMEOUT("ENDPOINT_TIMEOUT");
 
     override fun toString(): String {
         return value
