@@ -44,7 +44,7 @@ import com.hp.kalexa.model.request.event.ListItemsDeletedEventRequest
 import com.hp.kalexa.model.request.event.ListItemsUpdatedEventRequest
 import com.hp.kalexa.model.request.event.ListUpdatedEventRequest
 import com.hp.kalexa.model.response.AlexaResponse
-import com.hp.kalexa.model.response.alexaResponse
+import com.hp.kalexa.model.response.dsl.alexaResponse
 import org.apache.logging.log4j.LogManager
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance

@@ -12,7 +12,7 @@ import com.hp.kalexa.model.Slot
 import com.hp.kalexa.model.entityresolution.StatusCode
 import com.hp.kalexa.model.extension.getAttr
 import com.hp.kalexa.model.response.AlexaResponse
-import com.hp.kalexa.model.response.alexaResponse
+import com.hp.kalexa.model.response.dsl.alexaResponse
 
 /**
  * This class has some useful default responses that you can use it.

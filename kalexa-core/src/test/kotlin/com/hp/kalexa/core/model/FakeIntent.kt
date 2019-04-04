@@ -27,7 +27,7 @@ import com.hp.kalexa.model.request.event.ListItemsDeletedEventRequest
 import com.hp.kalexa.model.request.event.ListItemsUpdatedEventRequest
 import com.hp.kalexa.model.request.event.ListUpdatedEventRequest
 import com.hp.kalexa.model.response.AlexaResponse
-import com.hp.kalexa.model.response.alexaResponse
+import com.hp.kalexa.model.response.dsl.alexaResponse
 
 @LaunchIntent
 @Intent(mapsTo = ["FirstIntent", "SecondIntent", "ThirdIntent"])
