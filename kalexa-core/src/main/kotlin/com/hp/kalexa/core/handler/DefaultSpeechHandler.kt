@@ -57,7 +57,7 @@ open class DefaultSpeechHandler : SpeechHandler {
     private val intentHandlerClasses: List<KClass<out IntentHandler>> = loadIntentHandlerClasses()
     private val intentMap: Map<Set<String>, KClass<out IntentHandler>> = mapIntentHandlers<Intent>()
     private val canFulfillMap: Map<Set<String>, KClass<out IntentHandler>> = mapIntentHandlers<CanFulfillIntent>()
-    private val intentHandlerInstances = mutableMapOf<KClass<out Any>, IntentHandler>()
+    private val intentHandlerInstances: MutableMap<String, IntentHandler> = mutableMapOf()
 
     override fun handleSessionStartedRequest(alexaRequest: AlexaRequest<SessionStartedRequest>) =
         AlexaResponse.emptyResponse()
@@ -65,7 +65,7 @@ open class DefaultSpeechHandler : SpeechHandler {
     override fun handleLaunchRequest(alexaRequest: AlexaRequest<LaunchRequest>): AlexaResponse {
         logger.info("=========================== LaunchRequest =========================")
         logger.debug("Looking for LaunchIntent intents in ${getIntentPackage()}")
-        return intentHandlerInstances[LaunchIntent::class]?.onLaunchIntent(alexaRequest)
+        return intentHandlerInstances[LaunchIntent::class.simpleName!!]?.onLaunchIntent(alexaRequest)
             ?: run {
                 return lookupIntentHandlerFromAnnotation<LaunchIntent> { result ->
                     when (result) {
@@ -112,7 +112,7 @@ open class DefaultSpeechHandler : SpeechHandler {
 
     private fun fallbackIntent(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
         logger.info("=========================== Fallback Intent =========================")
-        return intentHandlerInstances[FallbackIntent::class]?.onFallbackIntent(alexaRequest)
+        return intentHandlerInstances[FallbackIntent::class.simpleName!!]?.onFallbackIntent(alexaRequest)
             ?: run {
                 return lookupIntentHandlerFromAnnotation<FallbackIntent> { result ->
                     when (result) {
@@ -126,7 +126,7 @@ open class DefaultSpeechHandler : SpeechHandler {
 
     private fun helpIntent(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
         logger.info("=========================== Help Intent =========================")
-        return intentHandlerInstances[HelpIntent::class]?.onHelpIntent(alexaRequest)
+        return intentHandlerInstances[HelpIntent::class.simpleName!!]?.onHelpIntent(alexaRequest)
             ?: run {
                 return lookupIntentHandlerFromAnnotation<HelpIntent> { result ->
                     when (result) {
@@ -142,7 +142,7 @@ open class DefaultSpeechHandler : SpeechHandler {
         builtInIntent: BuiltInIntent,
         alexaRequest: AlexaRequest<IntentRequest>
     ): AlexaResponse {
-        return intentHandlerInstances[RecoverIntentContext::class]?.onUnknownIntentContext(builtInIntent)
+        return intentHandlerInstances[RecoverIntentContext::class.simpleName!!]?.onUnknownIntentContext(builtInIntent)
             ?: run {
                 return lookupIntentHandlerFromAnnotation<RecoverIntentContext> { result ->
                     when (result) {
@@ -169,9 +169,9 @@ open class DefaultSpeechHandler : SpeechHandler {
     ): AlexaResponse {
         val intentHandler = getIntentHandlerOf(intentName, intentMap) ?: run {
             intentHandlerInstances.keys
-                .find { it.simpleName == intentName }
-                ?.cast<KClass<out IntentHandler>?>()
-                ?.let { getIntentHandlerOf(it) }
+                .find { it == intentName }
+                ?.let { intentHandlerInstances[intentName] }
+                ?.let { getIntentHandlerOf(it::class) }
                 ?: run { return unknownIntentException(intentName) }
         }
         val alexaResponse = intentHandler.onBuiltInIntent(builtInIntent, alexaRequest)
@@ -213,7 +213,7 @@ open class DefaultSpeechHandler : SpeechHandler {
         alexaRequest: AlexaRequest<ConnectionsResponseRequest>
     ): AlexaResponse {
         logger.info("=========================== Connections.Response =========================")
-        return intentHandlerInstances[Requester::class]?.onConnectionsResponse(alexaRequest) ?: run {
+        return intentHandlerInstances[Requester::class.simpleName!!]?.onConnectionsResponse(alexaRequest) ?: run {
             lookupIntentHandlerFromAnnotation<Requester> { result ->
                 when (result) {
                     is Result.Content -> result.intentHandler.onConnectionsResponse(alexaRequest)
@@ -226,7 +226,7 @@ open class DefaultSpeechHandler : SpeechHandler {
 
     override fun handleConnectionsRequest(alexaRequest: AlexaRequest<ConnectionsRequest>): AlexaResponse {
         logger.info("=========================== ConnectionsRequest =========================")
-        return intentHandlerInstances[Provider::class]?.onConnectionsRequest(alexaRequest) ?: run {
+        return intentHandlerInstances[Provider::class.simpleName!!]?.onConnectionsRequest(alexaRequest) ?: run {
             return lookupIntentHandlerFromAnnotation<Provider> { result ->
                 when (result) {
                     is Result.Content -> result.intentHandler.onConnectionsRequest(alexaRequest)
@@ -239,7 +239,7 @@ open class DefaultSpeechHandler : SpeechHandler {
 
     override fun handleListCreatedEventRequest(alexaRequest: AlexaRequest<ListCreatedEventRequest>): AlexaResponse {
         logger.info("=========================== ListCreatedEventRequest =========================")
-        return intentHandlerInstances[ListEvents::class]?.onListCreatedEventRequest(alexaRequest)
+        return intentHandlerInstances[ListEvents::class.simpleName!!]?.onListCreatedEventRequest(alexaRequest)
             ?: run {
                 return lookupIntentHandlerFromAnnotation<ListEvents> { result ->
                     when (result) {
@@ -253,7 +253,7 @@ open class DefaultSpeechHandler : SpeechHandler {
 
     override fun handleListUpdatedEventRequest(alexaRequest: AlexaRequest<ListUpdatedEventRequest>): AlexaResponse {
         logger.info("=========================== ListUpdatedEventRequest =========================")
-        return intentHandlerInstances[ListEvents::class]?.onListUpdatedEventRequest(alexaRequest)
+        return intentHandlerInstances[ListEvents::class.simpleName!!]?.onListUpdatedEventRequest(alexaRequest)
             ?: run {
                 return lookupIntentHandlerFromAnnotation<ListEvents> { result ->
                     when (result) {
@@ -267,7 +267,7 @@ open class DefaultSpeechHandler : SpeechHandler {
 
     override fun handleListDeletedEventRequest(alexaRequest: AlexaRequest<ListDeletedEventRequest>): AlexaResponse {
         logger.info("=========================== ListDeletedEventRequest =========================")
-        return intentHandlerInstances[ListEvents::class]?.onListDeletedEventRequest(alexaRequest)
+        return intentHandlerInstances[ListEvents::class.simpleName!!]?.onListDeletedEventRequest(alexaRequest)
             ?: run {
                 return lookupIntentHandlerFromAnnotation<ListEvents> { result ->
                     when (result) {
@@ -283,7 +283,7 @@ open class DefaultSpeechHandler : SpeechHandler {
         alexaRequest: AlexaRequest<ListItemsCreatedEventRequest>
     ): AlexaResponse {
         logger.info("=========================== ListItemsCreatedEventRequest =========================")
-        return intentHandlerInstances[ListEvents::class]?.onListItemsCreatedEventRequest(alexaRequest)
+        return intentHandlerInstances[ListEvents::class.simpleName!!]?.onListItemsCreatedEventRequest(alexaRequest)
             ?: run {
                 return lookupIntentHandlerFromAnnotation<ListEvents> { result ->
                     when (result) {
@@ -299,7 +299,7 @@ open class DefaultSpeechHandler : SpeechHandler {
         alexaRequest: AlexaRequest<ListItemsUpdatedEventRequest>
     ): AlexaResponse {
         logger.info("=========================== ListItemsUpdatedEventRequest =========================")
-        return intentHandlerInstances[ListEvents::class]?.onListItemsUpdatedEventRequest(alexaRequest)
+        return intentHandlerInstances[ListEvents::class.simpleName!!]?.onListItemsUpdatedEventRequest(alexaRequest)
             ?: run {
                 return lookupIntentHandlerFromAnnotation<ListEvents> { result ->
                     when (result) {
@@ -315,7 +315,7 @@ open class DefaultSpeechHandler : SpeechHandler {
         alexaRequest: AlexaRequest<ListItemsDeletedEventRequest>
     ): AlexaResponse {
         logger.info("=========================== ListItemsDeletedEventRequest =========================")
-        return intentHandlerInstances[ListEvents::class]?.onListItemsDeletedEventRequest(alexaRequest)
+        return intentHandlerInstances[ListEvents::class.simpleName!!]?.onListItemsDeletedEventRequest(alexaRequest)
             ?: run {
                 return lookupIntentHandlerFromAnnotation<ListEvents> { result ->
                     when (result) {
@@ -462,7 +462,14 @@ open class DefaultSpeechHandler : SpeechHandler {
      * @return an instance of the intentName
      */
     private fun getIntentHandlerOf(kclazz: KClass<out IntentHandler>) =
-        intentHandlerInstances.getOrPut(kclazz) { kclazz.createInstance() }
+        intentHandlerInstances.getOrPut(kclazz.simpleName!!) { kclazz.createInstance() }
+
+    /**
+     * Put into the Intent Handler Instances map the given instance.
+     */
+    fun registerIntentHandlerInstance(intentHandler: IntentHandler) {
+        intentHandlerInstances[intentHandler::class.simpleName!!] = intentHandler
+    }
 
     sealed class Result {
         object None : Result()
