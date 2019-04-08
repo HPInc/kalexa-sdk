@@ -43,27 +43,3 @@ fun richText(block: (RichText.() -> String)) = RichText().apply { text = block()
 fun image(block: (ImageBuilder.() -> Unit)): Image = ImageBuilder().apply { block() }.build()
 fun imageInstance(block: ImageInstanceBuilder.() -> Unit): ImageInstance =
     ImageInstanceBuilder().apply { block() }.build()
-
-fun main() {
-    println(alexaResponse {
-        response {
-            directives {
-                renderTemplateDirective {
-                    bodyTemplate7 {
-                        backgroundImage = image {
-                            sources = listOf(
-                                imageInstance {
-                                    url = "http://www.clicrbs.com.br"
-                                    size = ImageSize.LARGE
-                                },
-                                imageInstance {
-                                    url = "http://www.clicrbs.com.br"
-                                    size = ImageSize.LARGE
-                                })
-                        }
-                    }
-                }
-            }
-        }
-    }.toJson())
-}
