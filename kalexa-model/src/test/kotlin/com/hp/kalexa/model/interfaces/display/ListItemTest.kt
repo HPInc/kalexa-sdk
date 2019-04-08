@@ -7,8 +7,8 @@ package com.hp.kalexa.model.interfaces.display
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.hp.kalexa.model.response.plainText
-import com.hp.kalexa.model.response.richText
+import com.hp.kalexa.model.response.dsl.plainText
+import com.hp.kalexa.model.response.dsl.richText
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it

@@ -27,7 +27,7 @@ annotation class Provider
 annotation class Requester
 
 @Target(AnnotationTarget.CLASS)
-annotation class CanFulfillIntent
+annotation class CanFulfillIntent(val intents: Array<String> = [])
 
 @Target(AnnotationTarget.CLASS)
 annotation class ListEvents

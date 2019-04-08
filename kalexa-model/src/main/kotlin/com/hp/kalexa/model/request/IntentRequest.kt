@@ -16,6 +16,6 @@ class IntentRequest(
     locale: String,
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
     timestamp: LocalDateTime,
-    val intent: Intent,
-    val dialogState: DialogState?
-) : Request(requestId, locale, timestamp)
+    intent: Intent,
+    dialogState: DialogState?
+) : BaseIntentRequest(requestId, locale, timestamp, intent, dialogState)
