@@ -109,7 +109,7 @@ So when a SessionRequest comes from Alexa to your skill, `Kalexa-SDK` will map t
  - `@CanFulfillIntentRequest` and `onCanFulfillIntent` - Handles the CanFulfill. This request verifies if the skill can understand and fulfill the intent request and slots.
 
 Kotlin Code:
- ```
+ ```kotlin
  @Intent(mapsTo = ["RecipeIntent", "LaunchIntent"])
  class FoodIntent : IntentHandler() {
      override fun onIntentRequest(request: IntentRequest): AlexaResponse {
@@ -119,7 +119,7 @@ Kotlin Code:
  ```
 
 Java code:
- ```
+ ```java
  @Intent(mapsTo = ["RecipeIntent", "LaunchIntent"])
  class FoodIntent extends IntentHandler {
      @Override
@@ -143,7 +143,7 @@ For that you can use the method `lockIntentContext()` from `IntentHandler` class
 For example:
 
 `Java Code:`
-   ```
+   ```java
    @Intent
    class FoodIntent extends IntentHandler {
          @Override
@@ -180,7 +180,7 @@ Currently, it only supports *PRINT* connection type.
 If your skill acts as a Provider, you need to annotate your class with `@Provider` and override `onConnectionsRequest` callback method. In this case, after processing the request, you have to answer back to Alexa using the `SendResponseDirective` directive.
 
 `Kotlin Code:`
-```
+```kotlin
     override fun onConnectionsRequest(request: ConnectionsRequest): AlexaResponse {
         return alexaResponse {
             response {
@@ -201,7 +201,7 @@ If your skill acts as a Provider, you need to annotate your class with `@Provide
 If your skill acts as a Requester, just return to Alexa a `SendRequestDirective` with the type of the Entity-Pair object and the Payload:
 
 `Kotlin Code:`
-```
+```kotlin
     override fun onConnectionsRequest(request: ConnectionsRequest): AlexaResponse {
         return alexaResponse {
             response {
@@ -228,7 +228,7 @@ If your skill acts as a Requester, just return to Alexa a `SendRequestDirective`
 And then expect the response to be on `onConnectionsResponse` method
 
 `Java code:`
-```
+```java
     @NotNull
     @Override
     public AlexaResponse onConnectionsResponse(ConnectionsResponseRequest request) {
@@ -247,7 +247,7 @@ Note that you must annotate your class with `@Requester` so the `onConnectionsRe
 For Kotlin, Kalexa-sdk has two types of response `Builder` and `DSL`, for Java you can respond using `Builder`.
 ##### Java:
 AlexaBuilder builds the response gracefully to send back to Alexa:
-```
+```java
 String msg = "Hello, what a beautiful day!"
 AlexaResponse.Companion.builder()
     .speech(msg)
@@ -256,7 +256,7 @@ AlexaResponse.Companion.builder()
 ```
 ##### Kotlin:
 You may use AlexaBuilder or DSL:
-```
+```kotlin
 return alexaResponse {
     response {
         speech {"This is a hello from FakeIntent"}
@@ -278,7 +278,7 @@ UI directives: `RenderTemplateDirective` and populate with its Templates.
 With Kotlin, using DSL, it's possible to iterate over a list of items and generate a list item for each element:
 
 `Kotlin code`
-```
+```kotlin
 directives {
     renderTemplateDirective {
         listTemplate2 {
