@@ -24,12 +24,12 @@ Then, in your project:
 ##### Gradle
 add dependency to build.gradle
 ```
-compile "com.hp.kalexa:kalexa-sdk:0.1.0" 
+compile "com.hp.kalexa:kalexa-sdk:0.1.1" 
 ```
 or
 ```
-compile "com.hp.kalexa:kalexa-core:0.1.0" 
-compile "com.hp.kalexa:kalexa-model:0.1.0" 
+compile "com.hp.kalexa:kalexa-core:0.1.1" 
+compile "com.hp.kalexa:kalexa-model:0.1.1" 
 ```
 
 ##### Maven
@@ -38,7 +38,7 @@ add dependency to pom.xml
 <dependency>
     <groupId>com.hp.kalexa</groupId>
     <artifactId>kalexa-sdk</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
 </dependency>
 ```
 or
@@ -46,12 +46,12 @@ or
 <dependency>
     <groupId>com.hp.kalexa</groupId>
     <artifactId>kalexa-core</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
 </dependency>
 <dependency>
     <groupId>com.hp.kalexa</groupId>
     <artifactId>kalexa-model</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
 </dependency>
 ```
 
@@ -70,6 +70,19 @@ You must export three environment variables on your application before running t
 `INTENT_PACKAGE`: Package location where your Intent classes are located.
 
 `SKILL_NAME`: The name of the skill.
+
+##### Add Intent Handler manually to Speech Handler:
+If for some reason you need to add Intent Handler instances manually instead of defining the environment 
+variable `INTENT_PACKAGE`, you can do it by adding those instances into `SpeechHandler` object
+before providing it to `AlexaWebApplication`.
+
+```kotlin
+val intents = listOf(FirstIntent(), SecondIntent(), ThirdIntent(), FourthIntent())
+val speechHandler = SpeechHandler.newInstance(intentHandlerInstances = intents)
+val alexaWebApplication = AlexaWebApplication(speechHandler)
+
+```
+
 
 #### Create Intent:
 
