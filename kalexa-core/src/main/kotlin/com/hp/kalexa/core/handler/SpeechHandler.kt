@@ -5,6 +5,7 @@
 
 package com.hp.kalexa.core.handler
 
+import com.hp.kalexa.core.intent.IntentHandler
 import com.hp.kalexa.model.request.AlexaRequest
 import com.hp.kalexa.model.request.CanFulfillIntentRequest
 import com.hp.kalexa.model.request.ConnectionsRequest
@@ -54,5 +55,7 @@ interface SpeechHandler {
 
     companion object {
         const val INTENT_CONTEXT = "com.hp.kalexa.intentContext"
+        fun newInstance(intentHandlerInstances: List<IntentHandler> = emptyList()): SpeechHandler =
+            DefaultSpeechHandler(intentHandlerInstances)
     }
 }

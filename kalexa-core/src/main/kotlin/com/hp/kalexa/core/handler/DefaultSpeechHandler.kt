@@ -51,13 +51,15 @@ import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.superclasses
 
-open class DefaultSpeechHandler : SpeechHandler {
+open class DefaultSpeechHandler(instances: List<IntentHandler> = emptyList()) : SpeechHandler {
+
     private val logger = LogManager.getLogger(DefaultSpeechHandler::class.java)
 
-    private val intentHandlerClasses: List<KClass<out IntentHandler>> = loadIntentHandlerClasses()
-    private val intentMap: Map<Set<String>, KClass<out IntentHandler>> = mapIntentHandlers<Intent>()
-    private val canFulfillMap: Map<Set<String>, KClass<out IntentHandler>> = mapIntentHandlers<CanFulfillIntent>()
-    private val intentHandlerInstances: MutableMap<String, IntentHandler> = mutableMapOf()
+    private val intentHandlerClasses: Set<KClass<out IntentHandler>> =
+        getClassesFrom(instances) + loadIntentHandlerClasses()
+    private val intentMap: Map<Set<String>, KClass<out IntentHandler>> = mapIntentHandlersOf<Intent>()
+    private val canFulfillMap: Map<Set<String>, KClass<out IntentHandler>> = mapIntentHandlersOf<CanFulfillIntent>()
+    private val intentHandlerInstances: MutableMap<String, IntentHandler> = toMap(instances)
 
     override fun handleSessionStartedRequest(alexaRequest: AlexaRequest<SessionStartedRequest>) =
         AlexaResponse.emptyResponse()
@@ -410,13 +412,14 @@ open class DefaultSpeechHandler : SpeechHandler {
      * Loads all IntentHandler classes from the INTENT_PACKAGE environment variable.
      */
     @Suppress("unchecked_cast")
-    private fun loadIntentHandlerClasses(): List<KClass<out IntentHandler>> {
+    private fun loadIntentHandlerClasses(): Set<KClass<out IntentHandler>> {
         return loadIntentClassesFromPackage()
             .filter { clazz ->
                 clazz.superclasses.find { superclazz ->
                     superclazz.simpleName == IntentHandler::class.java.simpleName
                 } != null
             }
+            .toSet()
             .cast()
     }
 
@@ -424,7 +427,7 @@ open class DefaultSpeechHandler : SpeechHandler {
      * Look a given annotation up
      * @return Map of Kclasses. The Array of mapsTo corresponds to the key and kClass is the value
      */
-    private inline fun <reified T : Annotation> mapIntentHandlers(): Map<Set<String>, KClass<out IntentHandler>> {
+    private inline fun <reified T : Annotation> mapIntentHandlersOf(): Map<Set<String>, KClass<out IntentHandler>> {
         return findAnnotatedClasses(intentHandlerClasses, T::class)
             .map { annotatedClass ->
                 val annotation = annotatedClass.findAnnotation<T>()!!
@@ -464,12 +467,11 @@ open class DefaultSpeechHandler : SpeechHandler {
     private fun getIntentHandlerOf(kclazz: KClass<out IntentHandler>) =
         intentHandlerInstances.getOrPut(kclazz.simpleName!!) { kclazz.createInstance() }
 
-    /**
-     * Put into the Intent Handler Instances map the given instance.
-     */
-    fun registerIntentHandlerInstance(intentHandler: IntentHandler) {
-        intentHandlerInstances[intentHandler::class.simpleName!!] = intentHandler
-    }
+    private fun toMap(intentHandlers: List<IntentHandler>) =
+        intentHandlers.map { it::class.simpleName!! to it }.toMap().toMutableMap()
+
+    private fun getClassesFrom(intentHandlers: List<IntentHandler>) =
+        intentHandlers.map { it::class }.toSet()
 
     sealed class Result {
         object None : Result()

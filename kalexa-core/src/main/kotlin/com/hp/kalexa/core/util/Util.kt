@@ -15,21 +15,26 @@ object Util {
 
     fun getApplicationID(): String? = System.getenv("APPLICATION_ID")
 
-    fun getIntentPackage() = System.getenv("INTENT_PACKAGE")
-        ?: throw IllegalArgumentException("You must define INTENT_PACKAGE environment variable")
+    fun getIntentPackage(): String? = System.getenv("INTENT_PACKAGE")
 
     fun <T : Annotation> findAnnotatedClasses(
-        intentClasses: List<KClass<out IntentHandler>>,
+        intentClasses: Set<KClass<out IntentHandler>>,
         annotation: KClass<T>
-    ): List<KClass<out IntentHandler>> {
+    ): Set<KClass<out IntentHandler>> {
         return intentClasses.filter {
             it.findAnnotation(annotation) != null
-        }
+        }.toSet()
     }
 
-    fun loadIntentClassesFromPackage(): List<KClass<out Any>> {
-        return ClassPath.from(Thread.currentThread().contextClassLoader)
-            .getTopLevelClasses(getIntentPackage())
-            .map { it.load().kotlin }
+    fun loadIntentClassesFromPackage(): Set<KClass<out Any>> {
+        val intentPackage = getIntentPackage() ?: ""
+        return if (intentPackage.isNotEmpty()) {
+            ClassPath.from(Thread.currentThread().contextClassLoader)
+                .getTopLevelClasses(intentPackage)
+                .map { it.load().kotlin }
+                .toSet()
+        } else {
+            emptySet()
+        }
     }
 }
