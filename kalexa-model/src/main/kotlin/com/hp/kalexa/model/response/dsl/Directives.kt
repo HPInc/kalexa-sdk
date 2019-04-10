@@ -1,3 +1,8 @@
+/*
+ * Copyright 2018 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
 package com.hp.kalexa.model.response.dsl
 
 import com.hp.kalexa.model.directive.ConfirmIntentDirective
@@ -6,6 +11,7 @@ import com.hp.kalexa.model.directive.DelegateDirective
 import com.hp.kalexa.model.directive.Directive
 import com.hp.kalexa.model.directive.HintDirective
 import com.hp.kalexa.model.directive.LaunchDirective
+import com.hp.kalexa.model.directive.PlayDirective
 import com.hp.kalexa.model.directive.RenderTemplateDirective
 import com.hp.kalexa.model.interfaces.display.BodyTemplate1
 import com.hp.kalexa.model.interfaces.display.BodyTemplate2
@@ -29,6 +35,10 @@ class Directives : ArrayList<Directive>() {
 
     fun metadata(block: com.hp.kalexa.model.interfaces.video.Metadata.() -> Unit) {
         metadata = com.hp.kalexa.model.interfaces.video.Metadata().apply { block() }
+    }
+
+    fun playDirective(block: PlayDirectiveBuilder.() -> Unit) {
+        add(PlayDirectiveBuilder().apply { apply(block) }.build())
     }
 
     fun videoDirective(block: VideoItem.() -> Unit) {

@@ -7,33 +7,19 @@ This library aims to simplify the skill creation without writing boiler-plate co
 It's also possible to use Java and add kalexa-sdk as dependency.
 
 ## Usage:
-You need to add this lib as dependency in your project.
-Since it is not in a repository yet, you need to clone this repo and build it:
-#### Windows:
-```
-gradlew.bat build install
-```
-#### Linux
-```
-gradlew build install
-```
-
-This will handle dependencies and also install kalexa-sdk in your local repository.
-
-Then, in your project:
 ##### Gradle
-add dependency to build.gradle
+add dependency to build.gradle:
 ```
 compile "com.hp.kalexa:kalexa-sdk:0.1.1" 
 ```
-or
+or as separated artifacts:
 ```
 compile "com.hp.kalexa:kalexa-core:0.1.1" 
 compile "com.hp.kalexa:kalexa-model:0.1.1" 
 ```
 
 ##### Maven
-add dependency to pom.xml
+add dependency to pom.xml:
 ```
 <dependency>
     <groupId>com.hp.kalexa</groupId>
@@ -41,7 +27,7 @@ add dependency to pom.xml
     <version>0.1.1</version>
 </dependency>
 ```
-or
+or as separated artifacts:
 ```
 <dependency>
     <groupId>com.hp.kalexa</groupId>
