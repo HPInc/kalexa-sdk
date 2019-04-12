@@ -51,9 +51,9 @@ import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.superclasses
 
-open class DefaultSpeechHandler(instances: List<IntentHandler> = emptyList()) : SpeechHandler {
+open class ConcreteSpeechHandler(instances: List<IntentHandler> = emptyList()) : SpeechHandler {
 
-    private val logger = LogManager.getLogger(DefaultSpeechHandler::class.java)
+    private val logger = LogManager.getLogger(ConcreteSpeechHandler::class.java)
 
     private val intentHandlerClasses: Set<KClass<out IntentHandler>> =
         getClassesFrom(instances) + loadIntentHandlerClasses()

@@ -56,6 +56,6 @@ interface SpeechHandler {
     companion object {
         const val INTENT_CONTEXT = "com.hp.kalexa.intentContext"
         fun newInstance(intentHandlerInstances: List<IntentHandler> = emptyList()): SpeechHandler =
-            DefaultSpeechHandler(intentHandlerInstances)
+            ConcreteSpeechHandler(intentHandlerInstances)
     }
 }

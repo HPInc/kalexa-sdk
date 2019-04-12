@@ -5,14 +5,15 @@
 
 package com.hp.kalexa.core.handler.webapplication
 
+import com.hp.kalexa.core.handler.SkillConfig
 import com.hp.kalexa.core.handler.SpeechHandler
 import com.hp.kalexa.core.handler.SpeechRequestHandler
 import org.apache.logging.log4j.LogManager
 
-class AlexaWebApplication(speechHandler: SpeechHandler = SpeechHandler.newInstance()) {
+class AlexaWebApplication(skillConfig: SkillConfig) {
     private val logger = LogManager.getLogger(AlexaWebApplication::class.java)
 
-    var speechRequestHandler: SpeechRequestHandler = SpeechRequestHandler(speechHandler)
+    private val speechRequestHandler: SpeechRequestHandler = SpeechRequestHandler(skillConfig)
 
     fun process(input: String): ByteArray {
         return process(input.toByteArray())

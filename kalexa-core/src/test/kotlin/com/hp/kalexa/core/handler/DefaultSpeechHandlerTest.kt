@@ -49,17 +49,17 @@ import kotlin.test.assertFailsWith
 object DefaultSpeechHandlerTest : Spek({
 
     describe("a Default speech handler class") {
-        lateinit var defaultSpeechHandler: DefaultSpeechHandler
+        lateinit var concreteSpeechHandler: ConcreteSpeechHandler
         beforeEachTest {
             mockkObject(Util)
             every { Util.getIntentPackage() } returns "com.hp.kalexa.core.model"
-            defaultSpeechHandler = DefaultSpeechHandler()
+            concreteSpeechHandler = ConcreteSpeechHandler()
         }
 
         describe("When handleSessionStarted method is called") {
             val envelope = mockk<AlexaRequest<SessionStartedRequest>>()
             it("should return an empty response") {
-                val alexaResponse = defaultSpeechHandler.handleSessionStartedRequest(envelope)
+                val alexaResponse = concreteSpeechHandler.handleSessionStartedRequest(envelope)
                 assertEquals(AlexaResponse.emptyResponse().toJson(), alexaResponse.toJson())
             }
         }
@@ -80,8 +80,8 @@ object DefaultSpeechHandlerTest : Spek({
             on("Intent without LaunchIntent annotation") {
                 it("should return a default Launch response") {
                     every { Util.getIntentPackage() } returns "package.with.no.intent"
-                    defaultSpeechHandler = DefaultSpeechHandler()
-                    val alexaResponse = defaultSpeechHandler.handleLaunchRequest(customLaunchRequestEnvelope)
+                    concreteSpeechHandler = ConcreteSpeechHandler()
+                    val alexaResponse = concreteSpeechHandler.handleLaunchRequest(customLaunchRequestEnvelope)
                     assertEquals(IntentUtil.defaultGreetings().toJson(), alexaResponse.toJson())
                 }
             }
@@ -92,7 +92,7 @@ object DefaultSpeechHandlerTest : Spek({
                 every { Util.findAnnotatedClasses(any(), LaunchIntent::class) } returns setOf(fakeIntent::class)
 
                 it("should return a call onLaunchIntent method from the intent annotated with launcher") {
-                    val alexaResponse = defaultSpeechHandler.handleLaunchRequest(customLaunchRequestEnvelope)
+                    val alexaResponse = concreteSpeechHandler.handleLaunchRequest(customLaunchRequestEnvelope)
                     assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a hello from FakeIntent@onLaunchIntent"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""",
                             alexaResponse.toJson())
                 }
@@ -102,7 +102,7 @@ object DefaultSpeechHandlerTest : Spek({
                 val intentHandler2 = mockk<KClass<out IntentHandler>>()
                 every { Util.findAnnotatedClasses(any(), LaunchIntent::class) } returns setOf(intentHandler, intentHandler2)
                 it("should throw illegal annotation argument") {
-                    assertFailsWith(exceptionClass = IllegalAnnotationException::class) { defaultSpeechHandler.handleLaunchRequest(customLaunchRequestEnvelope) }
+                    assertFailsWith(exceptionClass = IllegalAnnotationException::class) { concreteSpeechHandler.handleLaunchRequest(customLaunchRequestEnvelope) }
                 }
             }
         }
@@ -133,7 +133,7 @@ object DefaultSpeechHandlerTest : Spek({
                 on("Existent Custom Intent") {
                     every { intentRequestEnvelope.request.intent.name } returns "FakeIntent"
                     it("should call onIntentRequest method") {
-                        val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                        val response = concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                         assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a hello from FakeIntent"},"card":{"type":"Simple","title":"Hello world","content":"This is a content coming from FakeIntent"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""", response.toJson())
                     }
                 }
@@ -141,7 +141,7 @@ object DefaultSpeechHandlerTest : Spek({
                     every { intentRequestEnvelope.request.intent.name } returns "UnknownIntent"
                     it("should throw IllegalArgumentException") {
                         assertFailsWith(exceptionClass = IllegalArgumentException::class) {
-                            defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                            concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                         }
                     }
                 }
@@ -153,7 +153,7 @@ object DefaultSpeechHandlerTest : Spek({
                 on("FallbackIntent Intent with @FallbackIntent annotation") {
                     every { intentRequestEnvelope.request.intent.name } returns "AMAZON.FallbackIntent"
                     it("should call FakeIntent fallback method") {
-                        val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                        val response = concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                         assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a fallback response"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""",
                                 response.toJson())
                     }
@@ -163,7 +163,7 @@ object DefaultSpeechHandlerTest : Spek({
                     every { Util.loadIntentClassesFromPackage() } returns emptySet()
                     every { Util.findAnnotatedClasses(any(), FallbackIntent::class) } returns emptySet()
                     it("should call default fallback method") {
-                        val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                        val response = concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                         assertEquals(IntentUtil.unsupportedIntent().toJson(),
                                 response.toJson())
                     }
@@ -175,7 +175,7 @@ object DefaultSpeechHandlerTest : Spek({
                     every { Util.findAnnotatedClasses(any(), FallbackIntent::class) } returns setOf(intentHandler, intentHandler2)
                     it("should throw illegal annotation argument") {
                         assertFailsWith(exceptionClass = IllegalAnnotationException::class) {
-                            defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                            concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                         }
                     }
                 }
@@ -187,7 +187,7 @@ object DefaultSpeechHandlerTest : Spek({
                 on("Intent with @HelpIntent annotation") {
                     every { intentRequestEnvelope.request.intent.name } returns "AMAZON.HelpIntent"
                     it("should call FakeIntent onHelpIntent method") {
-                        val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                        val response = concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                         assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a help response"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""",
                                 response.toJson())
                     }
@@ -197,7 +197,7 @@ object DefaultSpeechHandlerTest : Spek({
                     every { Util.loadIntentClassesFromPackage() } returns emptySet()
                     every { Util.findAnnotatedClasses(any(), HelpIntent::class) } returns emptySet()
                     it("should call default helpIntent method") {
-                        val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                        val response = concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                         assertEquals(IntentUtil.helpIntent().toJson(),
                                 response.toJson())
                     }
@@ -209,7 +209,7 @@ object DefaultSpeechHandlerTest : Spek({
                     every { Util.findAnnotatedClasses(any(), HelpIntent::class) } returns setOf(intentHandler, intentHandler2)
                     it("should throw illegal annotation argument") {
                         assertFailsWith(exceptionClass = IllegalAnnotationException::class) {
-                            defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                            concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                         }
                     }
                 }
@@ -219,7 +219,7 @@ object DefaultSpeechHandlerTest : Spek({
                     every { intentRequestEnvelope.request.intent.name } returns BuiltInIntent.YES_INTENT.rawValue
                     attributesSession[SpeechHandler.INTENT_CONTEXT] = "FakeIntent"
                     it("should call onBuiltInIntent method") {
-                        val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                        val response = concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                         assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"I'm sorry, I couldn't understand what you have said. Could you say it again?"},"directives":[],"shouldEndSession":false},"sessionAttributes":{"com.hp.kalexa.intentContext":"FakeIntent","retry":1},"version":"1.0"}""",
                                 response.toJson())
                     }
@@ -229,7 +229,7 @@ object DefaultSpeechHandlerTest : Spek({
                     every { intentRequestEnvelope.request.intent.name } returns BuiltInIntent.YES_INTENT.rawValue
                     it("should throw IllegalArgumentException") {
                         assertFailsWith(exceptionClass = IllegalArgumentException::class) {
-                            defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                            concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                         }
                     }
                 }
@@ -237,7 +237,7 @@ object DefaultSpeechHandlerTest : Spek({
                     on("Intent with @RecoverIntentContext annotation") {
                         every { intentRequestEnvelope.request.intent.name } returns BuiltInIntent.YES_INTENT.rawValue
                         it("should should call unknownIntentContext") {
-                            val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                            val response = concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                             assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a unknown intent context response"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""",
                                     response.toJson())
                         }
@@ -245,9 +245,9 @@ object DefaultSpeechHandlerTest : Spek({
                     on("Intent without @RecoverIntentContext annotation") {
                         every { intentRequestEnvelope.request.intent.name } returns BuiltInIntent.YES_INTENT.rawValue
                         every { Util.loadIntentClassesFromPackage() } returns emptySet()
-                        defaultSpeechHandler = DefaultSpeechHandler()
+                        concreteSpeechHandler = ConcreteSpeechHandler()
                         it("should should call default unknownIntentContext response") {
-                            val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                            val response = concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                             assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"I'm sorry, I couldn't understand what you have said. Could you say it again?"},"directives":[],"shouldEndSession":false},"sessionAttributes":{"retry":1},"version":"1.0"}""",
                                     response.toJson())
                         }
@@ -260,7 +260,7 @@ object DefaultSpeechHandlerTest : Spek({
                         every { Util.findAnnotatedClasses(any(), RecoverIntentContext::class) } returns setOf(intentHandler, intentHandler2)
                         it("should throw illegal annotation argument") {
                             assertFailsWith(exceptionClass = IllegalAnnotationException::class) {
-                                defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                                concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                             }
                         }
                     }
@@ -293,7 +293,7 @@ object DefaultSpeechHandlerTest : Spek({
             }
             on("Element Selected with intent context locked") {
                 attributesSession[SpeechHandler.INTENT_CONTEXT] = "FakeIntent"
-                val response = defaultSpeechHandler.handleElementSelectedRequest(elementSelectedRequest)
+                val response = concreteSpeechHandler.handleElementSelectedRequest(elementSelectedRequest)
                 it("should use value of Intent Context to call FakeIntent.onElementSelected and return an empty response") {
                     assertEquals("{\"response\":{\"directives\":[]},\"sessionAttributes\":{\"com.hp.kalexa.intentContext\":\"FakeIntent\"},\"version\":\"1.0\"}", response.toJson())
                 }
@@ -302,12 +302,12 @@ object DefaultSpeechHandlerTest : Spek({
                 attributesSession[SpeechHandler.INTENT_CONTEXT] = "UnknownIntent"
                 it("should throw IllegalArgumentException") {
                     assertFailsWith(exceptionClass = IllegalArgumentException::class) {
-                        defaultSpeechHandler.handleElementSelectedRequest(elementSelectedRequest)
+                        concreteSpeechHandler.handleElementSelectedRequest(elementSelectedRequest)
                     }
                 }
             }
             on("Element Selected with intent context UNLOCKED") {
-                val response = defaultSpeechHandler.handleElementSelectedRequest(elementSelectedRequest)
+                val response = concreteSpeechHandler.handleElementSelectedRequest(elementSelectedRequest)
                 it("should use value of token to call FakeIntent.onElementSelected and return an empty response") {
                     assertEquals("{\"response\":{\"directives\":[]},\"sessionAttributes\":{},\"version\":\"1.0\"}", response.toJson())
                 }
@@ -341,7 +341,7 @@ object DefaultSpeechHandlerTest : Spek({
 
             on("Intent with @Requester annotation") {
                 it("should call onConnectionsResponse method") {
-                    val response = defaultSpeechHandler.handleConnectionsResponseRequest(connectionsResponseRequest)
+                    val response = concreteSpeechHandler.handleConnectionsResponseRequest(connectionsResponseRequest)
                     assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a onConnectionsResponse from FakeIntent"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""",
                         response.toJson())
                 }
@@ -350,7 +350,7 @@ object DefaultSpeechHandlerTest : Spek({
                 every { Util.loadIntentClassesFromPackage() } returns emptySet()
                 every { Util.findAnnotatedClasses(any(), Requester::class) } returns emptySet()
                 it("should call default onConnectionsResponse method") {
-                    val response = defaultSpeechHandler.handleConnectionsResponseRequest(connectionsResponseRequest)
+                    val response = concreteSpeechHandler.handleConnectionsResponseRequest(connectionsResponseRequest)
                     assertEquals(AlexaResponse.emptyResponse().toJson(),
                         response.toJson())
                 }
@@ -361,7 +361,7 @@ object DefaultSpeechHandlerTest : Spek({
                 every { Util.findAnnotatedClasses(any(), Requester::class) } returns setOf(intentHandler, intentHandler2)
                 it("should throw illegal annotation argument") {
                     assertFailsWith(exceptionClass = IllegalAnnotationException::class) {
-                        defaultSpeechHandler.handleConnectionsResponseRequest(connectionsResponseRequest)
+                        concreteSpeechHandler.handleConnectionsResponseRequest(connectionsResponseRequest)
                     }
                 }
             }
@@ -396,7 +396,7 @@ object DefaultSpeechHandlerTest : Spek({
                 every { Util.findAnnotatedClasses(any(), Provider::class) } returns emptySet()
                 it("should return a default Provider response") {
                     every { Util.getIntentPackage() } returns "package.with.no.intent"
-                    val alexaResponse = defaultSpeechHandler.handleConnectionsRequest(connectionsRequest)
+                    val alexaResponse = concreteSpeechHandler.handleConnectionsRequest(connectionsRequest)
                     assertEquals(IntentUtil.unsupportedIntent().toJson(), alexaResponse.toJson())
                 }
             }
@@ -405,7 +405,7 @@ object DefaultSpeechHandlerTest : Spek({
                 every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
 
                 it("should return a call onConnectionsRequest method from the intent annotated with Provider") {
-                    val alexaResponse = defaultSpeechHandler.handleConnectionsRequest(connectionsRequest)
+                    val alexaResponse = concreteSpeechHandler.handleConnectionsRequest(connectionsRequest)
                     assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a onConnectionsRequest from FakeIntent"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""",
                             alexaResponse.toJson())
                 }
@@ -415,7 +415,7 @@ object DefaultSpeechHandlerTest : Spek({
                 val intentHandler2 = mockk<KClass<out IntentHandler>>()
                 every { Util.findAnnotatedClasses(any(), Provider::class) } returns setOf(intentHandler, intentHandler2)
                 it("should throw illegal annotation argument") {
-                    assertFailsWith(exceptionClass = IllegalAnnotationException::class) { defaultSpeechHandler.handleConnectionsRequest(connectionsRequest) }
+                    assertFailsWith(exceptionClass = IllegalAnnotationException::class) { concreteSpeechHandler.handleConnectionsRequest(connectionsRequest) }
                 }
             }
         }
@@ -448,7 +448,7 @@ object DefaultSpeechHandlerTest : Spek({
                 every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns emptySet()
                 it("should return a default ListEvents response") {
                     every { Util.getIntentPackage() } returns "package.with.no.intent"
-                    val alexaResponse = defaultSpeechHandler.handleListCreatedEventRequest(listCreatedEventRequest)
+                    val alexaResponse = concreteSpeechHandler.handleListCreatedEventRequest(listCreatedEventRequest)
                     assertEquals(IntentUtil.unsupportedIntent().toJson(), alexaResponse.toJson())
                 }
             }
@@ -457,7 +457,7 @@ object DefaultSpeechHandlerTest : Spek({
                 every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
 
                 it("should return a call onListCreatedEventRequest method from the intent annotated with ListEvents") {
-                    val alexaResponse = defaultSpeechHandler.handleListCreatedEventRequest(listCreatedEventRequest)
+                    val alexaResponse = concreteSpeechHandler.handleListCreatedEventRequest(listCreatedEventRequest)
                     assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a ListCreatedEventRequest response"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""",
                             alexaResponse.toJson())
                 }
@@ -467,7 +467,7 @@ object DefaultSpeechHandlerTest : Spek({
                 val intentHandler2 = mockk<KClass<out IntentHandler>>()
                 every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns setOf(intentHandler, intentHandler2)
                 it("should throw illegal annotation argument") {
-                    assertFailsWith(exceptionClass = IllegalAnnotationException::class) { defaultSpeechHandler.handleListCreatedEventRequest(listCreatedEventRequest) }
+                    assertFailsWith(exceptionClass = IllegalAnnotationException::class) { concreteSpeechHandler.handleListCreatedEventRequest(listCreatedEventRequest) }
                 }
             }
         }
@@ -500,7 +500,7 @@ object DefaultSpeechHandlerTest : Spek({
                 every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns emptySet()
                 it("should return a default ListEvents response") {
                     every { Util.getIntentPackage() } returns "package.with.no.intent"
-                    val alexaResponse = defaultSpeechHandler.handleListUpdatedEventRequest(listUpdatedEventRequest)
+                    val alexaResponse = concreteSpeechHandler.handleListUpdatedEventRequest(listUpdatedEventRequest)
                     assertEquals(IntentUtil.unsupportedIntent().toJson(), alexaResponse.toJson())
                 }
             }
@@ -509,7 +509,7 @@ object DefaultSpeechHandlerTest : Spek({
                 every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
 
                 it("should return a call onListUpdatedEventRequest method from the intent annotated with ListEvents") {
-                    val alexaResponse = defaultSpeechHandler.handleListUpdatedEventRequest(listUpdatedEventRequest)
+                    val alexaResponse = concreteSpeechHandler.handleListUpdatedEventRequest(listUpdatedEventRequest)
                     assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a ListUpdatedEventRequest response"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""",
                             alexaResponse.toJson())
                 }
@@ -519,7 +519,7 @@ object DefaultSpeechHandlerTest : Spek({
                 val intentHandler2 = mockk<KClass<out IntentHandler>>()
                 every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns setOf(intentHandler, intentHandler2)
                 it("should throw illegal annotation argument") {
-                    assertFailsWith(exceptionClass = IllegalAnnotationException::class) { defaultSpeechHandler.handleListUpdatedEventRequest(listUpdatedEventRequest) }
+                    assertFailsWith(exceptionClass = IllegalAnnotationException::class) { concreteSpeechHandler.handleListUpdatedEventRequest(listUpdatedEventRequest) }
                 }
             }
         }
@@ -552,7 +552,7 @@ object DefaultSpeechHandlerTest : Spek({
                 every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns emptySet()
                 it("should return a default ListEvents response") {
                     every { Util.getIntentPackage() } returns "package.with.no.intent"
-                    val alexaResponse = defaultSpeechHandler.handleListDeletedEventRequest(listDeletedEventRequest)
+                    val alexaResponse = concreteSpeechHandler.handleListDeletedEventRequest(listDeletedEventRequest)
                     assertEquals(IntentUtil.unsupportedIntent().toJson(), alexaResponse.toJson())
                 }
             }
@@ -561,7 +561,7 @@ object DefaultSpeechHandlerTest : Spek({
                 every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
 
                 it("should return a call onListDeletedEventRequest method from the intent annotated with ListEvents") {
-                    val alexaResponse = defaultSpeechHandler.handleListDeletedEventRequest(listDeletedEventRequest)
+                    val alexaResponse = concreteSpeechHandler.handleListDeletedEventRequest(listDeletedEventRequest)
                     assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a ListDeletedEventRequest response"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""",
                             alexaResponse.toJson())
                 }
@@ -571,7 +571,7 @@ object DefaultSpeechHandlerTest : Spek({
                 val intentHandler2 = mockk<KClass<out IntentHandler>>()
                 every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns setOf(intentHandler, intentHandler2)
                 it("should throw illegal annotation argument") {
-                    assertFailsWith(exceptionClass = IllegalAnnotationException::class) { defaultSpeechHandler.handleListDeletedEventRequest(listDeletedEventRequest) }
+                    assertFailsWith(exceptionClass = IllegalAnnotationException::class) { concreteSpeechHandler.handleListDeletedEventRequest(listDeletedEventRequest) }
                 }
             }
         }
@@ -604,7 +604,7 @@ object DefaultSpeechHandlerTest : Spek({
                 every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns emptySet()
                 it("should return a default ListEvents response") {
                     every { Util.getIntentPackage() } returns "package.with.no.intent"
-                    val alexaResponse = defaultSpeechHandler.handleListItemsCreatedEventRequest(listItemsCreatedEventRequest)
+                    val alexaResponse = concreteSpeechHandler.handleListItemsCreatedEventRequest(listItemsCreatedEventRequest)
                     assertEquals(IntentUtil.unsupportedIntent().toJson(), alexaResponse.toJson())
                 }
             }
@@ -613,7 +613,7 @@ object DefaultSpeechHandlerTest : Spek({
                 every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
 
                 it("should return a call onListItemsCreatedEventRequest method from the intent annotated with ListEvents") {
-                    val alexaResponse = defaultSpeechHandler.handleListItemsCreatedEventRequest(listItemsCreatedEventRequest)
+                    val alexaResponse = concreteSpeechHandler.handleListItemsCreatedEventRequest(listItemsCreatedEventRequest)
                     assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a ListItemsCreatedEventRequest response"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""",
                             alexaResponse.toJson())
                 }
@@ -623,7 +623,7 @@ object DefaultSpeechHandlerTest : Spek({
                 val intentHandler2 = mockk<KClass<out IntentHandler>>()
                 every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns setOf(intentHandler, intentHandler2)
                 it("should throw illegal annotation argument") {
-                    assertFailsWith(exceptionClass = IllegalAnnotationException::class) { defaultSpeechHandler.handleListItemsCreatedEventRequest(listItemsCreatedEventRequest) }
+                    assertFailsWith(exceptionClass = IllegalAnnotationException::class) { concreteSpeechHandler.handleListItemsCreatedEventRequest(listItemsCreatedEventRequest) }
                 }
             }
         }
@@ -656,7 +656,7 @@ object DefaultSpeechHandlerTest : Spek({
                 every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns emptySet()
                 it("should return a default ListEvents response") {
                     every { Util.getIntentPackage() } returns "package.with.no.intent"
-                    val alexaResponse = defaultSpeechHandler.handleListItemsUpdatedEventRequest(listItemsUpdatedEventRequest)
+                    val alexaResponse = concreteSpeechHandler.handleListItemsUpdatedEventRequest(listItemsUpdatedEventRequest)
                     assertEquals(IntentUtil.unsupportedIntent().toJson(), alexaResponse.toJson())
                 }
             }
@@ -665,7 +665,7 @@ object DefaultSpeechHandlerTest : Spek({
                 every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
 
                 it("should return a call onListItemsUpdatedEventRequest method from the intent annotated with ListEvents") {
-                    val alexaResponse = defaultSpeechHandler.handleListItemsUpdatedEventRequest(listItemsUpdatedEventRequest)
+                    val alexaResponse = concreteSpeechHandler.handleListItemsUpdatedEventRequest(listItemsUpdatedEventRequest)
                     assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a ListItemsUpdatedEventRequest response"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""",
                             alexaResponse.toJson())
                 }
@@ -675,7 +675,7 @@ object DefaultSpeechHandlerTest : Spek({
                 val intentHandler2 = mockk<KClass<out IntentHandler>>()
                 every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns setOf(intentHandler, intentHandler2)
                 it("should throw illegal annotation argument") {
-                    assertFailsWith(exceptionClass = IllegalAnnotationException::class) { defaultSpeechHandler.handleListItemsUpdatedEventRequest(listItemsUpdatedEventRequest) }
+                    assertFailsWith(exceptionClass = IllegalAnnotationException::class) { concreteSpeechHandler.handleListItemsUpdatedEventRequest(listItemsUpdatedEventRequest) }
                 }
             }
         }
@@ -708,7 +708,7 @@ object DefaultSpeechHandlerTest : Spek({
                 every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns emptySet()
                 it("should return a default ListEvents response") {
                     every { Util.getIntentPackage() } returns "package.with.no.intent"
-                    val alexaResponse = defaultSpeechHandler.handleListItemsDeletedEventRequest(listItemsDeletedEventRequest)
+                    val alexaResponse = concreteSpeechHandler.handleListItemsDeletedEventRequest(listItemsDeletedEventRequest)
                     assertEquals(IntentUtil.unsupportedIntent().toJson(), alexaResponse.toJson())
                 }
             }
@@ -717,7 +717,7 @@ object DefaultSpeechHandlerTest : Spek({
                 every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
 
                 it("should return a call onListItemsDeletedEventRequest method from the intent annotated with ListEvents") {
-                    val alexaResponse = defaultSpeechHandler.handleListItemsDeletedEventRequest(listItemsDeletedEventRequest)
+                    val alexaResponse = concreteSpeechHandler.handleListItemsDeletedEventRequest(listItemsDeletedEventRequest)
                     assertEquals("""{"response":{"outputSpeech":{"type":"PlainText","text":"This is a ListItemsDeletedEventRequest response"},"directives":[],"shouldEndSession":true},"sessionAttributes":{},"version":"1.0"}""",
                             alexaResponse.toJson())
                 }
@@ -727,7 +727,7 @@ object DefaultSpeechHandlerTest : Spek({
                 val intentHandler2 = mockk<KClass<out IntentHandler>>()
                 every { Util.findAnnotatedClasses(any(), ListEvents::class) } returns setOf(intentHandler, intentHandler2)
                 it("should throw illegal annotation argument") {
-                    assertFailsWith(exceptionClass = IllegalAnnotationException::class) { defaultSpeechHandler.handleListItemsDeletedEventRequest(listItemsDeletedEventRequest) }
+                    assertFailsWith(exceptionClass = IllegalAnnotationException::class) { concreteSpeechHandler.handleListItemsDeletedEventRequest(listItemsDeletedEventRequest) }
                 }
             }
         }
