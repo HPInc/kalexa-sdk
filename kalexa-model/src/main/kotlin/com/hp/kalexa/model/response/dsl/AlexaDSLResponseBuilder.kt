@@ -7,7 +7,6 @@ package com.hp.kalexa.model.response.dsl
 
 import com.hp.kalexa.model.interfaces.display.Image
 import com.hp.kalexa.model.interfaces.display.ImageInstance
-import com.hp.kalexa.model.interfaces.display.ImageSize
 import com.hp.kalexa.model.interfaces.display.PlainText
 import com.hp.kalexa.model.interfaces.display.RichText
 import com.hp.kalexa.model.interfaces.display.TextContent

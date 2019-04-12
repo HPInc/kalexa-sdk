@@ -17,6 +17,9 @@ object Util {
 
     fun getIntentPackage(): String? = System.getenv("INTENT_PACKAGE")
 
+    fun isApplicationIdVerificationEnabled(): Boolean =
+        System.getenv("APPLICATION_ID_VERIFICATION")?.toBoolean() ?: true
+
     fun <T : Annotation> findAnnotatedClasses(
         intentClasses: Set<KClass<out IntentHandler>>,
         annotation: KClass<T>

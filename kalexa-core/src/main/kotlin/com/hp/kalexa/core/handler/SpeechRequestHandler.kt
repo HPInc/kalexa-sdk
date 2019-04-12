@@ -7,7 +7,15 @@ package com.hp.kalexa.core.handler
 
 import com.hp.kalexa.core.util.Util
 import com.hp.kalexa.model.json.JacksonSerializer
-import com.hp.kalexa.model.request.*
+import com.hp.kalexa.model.request.AlexaRequest
+import com.hp.kalexa.model.request.CanFulfillIntentRequest
+import com.hp.kalexa.model.request.ConnectionsRequest
+import com.hp.kalexa.model.request.ConnectionsResponseRequest
+import com.hp.kalexa.model.request.ElementSelectedRequest
+import com.hp.kalexa.model.request.IntentRequest
+import com.hp.kalexa.model.request.LaunchRequest
+import com.hp.kalexa.model.request.SessionEndedRequest
+import com.hp.kalexa.model.request.SessionStartedRequest
 import com.hp.kalexa.model.request.event.ListCreatedEventRequest
 import com.hp.kalexa.model.request.event.ListDeletedEventRequest
 import com.hp.kalexa.model.request.event.ListItemsCreatedEventRequest
@@ -17,29 +25,27 @@ import com.hp.kalexa.model.request.event.ListUpdatedEventRequest
 import com.hp.kalexa.model.response.AlexaResponse
 import org.apache.logging.log4j.LogManager
 
-class SpeechRequestHandler(private val skillConfig: SkillConfig) {
-    private val logger = LogManager.getLogger(SpeechRequestHandler::class.java)
+class SpeechRequestHandler(
+    private val skillConfig: SkillConfig = SkillConfig(),
     private val speechHandler: SpeechHandler = SpeechHandler.newInstance(skillConfig.intentHandlers)
+) {
+    private val logger = LogManager.getLogger(SpeechRequestHandler::class.java)
 
     fun process(input: ByteArray): String {
         val requestEnvelope = JacksonSerializer.deserialize(input, AlexaRequest::class.java)
 
-        if (validateApplicationId(requestEnvelope).not()) {
+        if (isApplicationIdValid(requestEnvelope).not()) {
             throw IllegalArgumentException("Request application ID doesn't match with given Application ID")
         }
-        handleInterceptors(skillConfig.interceptors as List<RequestInterceptor<Request>>, requestEnvelope)
+        handleInterceptors(skillConfig.interceptors, requestEnvelope)
         return handleRequestType(requestEnvelope)
     }
 
-    private fun handleInterceptors(requestInterceptors: List<RequestInterceptor<Request>>, requestEnvelope: AlexaRequest<*>) {
-        for (interceptor in requestInterceptors) {
-            interceptor.intercept(requestEnvelope)
+    private fun isApplicationIdValid(alexaRequest: AlexaRequest<*>): Boolean {
+        if (Util.isApplicationIdVerificationEnabled().not()) {
+            // if application id is disabled, bypass validation.
+            return true
         }
-    }
-
-    private fun validateApplicationId(alexaRequest: AlexaRequest<*>): Boolean {
-        return true
-
         val applicationId = Util.getApplicationID()
         if (applicationId == null || applicationId.isEmpty()) {
             logger.error("Application ID not defined in environment variable.")
@@ -50,6 +56,12 @@ class SpeechRequestHandler(private val skillConfig: SkillConfig) {
         } ?: alexaRequest.context.system.application.applicationId?.let {
             applicationId == it
         } ?: false
+    }
+
+    private fun handleInterceptors(requestInterceptors: List<RequestInterceptor>, requestEnvelope: AlexaRequest<*>) {
+        for (interceptor in requestInterceptors) {
+            interceptor.intercept(requestEnvelope)
+        }
     }
 
     @Suppress("unchecked_cast")
@@ -79,13 +91,16 @@ class SpeechRequestHandler(private val skillConfig: SkillConfig) {
                 speechHandler.handleListDeletedEventRequest(alexaRequest as AlexaRequest<ListDeletedEventRequest>)
             is ListItemsCreatedEventRequest ->
                 speechHandler.handleListItemsCreatedEventRequest(
-                        alexaRequest as AlexaRequest<ListItemsCreatedEventRequest>)
+                    alexaRequest as AlexaRequest<ListItemsCreatedEventRequest>
+                )
             is ListItemsUpdatedEventRequest ->
                 speechHandler.handleListItemsUpdatedEventRequest(
-                        alexaRequest as AlexaRequest<ListItemsUpdatedEventRequest>)
+                    alexaRequest as AlexaRequest<ListItemsUpdatedEventRequest>
+                )
             is ListItemsDeletedEventRequest ->
                 speechHandler.handleListItemsDeletedEventRequest(
-                        alexaRequest as AlexaRequest<ListItemsDeletedEventRequest>)
+                    alexaRequest as AlexaRequest<ListItemsDeletedEventRequest>
+                )
             else -> AlexaResponse.emptyResponse()
         }
         return alexaResponse.toJson()

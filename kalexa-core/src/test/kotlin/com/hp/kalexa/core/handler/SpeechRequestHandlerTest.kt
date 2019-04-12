@@ -59,7 +59,7 @@ object SpeechRequestHandlerTest : Spek({
             mockkObject(Util)
             lateinit var speechRequestHandler: SpeechRequestHandler
             beforeEachTest {
-                speechRequestHandler = SpeechRequestHandler(speechHandler)
+                speechRequestHandler = SpeechRequestHandler(SkillConfig(), speechHandler)
             }
 
             on("HandleRequestType") {
@@ -268,7 +268,7 @@ object SpeechRequestHandlerTest : Spek({
             }
             mockkObject(JacksonSerializer)
             mockkObject(Util)
-            val speechRequestHandler = SpeechRequestHandler(handler)
+            val speechRequestHandler = SpeechRequestHandler(speechHandler = handler)
 
             on("Application Id in not defined in environment variable") {
                 every { Util.getApplicationID() } returns null
