@@ -16,7 +16,6 @@ import com.hp.kalexa.model.System
 import com.hp.kalexa.model.interfaces.display.Display
 import com.hp.kalexa.model.request.AlexaRequest
 import com.hp.kalexa.model.request.IntentRequest
-import com.hp.kalexa.model.response.AlexaResponse
 import io.mockk.every
 import io.mockk.mockk
 import org.jetbrains.spek.api.Spek
@@ -28,10 +27,10 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class IntentHandlerTest : Spek({
+class BaseHandlerTest : Spek({
 
     given("Intent Handler implementor") {
-        val dummyIntent by memoized { DummyIntent() }
+        val dummyIntent: BaseHandler by memoized { DummyIntent() }
         val attributes = mutableMapOf<String, Any>()
         val session = mockk<Session>()
         val context = mockk<Context>()
@@ -47,38 +46,6 @@ class IntentHandlerTest : Spek({
             it("should return the skill name") {
                 val response = dummyIntent.getSkillName()
                 assertEquals("This Skill", response)
-            }
-        }
-
-        on("Launch Intent") {
-            val response = dummyIntent.onLaunchIntent(mockk())
-            it("should return default response") {
-                assertEquals("{\"response\":{\"outputSpeech\":{\"type\":\"PlainText\",\"text\":\"Hello, welcome to This Skill. What can I do for you?\"},\"card\":{\"type\":\"Simple\",\"title\":\"This Skill\",\"content\":\"Hello, welcome to This Skill. What can I do for you?\"},\"directives\":[],\"shouldEndSession\":false},\"sessionAttributes\":{},\"version\":\"1.0\"}",
-                        response.toJson())
-            }
-        }
-
-        on("onIntentRequest") {
-            it("should return default response") {
-                val response = dummyIntent.onIntentRequest(envelope)
-                assertEquals(AlexaResponse.emptyResponse().toJson(),
-                        response.toJson())
-            }
-        }
-
-        on("onConnectionsResponse") {
-            it("should return default response") {
-                val response = dummyIntent.onConnectionsResponse(mockk())
-                assertEquals(AlexaResponse.emptyResponse().toJson(),
-                        response.toJson())
-            }
-        }
-
-        on("onConnectionsRequest") {
-            it("should return default response") {
-                val response = dummyIntent.onConnectionsRequest(mockk())
-                assertEquals(AlexaResponse.emptyResponse().toJson(),
-                        response.toJson())
             }
         }
 
@@ -101,11 +68,6 @@ class IntentHandlerTest : Spek({
             it("should call onStopIntent default response callback through onBuiltInIntent ") {
                 val response = dummyIntent.onBuiltInIntent(BuiltInIntent.STOP_INTENT, envelope)
                 assertEquals(IntentUtil.goodbye().toJson(),
-                        response.toJson())
-            }
-            it("should call onHelpIntent default response callback through onBuiltInIntent ") {
-                val response = dummyIntent.onBuiltInIntent(BuiltInIntent.HELP_INTENT, envelope)
-                assertEquals(IntentUtil.helpIntent().toJson(),
                         response.toJson())
             }
             it("should call onCancelIntent default response callback through onBuiltInIntent ") {
@@ -143,85 +105,12 @@ class IntentHandlerTest : Spek({
                         response.toJson())
             }
         }
-        on("Help Intent") {
-            val response = dummyIntent.onHelpIntent(envelope)
-            it("should return default response") {
-                assertEquals(IntentUtil.helpIntent().toJson(),
-                        response.toJson())
-            }
-        }
 
         on("onElementSelected") {
             it("should return default response") {
                 val response = dummyIntent.onElementSelected(mockk())
                 assertEquals("{\"response\":{\"directives\":[]},\"sessionAttributes\":{},\"version\":\"1.0\"}",
                         response.toJson())
-            }
-        }
-
-        on("onUnknownIntentContext") {
-            it("should return default response") {
-                val response = dummyIntent.onUnknownIntentContext(mockk())
-                assertEquals("{\"response\":{\"directives\":[]},\"sessionAttributes\":{},\"version\":\"1.0\"}",
-                        response.toJson())
-            }
-        }
-
-        on("onFallbackIntent") {
-            it("should return default response") {
-                val response = dummyIntent.onFallbackIntent(mockk())
-                assertEquals("{\"response\":{\"outputSpeech\":{\"type\":\"PlainText\",\"text\":\"This is unsupported. Please try something else.\"},\"card\":{\"type\":\"Simple\",\"title\":\"Unsupported Intent\",\"content\":\"This is unsupported. Please try something else.\"},\"directives\":[],\"shouldEndSession\":true},\"sessionAttributes\":{},\"version\":\"1.0\"}",
-                        response.toJson())
-            }
-        }
-        on("onListCreatedEventRequest") {
-            it("should return default response") {
-                val response = dummyIntent.onListCreatedEventRequest(mockk())
-                assertEquals(AlexaResponse.emptyResponse().toJson(),
-                        response.toJson())
-            }
-        }
-        on("onListUpdatedEventRequest") {
-            it("should return default response") {
-                val response = dummyIntent.onListUpdatedEventRequest(mockk())
-                assertEquals(AlexaResponse.emptyResponse().toJson(),
-                        response.toJson())
-            }
-        }
-        on("onListDeletedEventRequest") {
-            it("should return default response") {
-                val response = dummyIntent.onListDeletedEventRequest(mockk())
-                assertEquals(AlexaResponse.emptyResponse().toJson(),
-                        response.toJson())
-            }
-        }
-        on("onListItemsCreatedEventRequest") {
-            it("should return default response") {
-                val response = dummyIntent.onListItemsCreatedEventRequest(mockk())
-                assertEquals(AlexaResponse.emptyResponse().toJson(),
-                        response.toJson())
-            }
-        }
-        on("onListItemsDeletedEventRequest") {
-            it("should return default response") {
-                val response = dummyIntent.onListItemsUpdatedEventRequest(mockk())
-                assertEquals(AlexaResponse.emptyResponse().toJson(),
-                        response.toJson())
-            }
-        }
-        on("onListItemsUpdatedEventRequest") {
-            it("should return default response") {
-                val response = dummyIntent.onListItemsDeletedEventRequest(mockk())
-                assertEquals(AlexaResponse.emptyResponse().toJson(),
-                        response.toJson())
-            }
-        }
-
-        on("onCanFulfillIntent") {
-            it("should return default response") {
-                val response = dummyIntent.onCanFulfillIntent(mockk())
-                assertEquals(AlexaResponse.emptyResponse().toJson(),
-                    response.toJson())
             }
         }
 

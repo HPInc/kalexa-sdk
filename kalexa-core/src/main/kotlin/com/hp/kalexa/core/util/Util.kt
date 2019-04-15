@@ -7,7 +7,7 @@ package com.hp.kalexa.core.util
 
 import com.google.common.reflect.ClassPath
 import com.hp.kalexa.core.extension.findAnnotation
-import com.hp.kalexa.core.intent.IntentHandler
+import com.hp.kalexa.core.intent.BaseHandler
 import kotlin.reflect.KClass
 
 object Util {
@@ -21,9 +21,9 @@ object Util {
         System.getenv("APPLICATION_ID_VERIFICATION")?.toBoolean() ?: true
 
     fun <T : Annotation> findAnnotatedClasses(
-        intentClasses: Set<KClass<out IntentHandler>>,
+        intentClasses: Set<KClass<out BaseHandler>>,
         annotation: KClass<T>
-    ): Set<KClass<out IntentHandler>> {
+    ): Set<KClass<out BaseHandler>> {
         return intentClasses.filter {
             it.findAnnotation(annotation) != null
         }.toSet()

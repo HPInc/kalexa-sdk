@@ -1,4 +1,4 @@
-package com.hp.kalexa.core.handler
+package com.hp.kalexa.core.interceptor
 
 import com.hp.kalexa.model.request.AlexaRequest
 

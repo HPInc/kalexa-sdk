@@ -6,13 +6,13 @@
 package com.hp.kalexa.core.intent
 
 import com.hp.kalexa.model.request.AlexaRequest
-import com.hp.kalexa.model.request.IntentRequest
+import com.hp.kalexa.model.request.LaunchRequest
 import com.hp.kalexa.model.response.AlexaResponse
 
-interface IntentHandler : BaseHandler {
+interface LaunchRequestHandler : BaseHandler {
 
     /**
-     * Handles Intent Request coming from Alexa
+     * Handles Launch Intent Request coming from Alexa
      */
-    fun onIntentRequest(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse
+    fun onLaunchIntent(alexaRequest: AlexaRequest<LaunchRequest>): AlexaResponse
 }

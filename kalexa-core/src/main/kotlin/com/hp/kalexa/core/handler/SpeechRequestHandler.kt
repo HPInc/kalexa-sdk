@@ -27,7 +27,8 @@ import org.apache.logging.log4j.LogManager
 
 class SpeechRequestHandler(
     private val skillConfig: SkillConfig = SkillConfig(),
-    private val speechHandler: SpeechHandler = SpeechHandler.newInstance(skillConfig.intentHandlers)
+    private val speechHandler: SpeechHandler = SpeechHandler.newInstance(skillConfig.intentHandlers),
+    private val interceptorHandler: InterceptorHandler = InterceptorHandler.newInstance(skillConfig.interceptors)
 ) {
     private val logger = LogManager.getLogger(SpeechRequestHandler::class.java)
 
@@ -37,7 +38,7 @@ class SpeechRequestHandler(
         if (isApplicationIdValid(requestEnvelope).not()) {
             throw IllegalArgumentException("Request application ID doesn't match with given Application ID")
         }
-        handleInterceptors(skillConfig.interceptors, requestEnvelope)
+        interceptorHandler.process(requestEnvelope)
         return handleRequestType(requestEnvelope)
     }
 
@@ -56,12 +57,6 @@ class SpeechRequestHandler(
         } ?: alexaRequest.context.system.application.applicationId?.let {
             applicationId == it
         } ?: false
-    }
-
-    private fun handleInterceptors(requestInterceptors: List<RequestInterceptor>, requestEnvelope: AlexaRequest<*>) {
-        for (interceptor in requestInterceptors) {
-            interceptor.intercept(requestEnvelope)
-        }
     }
 
     @Suppress("unchecked_cast")

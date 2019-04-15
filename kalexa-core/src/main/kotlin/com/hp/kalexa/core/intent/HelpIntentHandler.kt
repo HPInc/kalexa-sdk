@@ -5,14 +5,17 @@
 
 package com.hp.kalexa.core.intent
 
+import com.hp.kalexa.core.util.IntentUtil
 import com.hp.kalexa.model.request.AlexaRequest
 import com.hp.kalexa.model.request.IntentRequest
 import com.hp.kalexa.model.response.AlexaResponse
 
-interface IntentHandler : BaseHandler {
+interface HelpIntentHandler : BaseHandler {
 
     /**
-     * Handles Intent Request coming from Alexa
+     * Handles Help Built In Intent coming from Alexa.
      */
-    fun onIntentRequest(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse
+    fun onHelpIntent(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
+        return IntentUtil.helpIntent()
+    }
 }
