@@ -46,8 +46,8 @@ class ResponseBuilder {
         card = StandardCard().apply { block() }
     }
 
-    fun reprompt(block: Reprompt.() -> OutputSpeech) {
-        reprompt = Reprompt().apply { outputSpeech = block() }
+    fun reprompt(block: RepromptBuilder.() -> Unit) {
+        reprompt = RepromptBuilder().apply { block() }.build()
     }
 
     fun canFulfillIntent(block: CanFulfillIntentBuilder.() -> Unit) {
