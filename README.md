@@ -59,7 +59,7 @@ You must export three environment variables on your application before running t
 
 ##### Add Intent Handler manually to Speech Handler:
 If for some reason you need to add Intent Handler instances manually instead of defining the environment 
-variable `INTENT_PACKAGE`, you can do it by adding those instances into `SpeechHandler` object
+variable `INTENT_PACKAGE`, you can do it by adding those instances into `SkillConfig` object
 before providing it to `AlexaWebApplication`.
 
 ```kotlin
