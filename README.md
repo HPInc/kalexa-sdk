@@ -64,68 +64,77 @@ before providing it to `AlexaWebApplication`.
 
 ```kotlin
 val intents = listOf(FirstIntent(), SecondIntent(), ThirdIntent(), FourthIntent())
-val speechHandler = SpeechHandler.newInstance(intentHandlerInstances = intents)
-val alexaWebApplication = AlexaWebApplication(speechHandler)
-
+val skillConfig = SkillConfig(intentHandlers = intents)
+val alexaWebApplication = AlexaWebApplication(skillConfig)
 ```
 
+##### Add Request Interceptors.
+Request Interceptor is a way to intercept each request coming from Alexa before reach any Intent.
+So it's the perfect place to put a logic that you want to be executed every time a request reaches your skill.
+It can be implemented by implementing `RequestInterceptor` interface.
+
+```kotlin
+class CustomInterceptor : RequestInterceptor {
+
+    override fun intercept(alexaRequest: AlexaRequest<*>) {
+        // logic goes here.
+    }
+}
+```  
+After creating your interceptors, you must pass those interceptor instances to the `InterceptorHandler` the same way as
+`SpeechHandler`.
+
+```kotlin
+val interceptors = listOf(CustomInterceptor())
+val skillConfig = SkillConfig(interceptors = interceptors)
+val alexaWebApplication = AlexaWebApplication(skillConfig)
+```
 
 #### Create Intent:
+There are different interfaces for each type of request that you may want to handle:
+```
+LaunchRequestHandler, IntentHandler, ProviderHandler, RequesterHandler, ListEventsHandler, HelpIntentHandler,
+FallbackIntentHandler, CanFulfillIntentHandler, RecoverIntentContextHandler
+```
+All of them extends from `BaseHandler`.
 
-There are three simple things that you need to follow in order to fulfill the requirements of creating an Intent:
+Implementing one of them will have to handle the required method of the contract. Each interface will handle the
+corresponding Request type from Alexa.
+For example:
+```kotlin
+class CustomLaunchRequest : LaunchRequestHandler {
+    override fun onLaunchIntent(alexaRequest: AlexaRequest<LaunchRequest>): AlexaResponse {
+        //logic goes here
+    }
+}
+```
 
-- Implement `IntentHandler` interface.
-- Override `IntentHandler` callback methods. 
-- Annotate with the desired annotation: `Intent`, `LaunchIntent`, `FallbackIntent`,  `HelpIntent`, `Provider` and `Requester`.
-
-So, the way it works is basically a combination of the `IntentHandler` callbacks and the Annotations. 
-
-For instance: When annotating a class with`@LaunchIntent` you must override the callback method `onLaunchIntent`. 
-So when a SessionRequest comes from Alexa to your skill, `Kalexa-SDK` will map the Launch Request to the class annotated with `@LaunchRequest` and the `onLaunchIntent` of that class will be called.
+##### Intent Handler
+For Intent Requests, you may use the same class to listen to different Intents created on [Amazon Developer](https://developer.amazon.com)
+```kotlin
+class CustomIntent : IntentHandler {
+    @Intent(mapsTo = ["FirstIntent", "SecondIntent"])
+    override fun onIntentRequest(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
+        // logic for Intent Request type goes here.
+    }
+}
+```
+This peace of code handles FirstIntent, SecondIntent and CustomIntent intents. If you don't annotate at all, it'll map to
+the class name. CustomIntent in this case.
 
 ##### Supported Annotations and callback methods:
-
- - `@LaunchIntent` and  `onLaunchIntent` - Handles the LaunchIntent event.
- - `@Intent` and `onIntentRequest` - Probably the most used annotation since it's where you will handle all of your Intents. When an Intent is mapped to your Intent class the `onIntentRequest` will be called. You can also map more than one Intent per class using the `mapsTo` annotation property.
- - `@FallbackIntent` and `onFallbackIntent` - Handles the BuiltIn intent AMAZON.FallbackIntent
- - `@HelpIntent` and `onHelpIntent` - Handles the AMAZON.HelpIntent
- - `@Provider` and `onConnectionsRequest` - Handles the Skill request from another existent Skill. 
- - `@Requester` and `onConnectionsResponse` - Handles the Skill response from another existent Skill. 
- - `@RecoverIntentContext` and `onUnknownIntentContext` - When a BuiltInIntent comes without a context, you may annotate with `@RecoverIntentContext` to handle the error and respond gracefully.
+These are the interfaces that you may annotate the method to listen to more than one Intent.
+ - `@Intent` and `onIntentRequest` - Handles Intent Requests and the annotation gives you the power of map more than one Intent per class using the `mapsTo` annotation property. 
  - `@CanFulfillIntentRequest` and `onCanFulfillIntent` - Handles the CanFulfill. This request verifies if the skill can understand and fulfill the intent request and slots.
-
-Kotlin Code:
- ```kotlin
- @Intent(mapsTo = ["RecipeIntent", "LaunchIntent"])
- class FoodIntent : IntentHandler() {
-     override fun onIntentRequest(request: IntentRequest): AlexaResponse {
-        ...
-      }
- } 
- ```
-
-Java code:
- ```java
- @Intent(mapsTo = ["RecipeIntent", "LaunchIntent"])
- class FoodIntent extends IntentHandler {
-     @Override
-        public AlexaResponse onIntentRequest(IntentRequest request) {
-        ...
-        }
- } 
- ```  
  
- You may annotate with @Intent as many Intent classes you want.
- But, besides `@Intent` annotation, you can only have **ONE** class annotated with the other types in your skill. Otherwise an exception will be thrown.
-
 #### Overriding Builtin callbacks:
 Your intent can override the `onBuiltInIntent` method to handle Amazon Built In intents properly. 
 Or you can just override some basic callbacks and handle as you like.
 These basic methods are: `onYesIntent`, `onNoIntent`, `onCancelIntent`, `onStopIntent`.
 
 #### Lock Context:
-In an interaction, you often need to lock the context (force interaction to go back to the last intent) for when you need an answer for the user.
-For that you can use the method `lockIntentContext()` from `IntentHandler` class. You may remove the lock calling `unlockIntentContext()`
+In an interaction, you often need to lock the context (force interaction to go back to the last intent) for when you need an answer from the user.
+For that you can use the method `lockIntentContext()` from `BaseHandler` interface. You may remove the lock calling `unlockIntentContext()`
 For example:
 
 `Java Code:`
@@ -149,9 +158,11 @@ For example:
    } 
    ```  
 #### Display Interface
-If you're working with Display interface, you will probably want to handle touch screen events. To handle it, override the `onElementSelected` and handle properly the touch event.
+If you're working with Display interface, you will probably want to handle touch screen events. To handle it, override the
+ `onElementSelected` and handle properly the touch event.
 
-`Kalexa-SDK` will try to map the intent from `INTENT_CONTEXT` key in session attributes if no such context exists, Kalexa-SDK will look for the Token key in item list object of the request and use its value as the Intent to call its `onElementSelected` method.
+`Kalexa-SDK` will try to map the intent from Locked Context (`lockIntentContext()` method), if no such context exists, 
+`Kalexa-SDK` will look for the Token key in the item list object of the request and use its value as the Intent to call its `onElementSelected` method.
 
 `Kalexa-SDK` will use `|` as separator to split the token string in more than one values. But keep in mind that the first value HAS to be the Intent that you want to execute `onElementSelected` method.
 For example: `{"token": "MyIntentName|Value|SomeOtherValue"}`
@@ -162,12 +173,14 @@ It's possible to verify whether the device has screen support by checking if sup
 `Kalexa-SDK` also supports Skill Connections feature. 
 Your skill can act as a `Provider` or as a `Requester`
 Currently, it only supports *PRINT* connection type. 
+
 ##### Provider:
-If your skill acts as a Provider, you need to annotate your class with `@Provider` and override `onConnectionsRequest` callback method. In this case, after processing the request, you have to answer back to Alexa using the `SendResponseDirective` directive.
+If your skill acts as a Provider, you need to implement `ProviderHandler` interface and override `onConnectionsRequest` 
+method. In this case, after processing the request, you have to answer back to Alexa using the `SendResponseDirective` directive.
 
 `Kotlin Code:`
 ```kotlin
-    override fun onConnectionsRequest(request: ConnectionsRequest): AlexaResponse {
+    override fun onConnectionsRequest(alexaRequest: AlexaRequest<ConnectionsRequest>): AlexaResponse {
         return alexaResponse {
             response {
                 directives {
@@ -188,7 +201,7 @@ If your skill acts as a Requester, just return to Alexa a `SendRequestDirective`
 
 `Kotlin Code:`
 ```kotlin
-    override fun onConnectionsRequest(request: ConnectionsRequest): AlexaResponse {
+    fun someMethod() {
         return alexaResponse {
             response {
                 directives {
@@ -213,29 +226,27 @@ If your skill acts as a Requester, just return to Alexa a `SendRequestDirective`
 ```
 And then expect the response to be on `onConnectionsResponse` method
 
-`Java code:`
-```java
-    @NotNull
-    @Override
-    public AlexaResponse onConnectionsResponse(ConnectionsResponseRequest request) {
-        if (request.getStatus().isSuccess()) {
-            return new AlexaResponse.Builder()
-                    .speech("Your request was successfull!")
-                    .build();
+```kotlin
+    override fun onConnectionsResponse(alexaRequest: AlexaRequest<ConnectionsResponseRequest>): AlexaResponse {
+        val msg = if (alexaRequest.request.status.isSuccess()) "Your request was successfull!" else "Sorry, something went wrong."
+        return alexaResponse {
+            response {
+                speech { msg }
+            }
         }
-        return new AlexaResponse.Builder()
-                .speech("Sorry, something went wrong.")
-                .build();
     }
+
  ```
-Note that you must annotate your class with `@Requester` so the `onConnectionsResponse` callback can be called properly. 
- #### Response:
-For Kotlin, Kalexa-sdk has two types of response `Builder` and `DSL`, for Java you can respond using `Builder`.
+Note that you must implement `RequesterHandler` interface and override `onConnectionsResponse` method in order to be called properly. 
+ 
+#### Response:
+For Kotlin, `Kalexa-SDK` has two types of response `Builder` and `DSL`, for Java you can respond using `Builder`.
+
 ##### Java:
 AlexaBuilder builds the response gracefully to send back to Alexa:
 ```java
 String msg = "Hello, what a beautiful day!"
-AlexaResponse.Companion.builder()
+return AlexaResponse.Companion.builder()
     .speech(msg)
     .simpleCard("Title",msg)
     .build();   
@@ -256,7 +267,7 @@ return alexaResponse {
 ```
 
 #### Directives
-Kalexa-sdk supports most of the directives.
+`Kalexa-SDK` supports most of the directives.
 
 Dialog directives such `DelegateDirective`, `ElicitSlotDirective` and `ConfirmIntentDirective` directives.
 

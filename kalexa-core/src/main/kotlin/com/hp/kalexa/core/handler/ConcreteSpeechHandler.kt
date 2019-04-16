@@ -372,18 +372,17 @@ open class ConcreteSpeechHandler(instances: List<BaseHandler> = emptyList()) : S
             it.simpleName == kClass.simpleName || it.superclasses.find { superclazz ->
                 superclazz.simpleName == kClass.simpleName
             } != null
-        }.map { annotatedClass ->
-            val annotation = annotatedClass.declaredFunctions.find {
+        }.map { clazz ->
+            val annotation = clazz.declaredFunctions.find {
                 it.findAnnotation<T>() != null
             }?.findAnnotation<T>()
 
             val mapsTo = when (annotation) {
-                is Intent -> annotation.cast<Intent>().mapsTo.toSet() + annotatedClass.simpleName!!
-                is CanFulfillIntent -> annotation.cast<CanFulfillIntent>().intents.toSet() +
-                    annotatedClass.simpleName!!
+                is Intent -> annotation.cast<Intent>().mapsTo.toSet()
+                is CanFulfillIntent -> annotation.cast<CanFulfillIntent>().intents.toSet()
                 else -> emptySet()
-            }
-            mapsTo to annotatedClass
+            } + clazz.simpleName!!
+            mapsTo to clazz
         }.toMap()
     }
 
