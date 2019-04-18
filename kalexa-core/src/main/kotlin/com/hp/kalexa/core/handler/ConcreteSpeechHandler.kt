@@ -319,12 +319,13 @@ open class ConcreteSpeechHandler(instances: List<BaseHandler> = emptyList()) : S
     private fun unknownIntentException(intentName: String): AlexaResponse {
         throw IllegalArgumentException(
             "It was not possible to map intent $intentName to a Class. " +
-                "Please make sure that the class implements the correct interface handler or check intent package location"
+                "Please make sure that the class implements the correct interface handler or check intent package " +
+                "location"
         )
     }
 
     /**
-     * Loads all BaseHandler classes from the INTENT_PACKAGE environment variable.
+     * Loads all BaseHandler classes from the SCAN_PACKAGE environment variable.
      */
     @Suppress("unchecked_cast")
     private fun loadIntentHandlerClasses(): Set<KClass<out BaseHandler>> {

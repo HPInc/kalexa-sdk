@@ -20,6 +20,8 @@ object Util {
     fun isApplicationIdVerificationEnabled(): Boolean =
         System.getenv("APPLICATION_ID_VERIFICATION")?.toBoolean() ?: true
 
+    fun loadClassesFromPackage() = classesFromPackage
+
     fun <T : Annotation> findAnnotatedClasses(
         intentClasses: Set<KClass<out BaseHandler>>,
         annotation: KClass<T>
@@ -29,9 +31,9 @@ object Util {
         }.toSet()
     }
 
-    fun loadClassesFromPackage(): Set<KClass<out Any>> {
+    private val classesFromPackage by lazy {
         val intentPackage = getScanPackage() ?: ""
-        return if (intentPackage.isNotEmpty()) {
+        if (intentPackage.isNotEmpty()) {
             ClassPath.from(Thread.currentThread().contextClassLoader)
                 .getTopLevelClassesRecursive(intentPackage)
                 .map { it.load().kotlin }
