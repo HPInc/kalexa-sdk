@@ -15,7 +15,7 @@ object Util {
 
     fun getApplicationID(): String? = System.getenv("APPLICATION_ID")
 
-    fun getIntentPackage(): String? = System.getenv("INTENT_PACKAGE")
+    fun getScanPackage(): String? = System.getenv("SCAN_PACKAGE")
 
     fun isApplicationIdVerificationEnabled(): Boolean =
         System.getenv("APPLICATION_ID_VERIFICATION")?.toBoolean() ?: true
@@ -29,11 +29,11 @@ object Util {
         }.toSet()
     }
 
-    fun loadIntentClassesFromPackage(): Set<KClass<out Any>> {
-        val intentPackage = getIntentPackage() ?: ""
+    fun loadClassesFromPackage(): Set<KClass<out Any>> {
+        val intentPackage = getScanPackage() ?: ""
         return if (intentPackage.isNotEmpty()) {
             ClassPath.from(Thread.currentThread().contextClassLoader)
-                .getTopLevelClasses(intentPackage)
+                .getTopLevelClassesRecursive(intentPackage)
                 .map { it.load().kotlin }
                 .toSet()
         } else {

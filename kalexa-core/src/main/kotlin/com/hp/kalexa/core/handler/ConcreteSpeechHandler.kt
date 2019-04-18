@@ -24,9 +24,8 @@ import com.hp.kalexa.core.util.IntentUtil.defaultBuiltInResponse
 import com.hp.kalexa.core.util.IntentUtil.defaultGreetings
 import com.hp.kalexa.core.util.IntentUtil.helpIntent
 import com.hp.kalexa.core.util.IntentUtil.unsupportedIntent
-import com.hp.kalexa.core.util.Util.getIntentPackage
-import com.hp.kalexa.core.util.Util.loadIntentClassesFromPackage
-import com.hp.kalexa.model.exception.IllegalAnnotationException
+import com.hp.kalexa.core.util.Util.getScanPackage
+import com.hp.kalexa.core.util.Util.loadClassesFromPackage
 import com.hp.kalexa.model.extension.attribute
 import com.hp.kalexa.model.request.AlexaRequest
 import com.hp.kalexa.model.request.BaseIntentRequest
@@ -70,7 +69,7 @@ open class ConcreteSpeechHandler(instances: List<BaseHandler> = emptyList()) : S
 
     override fun handleLaunchRequest(alexaRequest: AlexaRequest<LaunchRequest>): AlexaResponse {
         logger.info("=========================== LaunchRequest =========================")
-        logger.debug("Looking for LaunchIntent intents in ${getIntentPackage()}")
+        logger.debug("Looking for LaunchIntent intents in ${getScanPackage()}")
         val launchRequest: LaunchRequestHandler? = getHandler(LaunchRequestHandler::class)?.cast()
 
         return launchRequest?.let {
@@ -93,74 +92,12 @@ open class ConcreteSpeechHandler(instances: List<BaseHandler> = emptyList()) : S
         }
     }
 
-    private fun customIntent(intentName: String, alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
-        return handleBaseIntentRequest(alexaRequest, intentName = intentName) { intentHandler ->
-            (intentHandler as IntentHandler).onIntentRequest(alexaRequest)
-        }
-    }
-
     override fun handleCanFulfillIntentRequest(alexaRequest: AlexaRequest<CanFulfillIntentRequest>): AlexaResponse {
         logger.info("=========================== CanFulfillIntentRequest =========================")
         return handleBaseIntentRequest(
             alexaRequest,
             canFulfillMap
         ) { intentHandler -> (intentHandler as CanFulfillIntentHandler).onCanFulfillIntent(alexaRequest) }
-    }
-
-    private fun fallbackIntent(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
-        logger.info("=========================== Fallback Intent =========================")
-        val fallback: FallbackIntentHandler? = getHandler(FallbackIntentHandler::class)?.cast()
-
-        return fallback?.let {
-            val alexaResponse = fallback.onFallbackIntent(alexaRequest)
-            return generateResponse(fallback, alexaRequest, alexaResponse)
-        } ?: unsupportedIntent()
-    }
-
-    private fun helpIntent(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
-        logger.info("=========================== Help Intent =========================")
-        val helpHandler: HelpIntentHandler? = getHandler(HelpIntentHandler::class)?.cast()
-
-        return helpHandler?.let {
-            val alexaResponse = helpHandler.onHelpIntent(alexaRequest)
-            return generateResponse(helpHandler, alexaRequest, alexaResponse)
-        } ?: helpIntent()
-    }
-
-    private fun unknownIntentContext(
-        builtInIntent: BuiltInIntent,
-        alexaRequest: AlexaRequest<IntentRequest>
-    ): AlexaResponse {
-        val recoverIntent: RecoverIntentContextHandler? = getHandler(RecoverIntentContextHandler::class)?.cast()
-
-        return recoverIntent?.let {
-            val alexaResponse = recoverIntent.onUnknownIntentContext(builtInIntent)
-            return generateResponse(recoverIntent, alexaRequest, alexaResponse)
-        } ?: defaultBuiltInResponse(builtInIntent, alexaRequest.session?.attributes)
-    }
-
-    /**
-     * Executes builtInIntent callback method from the Intent Handler instance from the given intent name.
-     * First it looks in the IntentClasses, if the class is not found then it looks in the intent handler instances.
-     * This way every built in method works without the need of annotating a class as @Intent if the class is annotated
-     * with @LaunchIntent or any other type.
-     * @param intentName Intent to have the onBuiltInIntent method executed
-     * @param builtInIntent the BuiltInIntent itself
-     */
-    private fun builtInIntent(
-        intentName: String,
-        builtInIntent: BuiltInIntent,
-        alexaRequest: AlexaRequest<IntentRequest>
-    ): AlexaResponse {
-        val intentHandler = getIntentHandlerOf(intentName, intentMap) ?: run {
-            handlerInstances.keys
-                .find { it == intentName }
-                ?.let { handlerInstances[intentName] }
-                ?.let { getIntentHandlerOf(it::class) }
-                ?: run { return unknownIntentException(intentName) }
-        }
-        val alexaResponse = intentHandler.onBuiltInIntent(builtInIntent, alexaRequest)
-        return generateResponse(intentHandler, alexaRequest, alexaResponse)
     }
 
     override fun handleElementSelectedRequest(alexaRequest: AlexaRequest<ElementSelectedRequest>): AlexaResponse {
@@ -290,6 +227,68 @@ open class ConcreteSpeechHandler(instances: List<BaseHandler> = emptyList()) : S
         } ?: unknownIntentException(name)
     }
 
+    private fun customIntent(intentName: String, alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
+        return handleBaseIntentRequest(alexaRequest, intentName = intentName) { intentHandler ->
+            (intentHandler as IntentHandler).onIntentRequest(alexaRequest)
+        }
+    }
+
+    private fun fallbackIntent(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
+        logger.info("=========================== Fallback Intent =========================")
+        val fallback: FallbackIntentHandler? = getHandler(FallbackIntentHandler::class)?.cast()
+
+        return fallback?.let {
+            val alexaResponse = fallback.onFallbackIntent(alexaRequest)
+            return generateResponse(fallback, alexaRequest, alexaResponse)
+        } ?: unsupportedIntent()
+    }
+
+    private fun helpIntent(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
+        logger.info("=========================== Help Intent =========================")
+        val helpHandler: HelpIntentHandler? = getHandler(HelpIntentHandler::class)?.cast()
+
+        return helpHandler?.let {
+            val alexaResponse = helpHandler.onHelpIntent(alexaRequest)
+            return generateResponse(helpHandler, alexaRequest, alexaResponse)
+        } ?: helpIntent()
+    }
+
+    private fun unknownIntentContext(
+        builtInIntent: BuiltInIntent,
+        alexaRequest: AlexaRequest<IntentRequest>
+    ): AlexaResponse {
+        val recoverIntent: RecoverIntentContextHandler? = getHandler(RecoverIntentContextHandler::class)?.cast()
+
+        return recoverIntent?.let {
+            val alexaResponse = recoverIntent.onUnknownIntentContext(builtInIntent)
+            return generateResponse(recoverIntent, alexaRequest, alexaResponse)
+        } ?: defaultBuiltInResponse(builtInIntent, alexaRequest.session?.attributes)
+    }
+
+    /**
+     * Executes builtInIntent callback method from the Intent Handler instance from the given intent name.
+     * First it looks in the IntentClasses, if the class is not found then it looks in the intent handler instances.
+     * This way every built in method works without the need of annotating a class as @Intent if the class is annotated
+     * with @LaunchIntent or any other type.
+     * @param intentName Intent to have the onBuiltInIntent method executed
+     * @param builtInIntent the BuiltInIntent itself
+     */
+    private fun builtInIntent(
+        intentName: String,
+        builtInIntent: BuiltInIntent,
+        alexaRequest: AlexaRequest<IntentRequest>
+    ): AlexaResponse {
+        val intentHandler = getIntentHandlerOf(intentName, intentMap) ?: run {
+            handlerInstances.keys
+                .find { it == intentName }
+                ?.let { handlerInstances[intentName] }
+                ?.let { getIntentHandlerOf(it::class) }
+                ?: run { return unknownIntentException(intentName) }
+        }
+        val alexaResponse = intentHandler.onBuiltInIntent(builtInIntent, alexaRequest)
+        return generateResponse(intentHandler, alexaRequest, alexaResponse)
+    }
+
     /**
      * Generates the Alexa response based on the INTENT_CONTEXT. If INTENT_CONTEXT is enabled,
      * then it will add the intent context value (which is the class name of the current intent handler)
@@ -314,36 +313,14 @@ open class ConcreteSpeechHandler(instances: List<BaseHandler> = emptyList()) : S
         }
     }
 
-    private fun getHandler(clazz: KClass<out BaseHandler>): BaseHandler? {
-        return (handlerInstances[clazz.simpleName!!]
-            ?: run {
-                intentHandlerClasses.find {
-                    it == clazz || it.superclasses.find { superclazz ->
-                        superclazz == clazz
-                    } != null
-                }?.createInstance()
-                    ?.let { handler ->
-                        handlerInstances[clazz.simpleName!!] = handler
-                        handler
-                    }
-            })
-    }
-
     /**
      * Throws a IllegalArgumentException
      */
     private fun unknownIntentException(intentName: String): AlexaResponse {
         throw IllegalArgumentException(
             "It was not possible to map intent $intentName to a Class. " +
-                "Please make sure that the Intent class is annotated with @Intent or check intent package location"
+                "Please make sure that the class implements the correct interface handler or check intent package location"
         )
-    }
-
-    /**
-     * Throws a IllegalAnnotationException
-     */
-    private fun illegalAnnotationArgument(annotation: String): IllegalAnnotationException {
-        return IllegalAnnotationException("The skill can only have one @$annotation method.")
     }
 
     /**
@@ -351,7 +328,7 @@ open class ConcreteSpeechHandler(instances: List<BaseHandler> = emptyList()) : S
      */
     @Suppress("unchecked_cast")
     private fun loadIntentHandlerClasses(): Set<KClass<out BaseHandler>> {
-        return loadIntentClassesFromPackage()
+        return loadClassesFromPackage()
             .filter { clazz ->
                 clazz.superclasses.find { superclazz ->
                     superclazz.simpleName == BaseHandler::class.java.simpleName || superclazz.superclasses.find {
@@ -367,7 +344,8 @@ open class ConcreteSpeechHandler(instances: List<BaseHandler> = emptyList()) : S
      * Look a given annotation up
      * @return Map of Kclasses. The Array of mapsTo corresponds to the key and kClass is the value
      */
-    private inline fun <reified T : Annotation> mapIntentHandlersOf(kClass: KClass<out BaseHandler>): Map<Set<String>, KClass<out BaseHandler>> {
+    private inline fun <reified T : Annotation> mapIntentHandlersOf(kClass: KClass<out BaseHandler>):
+        Map<Set<String>, KClass<out BaseHandler>> {
         return intentHandlerClasses.filter {
             it.simpleName == kClass.simpleName || it.superclasses.find { superclazz ->
                 superclazz.simpleName == kClass.simpleName
@@ -384,6 +362,21 @@ open class ConcreteSpeechHandler(instances: List<BaseHandler> = emptyList()) : S
             } + clazz.simpleName!!
             mapsTo to clazz
         }.toMap()
+    }
+
+    private fun getHandler(clazz: KClass<out BaseHandler>): BaseHandler? {
+        return (handlerInstances[clazz.simpleName!!]
+            ?: run {
+                intentHandlerClasses.find {
+                    it == clazz || it.superclasses.find { superclazz ->
+                        superclazz == clazz
+                    } != null
+                }?.createInstance()
+                    ?.let { handler ->
+                        handlerInstances[clazz.simpleName!!] = handler
+                        handler
+                    }
+            })
     }
 
     /**

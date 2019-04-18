@@ -43,7 +43,7 @@ object ConcreteSpeechHandlerTest : Spek({
         lateinit var concreteSpeechHandler: ConcreteSpeechHandler
         beforeEachTest {
             mockkObject(Util)
-            every { Util.getIntentPackage() } returns "com.hp.kalexa.core.model"
+            every { Util.getScanPackage() } returns "com.hp.kalexa.core.model"
             concreteSpeechHandler = ConcreteSpeechHandler()
         }
 
@@ -70,16 +70,16 @@ object ConcreteSpeechHandlerTest : Spek({
             }
             on("Intent without LaunchIntent annotation") {
                 it("should return a default Launch response") {
-                    every { Util.getIntentPackage() } returns "package.with.no.intent"
+                    every { Util.getScanPackage() } returns "package.with.no.intent"
                     concreteSpeechHandler = ConcreteSpeechHandler()
                     val alexaResponse = concreteSpeechHandler.handleLaunchRequest(customLaunchRequestEnvelope)
                     assertEquals(IntentUtil.defaultGreetings().toJson(), alexaResponse.toJson())
                 }
             }
             on("Intent with LaunchIntent annotation") {
-                every { Util.getIntentPackage() } returns "package.with.intent"
+                every { Util.getScanPackage() } returns "package.with.intent"
                 val fakeIntent = mockk<FakeIntent>()
-                every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
+                every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
 
                 it("should return a call onLaunchIntent method from the intent annotated with launcher") {
                     val alexaResponse = concreteSpeechHandler.handleLaunchRequest(customLaunchRequestEnvelope)
@@ -99,8 +99,8 @@ object ConcreteSpeechHandlerTest : Spek({
             beforeEachTest {
                 fakeIntent = mockk<FakeIntent>()
                 attributesSession.clear()
-                every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
-                every { Util.getIntentPackage() } returns "package.with.intent"
+                every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
+                every { Util.getScanPackage() } returns "package.with.intent"
                 session = mockk {
                     every { attributes } returns attributesSession
                 }
@@ -139,7 +139,7 @@ object ConcreteSpeechHandlerTest : Spek({
                 }
                 on("FallbackIntent Intent without @FallbackIntent implementation") {
                     every { intentRequestEnvelope.request.intent.name } returns "AMAZON.FallbackIntent"
-                    every { Util.loadIntentClassesFromPackage() } returns emptySet()
+                    every { Util.loadClassesFromPackage() } returns emptySet()
                     concreteSpeechHandler = ConcreteSpeechHandler()
                     it("should call default fallback method") {
                         val response = concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
@@ -160,7 +160,7 @@ object ConcreteSpeechHandlerTest : Spek({
                 }
                 on("Intent without @HelpIntent annotation") {
                     every { intentRequestEnvelope.request.intent.name } returns "AMAZON.HelpIntent"
-                    every { Util.loadIntentClassesFromPackage() } returns emptySet()
+                    every { Util.loadClassesFromPackage() } returns emptySet()
                     concreteSpeechHandler = ConcreteSpeechHandler()
                     it("should call default helpIntent method") {
                         val response = concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
@@ -199,7 +199,7 @@ object ConcreteSpeechHandlerTest : Spek({
                     }
                     on("Intent without @RecoverIntentContext annotation") {
                         every { intentRequestEnvelope.request.intent.name } returns BuiltInIntent.YES_INTENT.rawValue
-                        every { Util.loadIntentClassesFromPackage() } returns emptySet()
+                        every { Util.loadClassesFromPackage() } returns emptySet()
                         concreteSpeechHandler = ConcreteSpeechHandler()
                         it("should should call default unknownIntentContext response") {
                             val response = concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
@@ -220,8 +220,8 @@ object ConcreteSpeechHandlerTest : Spek({
             beforeEachTest {
                 fakeIntent = mockk<FakeIntent>()
                 attributesSession.clear()
-                every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
-                every { Util.getIntentPackage() } returns "package.with.intent"
+                every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
+                every { Util.getScanPackage() } returns "package.with.intent"
                 session = mockk {
                     every { attributes } returns attributesSession
                 }
@@ -266,8 +266,8 @@ object ConcreteSpeechHandlerTest : Spek({
             beforeEachTest {
                 fakeIntent = mockk<FakeIntent>()
                 attributesSession.clear()
-                every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
-                every { Util.getIntentPackage() } returns "package.with.intent"
+                every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
+                every { Util.getScanPackage() } returns "package.with.intent"
                 session = mockk {
                     every { attributes } returns attributesSession
                 }
@@ -289,7 +289,7 @@ object ConcreteSpeechHandlerTest : Spek({
                 }
             }
             on("Intent without @Requester annotation") {
-                every { Util.loadIntentClassesFromPackage() } returns emptySet()
+                every { Util.loadClassesFromPackage() } returns emptySet()
                 concreteSpeechHandler = ConcreteSpeechHandler()
                 it("should call default onConnectionsResponse method") {
                     val response = concreteSpeechHandler.handleConnectionsResponseRequest(connectionsResponseRequest)
@@ -309,8 +309,8 @@ object ConcreteSpeechHandlerTest : Spek({
             beforeEachTest {
                 fakeIntent = mockk<FakeIntent>()
                 attributesSession.clear()
-                every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
-                every { Util.getIntentPackage() } returns "package.with.intent"
+                every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
+                every { Util.getScanPackage() } returns "package.with.intent"
                 session = mockk {
                     every { attributes } returns attributesSession
                 }
@@ -323,8 +323,8 @@ object ConcreteSpeechHandlerTest : Spek({
             }
 
             on("Intent without Provider annotation") {
-                every { Util.loadIntentClassesFromPackage() } returns emptySet()
-                every { Util.getIntentPackage() } returns "package.with.no.intent"
+                every { Util.loadClassesFromPackage() } returns emptySet()
+                every { Util.getScanPackage() } returns "package.with.no.intent"
                 concreteSpeechHandler = ConcreteSpeechHandler()
                 it("should return a default Provider response") {
                     val alexaResponse = concreteSpeechHandler.handleConnectionsRequest(connectionsRequest)
@@ -332,8 +332,8 @@ object ConcreteSpeechHandlerTest : Spek({
                 }
             }
             on("Intent with Provider annotation") {
-                every { Util.getIntentPackage() } returns "package.with.intent"
-                every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
+                every { Util.getScanPackage() } returns "package.with.intent"
+                every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
                 concreteSpeechHandler = ConcreteSpeechHandler()
                 it("should return a call onConnectionsRequest method from the intent annotated with Provider") {
                     val alexaResponse = concreteSpeechHandler.handleConnectionsRequest(connectionsRequest)
@@ -352,8 +352,8 @@ object ConcreteSpeechHandlerTest : Spek({
             beforeEachTest {
                 fakeIntent = mockk<FakeIntent>()
                 attributesSession.clear()
-                every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
-                every { Util.getIntentPackage() } returns "package.with.intent"
+                every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
+                every { Util.getScanPackage() } returns "package.with.intent"
                 session = mockk {
                     every { attributes } returns attributesSession
                 }
@@ -366,8 +366,8 @@ object ConcreteSpeechHandlerTest : Spek({
             }
 
             on("Intent without ListEvents annotation") {
-                every { Util.loadIntentClassesFromPackage() } returns emptySet()
-                every { Util.getIntentPackage() } returns "package.with.no.intent"
+                every { Util.loadClassesFromPackage() } returns emptySet()
+                every { Util.getScanPackage() } returns "package.with.no.intent"
                 concreteSpeechHandler = ConcreteSpeechHandler()
                 it("should return a default ListEvents response") {
                     val alexaResponse = concreteSpeechHandler.handleListCreatedEventRequest(listCreatedEventRequest)
@@ -375,8 +375,8 @@ object ConcreteSpeechHandlerTest : Spek({
                 }
             }
             on("Intent with ListEvents annotation") {
-                every { Util.getIntentPackage() } returns "package.with.intent"
-                every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
+                every { Util.getScanPackage() } returns "package.with.intent"
+                every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
 
                 it("should return a call onListCreatedEventRequest method from the intent annotated with ListEvents") {
                     val alexaResponse = concreteSpeechHandler.handleListCreatedEventRequest(listCreatedEventRequest)
@@ -395,8 +395,8 @@ object ConcreteSpeechHandlerTest : Spek({
             beforeEachTest {
                 fakeIntent = mockk<FakeIntent>()
                 attributesSession.clear()
-                every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
-                every { Util.getIntentPackage() } returns "package.with.intent"
+                every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
+                every { Util.getScanPackage() } returns "package.with.intent"
                 session = mockk {
                     every { attributes } returns attributesSession
                 }
@@ -409,8 +409,8 @@ object ConcreteSpeechHandlerTest : Spek({
             }
 
             on("Intent without ListEvents annotation") {
-                every { Util.loadIntentClassesFromPackage() } returns emptySet()
-                every { Util.getIntentPackage() } returns "package.with.no.intent"
+                every { Util.loadClassesFromPackage() } returns emptySet()
+                every { Util.getScanPackage() } returns "package.with.no.intent"
                 concreteSpeechHandler = ConcreteSpeechHandler()
                 it("should return a default ListEvents response") {
                     val alexaResponse = concreteSpeechHandler.handleListUpdatedEventRequest(listUpdatedEventRequest)
@@ -418,8 +418,8 @@ object ConcreteSpeechHandlerTest : Spek({
                 }
             }
             on("Intent with ListEvents annotation") {
-                every { Util.getIntentPackage() } returns "package.with.intent"
-                every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
+                every { Util.getScanPackage() } returns "package.with.intent"
+                every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
 
                 it("should return a call onListUpdatedEventRequest method from the intent annotated with ListEvents") {
                     val alexaResponse = concreteSpeechHandler.handleListUpdatedEventRequest(listUpdatedEventRequest)
@@ -438,8 +438,8 @@ object ConcreteSpeechHandlerTest : Spek({
             beforeEachTest {
                 fakeIntent = mockk<FakeIntent>()
                 attributesSession.clear()
-                every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
-                every { Util.getIntentPackage() } returns "package.with.intent"
+                every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
+                every { Util.getScanPackage() } returns "package.with.intent"
                 session = mockk {
                     every { attributes } returns attributesSession
                 }
@@ -452,8 +452,8 @@ object ConcreteSpeechHandlerTest : Spek({
             }
 
             on("Intent without ListEvents annotation") {
-                every { Util.loadIntentClassesFromPackage() } returns emptySet()
-                every { Util.getIntentPackage() } returns "package.with.no.intent"
+                every { Util.loadClassesFromPackage() } returns emptySet()
+                every { Util.getScanPackage() } returns "package.with.no.intent"
                 concreteSpeechHandler = ConcreteSpeechHandler()
                 it("should return a default ListEvents response") {
                     val alexaResponse = concreteSpeechHandler.handleListDeletedEventRequest(listDeletedEventRequest)
@@ -461,8 +461,8 @@ object ConcreteSpeechHandlerTest : Spek({
                 }
             }
             on("Intent with ListEvents annotation") {
-                every { Util.getIntentPackage() } returns "package.with.intent"
-                every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
+                every { Util.getScanPackage() } returns "package.with.intent"
+                every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
 
                 it("should return a call onListDeletedEventRequest method from the intent annotated with ListEvents") {
                     val alexaResponse = concreteSpeechHandler.handleListDeletedEventRequest(listDeletedEventRequest)
@@ -481,8 +481,8 @@ object ConcreteSpeechHandlerTest : Spek({
             beforeEachTest {
                 fakeIntent = mockk<FakeIntent>()
                 attributesSession.clear()
-                every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
-                every { Util.getIntentPackage() } returns "package.with.intent"
+                every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
+                every { Util.getScanPackage() } returns "package.with.intent"
                 session = mockk {
                     every { attributes } returns attributesSession
                 }
@@ -495,8 +495,8 @@ object ConcreteSpeechHandlerTest : Spek({
             }
 
             on("Intent without ListEvents annotation") {
-                every { Util.loadIntentClassesFromPackage() } returns emptySet()
-                every { Util.getIntentPackage() } returns "package.with.no.intent"
+                every { Util.loadClassesFromPackage() } returns emptySet()
+                every { Util.getScanPackage() } returns "package.with.no.intent"
                 concreteSpeechHandler = ConcreteSpeechHandler()
                 it("should return a default ListEvents response") {
                     val alexaResponse = concreteSpeechHandler.handleListItemsCreatedEventRequest(listItemsCreatedEventRequest)
@@ -504,8 +504,8 @@ object ConcreteSpeechHandlerTest : Spek({
                 }
             }
             on("Intent with ListEvents annotation") {
-                every { Util.getIntentPackage() } returns "package.with.intent"
-                every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
+                every { Util.getScanPackage() } returns "package.with.intent"
+                every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
 
                 it("should return a call onListItemsCreatedEventRequest method from the intent annotated with ListEvents") {
                     val alexaResponse = concreteSpeechHandler.handleListItemsCreatedEventRequest(listItemsCreatedEventRequest)
@@ -524,8 +524,8 @@ object ConcreteSpeechHandlerTest : Spek({
             beforeEachTest {
                 fakeIntent = mockk<FakeIntent>()
                 attributesSession.clear()
-                every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
-                every { Util.getIntentPackage() } returns "package.with.intent"
+                every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
+                every { Util.getScanPackage() } returns "package.with.intent"
                 session = mockk {
                     every { attributes } returns attributesSession
                 }
@@ -538,8 +538,8 @@ object ConcreteSpeechHandlerTest : Spek({
             }
 
             on("Intent without ListEvents annotation") {
-                every { Util.loadIntentClassesFromPackage() } returns emptySet()
-                every { Util.getIntentPackage() } returns "package.with.no.intent"
+                every { Util.loadClassesFromPackage() } returns emptySet()
+                every { Util.getScanPackage() } returns "package.with.no.intent"
                 concreteSpeechHandler = ConcreteSpeechHandler()
                 it("should return a default ListEvents response") {
                     val alexaResponse = concreteSpeechHandler.handleListItemsUpdatedEventRequest(listItemsUpdatedEventRequest)
@@ -547,8 +547,8 @@ object ConcreteSpeechHandlerTest : Spek({
                 }
             }
             on("Intent with ListEvents annotation") {
-                every { Util.getIntentPackage() } returns "package.with.intent"
-                every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
+                every { Util.getScanPackage() } returns "package.with.intent"
+                every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
 
                 it("should return a call onListItemsUpdatedEventRequest method from the intent annotated with ListEvents") {
                     val alexaResponse = concreteSpeechHandler.handleListItemsUpdatedEventRequest(listItemsUpdatedEventRequest)
@@ -567,8 +567,8 @@ object ConcreteSpeechHandlerTest : Spek({
             beforeEachTest {
                 fakeIntent = mockk<FakeIntent>()
                 attributesSession.clear()
-                every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
-                every { Util.getIntentPackage() } returns "package.with.intent"
+                every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
+                every { Util.getScanPackage() } returns "package.with.intent"
                 session = mockk {
                     every { attributes } returns attributesSession
                 }
@@ -581,8 +581,8 @@ object ConcreteSpeechHandlerTest : Spek({
             }
 
             on("Intent without ListEvents annotation") {
-                every { Util.loadIntentClassesFromPackage() } returns emptySet()
-                every { Util.getIntentPackage() } returns "package.with.no.intent"
+                every { Util.loadClassesFromPackage() } returns emptySet()
+                every { Util.getScanPackage() } returns "package.with.no.intent"
                 concreteSpeechHandler = ConcreteSpeechHandler()
                 it("should return a default ListEvents response") {
                     val alexaResponse = concreteSpeechHandler.handleListItemsDeletedEventRequest(listItemsDeletedEventRequest)
@@ -590,8 +590,8 @@ object ConcreteSpeechHandlerTest : Spek({
                 }
             }
             on("Intent with ListEvents annotation") {
-                every { Util.getIntentPackage() } returns "package.with.intent"
-                every { Util.loadIntentClassesFromPackage() } returns setOf(fakeIntent::class)
+                every { Util.getScanPackage() } returns "package.with.intent"
+                every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
 
                 it("should return a call onListItemsDeletedEventRequest method from the intent annotated with ListEvents") {
                     val alexaResponse = concreteSpeechHandler.handleListItemsDeletedEventRequest(listItemsDeletedEventRequest)

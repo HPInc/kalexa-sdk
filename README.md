@@ -10,12 +10,12 @@ It's also possible to use Java and add kalexa-sdk as dependency.
 ##### Gradle
 add dependency to build.gradle:
 ```
-compile "com.hp.kalexa:kalexa-sdk:0.1.1" 
+compile "com.hp.kalexa:kalexa-sdk:0.2.0"
 ```
 or as separated artifacts:
 ```
-compile "com.hp.kalexa:kalexa-core:0.1.1" 
-compile "com.hp.kalexa:kalexa-model:0.1.1" 
+compile "com.hp.kalexa:kalexa-core:0.2.0"
+compile "com.hp.kalexa:kalexa-model:0.2.0"
 ```
 
 ##### Maven
@@ -24,7 +24,7 @@ add dependency to pom.xml:
 <dependency>
     <groupId>com.hp.kalexa</groupId>
     <artifactId>kalexa-sdk</artifactId>
-    <version>0.1.1</version>
+    <version>0.2.0</version>
 </dependency>
 ```
 or as separated artifacts:
@@ -32,12 +32,12 @@ or as separated artifacts:
 <dependency>
     <groupId>com.hp.kalexa</groupId>
     <artifactId>kalexa-core</artifactId>
-    <version>0.1.1</version>
+    <version>0.2.0</version>
 </dependency>
 <dependency>
     <groupId>com.hp.kalexa</groupId>
     <artifactId>kalexa-model</artifactId>
-    <version>0.1.1</version>
+    <version>0.2.0</version>
 </dependency>
 ```
 
@@ -53,14 +53,17 @@ You must export three environment variables on your application before running t
 
 `APPLICATION_ID`:  Corresponds to the skill id that you created on the Alexa Skills Kit Developer Console.
 
-`INTENT_PACKAGE`: Package location where your Intent classes are located.
+`APPLICATION_ID_VERIFICATION`: If you want to disable Application ID Verification, just set this environment variable
+as `True`.
+
+`SCAN_PACKAGE`: Package location where your Intent and Interceptor classes are located.
 
 `SKILL_NAME`: The name of the skill.
 
 ##### Add Intent Handler manually to Speech Handler:
 If for some reason you need to add Intent Handler instances manually instead of defining the environment 
 variable `INTENT_PACKAGE`, you can do it by adding those instances into `SkillConfig` object
-before providing it to `AlexaWebApplication`.
+before providing it to `AlexaWebApplication` or `AlexaRequestStreamHandler`.
 
 ```kotlin
 val intents = listOf(FirstIntent(), SecondIntent(), ThirdIntent(), FourthIntent())
@@ -69,20 +72,20 @@ val alexaWebApplication = AlexaWebApplication(skillConfig)
 ```
 
 ##### Add Request Interceptors.
-Request Interceptor is a way to intercept each request coming from Alexa before reach any Intent.
+Request Interceptors are a way to intercept each request coming from Alexa before reach any Intent.
 So it's the perfect place to put a logic that you want to be executed every time a request reaches your skill.
-It can be implemented by implementing `RequestInterceptor` interface.
+It can be done by implementing `RequestInterceptor` interface.
 
 ```kotlin
 class CustomInterceptor : RequestInterceptor {
 
-    override fun intercept(alexaRequest: AlexaRequest<*>) {
+    override fun interceptRequest(alexaRequest: AlexaRequest<*>) {
         // logic goes here.
     }
 }
 ```  
-After creating your interceptors, you must pass those interceptor instances to the `InterceptorHandler` the same way as
-`SpeechHandler`.
+And then pass the interceptors instances to the `SkillConfig` object the same way as
+`Intent` instances.
 
 ```kotlin
 val interceptors = listOf(CustomInterceptor())
@@ -91,14 +94,21 @@ val alexaWebApplication = AlexaWebApplication(skillConfig)
 ```
 
 #### Create Intent:
-There are different interfaces for each type of request that you may want to handle:
-```
-LaunchRequestHandler, IntentHandler, ProviderHandler, RequesterHandler, ListEventsHandler, HelpIntentHandler,
-FallbackIntentHandler, CanFulfillIntentHandler, RecoverIntentContextHandler
-```
-All of them extends from `BaseHandler`.
+There are different interfaces for each type of request that you may want to handle. They are:
 
-Implementing one of them will have to handle the required method of the contract. Each interface will handle the
+* LaunchRequestHandler
+* IntentHandler
+* FallbackIntentHandler
+* HelpIntentHandler
+* CanFulfillIntentHandler
+* ProviderHandler
+* RequesterHandler
+* ListEventsHandler
+* RecoverIntentContextHandler
+
+All of them extend from `BaseHandler`.
+
+Implementing one of them will force you to handle the required method of the contract. Each interface will handle the
 corresponding Request type from Alexa.
 For example:
 ```kotlin
@@ -109,13 +119,19 @@ class CustomLaunchRequest : LaunchRequestHandler {
 }
 ```
 
-##### Intent Handler
-For Intent Requests, you may use the same class to listen to different Intents created on [Amazon Developer](https://developer.amazon.com)
+##### Intent Handler and CanFulfillIntentHandler
+For Intent and CanFulfillIntent Requests, you may use the same class to handle different Intents created
+on [Amazon Developer](https://developer.amazon.com) by annotating accordingly.
 ```kotlin
-class CustomIntent : IntentHandler {
+class CustomIntent : IntentHandler, CanFulfillIntentHandler {
     @Intent(mapsTo = ["FirstIntent", "SecondIntent"])
     override fun onIntentRequest(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
         // logic for Intent Request type goes here.
+    }
+
+    @CanFulfillIntent(intents = ["FirstIntent", "SecondIntent"])
+    fun onCanFulfillIntent(alexaRequest: AlexaRequest<CanFulfillIntentRequest>): AlexaResponse {
+        // logic for CanFulfill Request type goes here.
     }
 }
 ```
@@ -124,13 +140,17 @@ the class name. CustomIntent in this case.
 
 ##### Supported Annotations and callback methods:
 These are the interfaces that you may annotate the method to listen to more than one Intent.
- - `@Intent` and `onIntentRequest` - Handles Intent Requests and the annotation gives you the power of map more than one Intent per class using the `mapsTo` annotation property. 
+ - `@Intent` and `onIntentRequest` - Handles Intent Requests and the annotation gives you the power of map more than one Intent per class using the `mapsTo` annotation property.
  - `@CanFulfillIntentRequest` and `onCanFulfillIntent` - Handles the CanFulfill. This request verifies if the skill can understand and fulfill the intent request and slots.
  
 #### Overriding Builtin callbacks:
-Your intent can override the `onBuiltInIntent` method to handle Amazon Built In intents properly. 
+Your intent class can override the `onBuiltInIntent` method to handle Amazon Built In intents properly. 
 Or you can just override some basic callbacks and handle as you like.
-These basic methods are: `onYesIntent`, `onNoIntent`, `onCancelIntent`, `onStopIntent`.
+These basic methods are:
+* onYesIntent
+* onNoIntent
+* onCancelIntent
+* onStopIntent
 
 #### Lock Context:
 In an interaction, you often need to lock the context (force interaction to go back to the last intent) for when you need an answer from the user.
@@ -267,9 +287,22 @@ return alexaResponse {
 ```
 
 #### Directives
-`Kalexa-SDK` supports most of the directives.
+`Kalexa-SDK` supports the follow directives:
+* AudioPlayer.ClearQueue
+* AudioPlayer.Stop"
+* AudioPlayer.Play"
+* Connections.SendResponse
+* Connections.SendRequest
+* Display.RenderTemplate
+* GadgetController.SetLight
+* Hint
+* VideoApp.Launch
 
-Dialog directives such `DelegateDirective`, `ElicitSlotDirective` and `ConfirmIntentDirective` directives.
+Also the Dialog directives:
+* Dialog.ConfirmIntent
+* Dialog.ConfirmSlot
+* Dialog.Delegate
+* Dialog.ElicitSlot
 
 UI directives: `RenderTemplateDirective` and populate with its Templates.  
 With Kotlin, using DSL, it's possible to iterate over a list of items and generate a list item for each element:

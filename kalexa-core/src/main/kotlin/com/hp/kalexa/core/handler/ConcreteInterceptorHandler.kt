@@ -27,7 +27,7 @@ class ConcreteInterceptorHandler(interceptorInstances: List<RequestInterceptor> 
 
     @Suppress("unchecked_cast")
     private fun loadInterceptorClasses(): List<KClass<out RequestInterceptor>> {
-        return Util.loadIntentClassesFromPackage()
+        return Util.loadClassesFromPackage()
             .filter { clazz ->
                 clazz.superclasses.find { superclazz ->
                     superclazz.simpleName == RequestInterceptor::class.java.simpleName
