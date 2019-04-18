@@ -11,7 +11,6 @@ import com.hp.kalexa.model.directive.DelegateDirective
 import com.hp.kalexa.model.directive.Directive
 import com.hp.kalexa.model.directive.HintDirective
 import com.hp.kalexa.model.directive.LaunchDirective
-import com.hp.kalexa.model.directive.PlayDirective
 import com.hp.kalexa.model.directive.RenderTemplateDirective
 import com.hp.kalexa.model.interfaces.display.BodyTemplate1
 import com.hp.kalexa.model.interfaces.display.BodyTemplate2

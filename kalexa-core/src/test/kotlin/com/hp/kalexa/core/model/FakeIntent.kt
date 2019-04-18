@@ -5,17 +5,19 @@
 
 package com.hp.kalexa.core.model
 
-import com.hp.kalexa.core.annotation.FallbackIntent
-import com.hp.kalexa.core.annotation.Provider
-import com.hp.kalexa.core.annotation.HelpIntent
 import com.hp.kalexa.core.annotation.Intent
-import com.hp.kalexa.core.annotation.LaunchIntent
-import com.hp.kalexa.core.annotation.ListEvents
-import com.hp.kalexa.core.annotation.RecoverIntentContext
-import com.hp.kalexa.core.annotation.Requester
 import com.hp.kalexa.core.intent.BuiltInIntent
+import com.hp.kalexa.core.intent.CanFulfillIntentHandler
+import com.hp.kalexa.core.intent.FallbackIntentHandler
+import com.hp.kalexa.core.intent.HelpIntentHandler
 import com.hp.kalexa.core.intent.IntentHandler
+import com.hp.kalexa.core.intent.LaunchRequestHandler
+import com.hp.kalexa.core.intent.ListEventsHandler
+import com.hp.kalexa.core.intent.ProviderHandler
+import com.hp.kalexa.core.intent.RecoverIntentContextHandler
+import com.hp.kalexa.core.intent.RequesterHandler
 import com.hp.kalexa.model.request.AlexaRequest
+import com.hp.kalexa.model.request.CanFulfillIntentRequest
 import com.hp.kalexa.model.request.ConnectionsRequest
 import com.hp.kalexa.model.request.ConnectionsResponseRequest
 import com.hp.kalexa.model.request.IntentRequest
@@ -29,15 +31,19 @@ import com.hp.kalexa.model.request.event.ListUpdatedEventRequest
 import com.hp.kalexa.model.response.AlexaResponse
 import com.hp.kalexa.model.response.dsl.alexaResponse
 
-@LaunchIntent
-@Intent(mapsTo = ["FirstIntent", "SecondIntent", "ThirdIntent"])
-@FallbackIntent
-@RecoverIntentContext
-@Provider
-@HelpIntent
-@ListEvents
-@Requester
-class FakeIntent : IntentHandler {
+class FakeIntent : IntentHandler, LaunchRequestHandler, HelpIntentHandler, FallbackIntentHandler,
+    RecoverIntentContextHandler, ProviderHandler, RequesterHandler, ListEventsHandler, CanFulfillIntentHandler {
+
+    override fun onCanFulfillIntent(alexaRequest: AlexaRequest<CanFulfillIntentRequest>): AlexaResponse {
+        return alexaResponse {
+            response {
+                speech {
+                    "This is a hello from FakeIntent@onCanFulfillIntent"
+                }
+            }
+        }
+    }
+
     override fun onLaunchIntent(alexaRequest: AlexaRequest<LaunchRequest>): AlexaResponse {
         return alexaResponse {
             response {
@@ -47,7 +53,7 @@ class FakeIntent : IntentHandler {
             }
         }
     }
-
+    @Intent(mapsTo = ["FirstIntent", "SecondIntent", "ThirdIntent"])
     override fun onIntentRequest(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
         return alexaResponse {
             response {

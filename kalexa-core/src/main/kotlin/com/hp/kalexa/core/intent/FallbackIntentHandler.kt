@@ -9,10 +9,10 @@ import com.hp.kalexa.model.request.AlexaRequest
 import com.hp.kalexa.model.request.IntentRequest
 import com.hp.kalexa.model.response.AlexaResponse
 
-interface IntentHandler : BaseHandler {
+interface FallbackIntentHandler : BaseHandler {
 
     /**
-     * Handles Intent Request coming from Alexa
+     * Handles FallbackIntent Built In Intent coming from Alexa.
      */
-    fun onIntentRequest(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse
+    fun onFallbackIntent(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse
 }

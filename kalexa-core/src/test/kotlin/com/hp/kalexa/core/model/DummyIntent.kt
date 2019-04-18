@@ -5,6 +5,6 @@
 
 package com.hp.kalexa.core.model
 
-import com.hp.kalexa.core.intent.IntentHandler
+import com.hp.kalexa.core.intent.BaseHandler
 
-class DummyIntent : IntentHandler
+class DummyIntent : BaseHandler

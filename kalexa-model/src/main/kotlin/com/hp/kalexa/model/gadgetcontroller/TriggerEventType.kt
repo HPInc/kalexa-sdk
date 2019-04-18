@@ -3,23 +3,23 @@
  * SPDX-License-Identifier: MIT
  */
 
-package com.hp.kalexa.model.canfulfill
+package com.hp.kalexa.model.gadgetcontroller
 
 import com.fasterxml.jackson.annotation.JsonCreator
 
-enum class CanUnderstandSlotValues(val value: String) {
-    YES("YES"),
-    NO("NO"),
-    MAYBE("MAYBE");
+enum class TriggerEventType(val value: String) {
+    BUTTONDOWN("buttonDown"),
+    BUTTONUP("buttonUp"),
+    NONE("none");
 
     override fun toString(): String {
-        return value
+        return this.value
     }
 
     companion object {
 
         @JsonCreator
-        fun fromValue(text: String): CanUnderstandSlotValues? {
+        fun fromValue(text: String): TriggerEventType? {
             for (value in values()) {
                 if (value.value == text) {
                     return value

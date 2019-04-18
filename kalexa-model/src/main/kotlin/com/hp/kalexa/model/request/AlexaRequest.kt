@@ -5,6 +5,7 @@
 
 package com.hp.kalexa.model.request
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.hp.kalexa.model.Context
 import com.hp.kalexa.model.Session
 
@@ -12,5 +13,7 @@ class AlexaRequest<out T : Request>(
     val version: String,
     val session: Session?,
     val context: Context,
-    val request: T
+    val request: T,
+    @JsonIgnore
+    val requestAttributes: MutableMap<String, Any> = mutableMapOf()
 )

@@ -24,10 +24,9 @@ object AlexaRequestStreamHandlerTest : Spek({
             val speechRequestHandler: SpeechRequestHandler = mockk<SpeechRequestHandler> {
                 every { process(any()) } returns expectedMsg
             }
-            val speechHandler = mockk<SpeechHandler>()
+            val skillConfig = mockk<SkillConfig>()
             val alexaRequestStreamHandler by memoized {
-                val alexaRequestStreamHandler = AlexaRequestStreamHandler(speechHandler)
-                alexaRequestStreamHandler.speechRequestHandler = speechRequestHandler
+                val alexaRequestStreamHandler = AlexaRequestStreamHandler(skillConfig, speechRequestHandler)
                 alexaRequestStreamHandler
             }
             val inputStream = ByteArrayInputStream("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.".toByteArray())

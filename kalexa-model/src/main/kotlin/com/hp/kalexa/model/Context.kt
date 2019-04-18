@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.hp.kalexa.model.interfaces.audioplayer.AudioPlayer
 import com.hp.kalexa.model.interfaces.display.Display
 import com.hp.kalexa.model.interfaces.geolocation.Geolocation
+import com.hp.kalexa.model.viewport.Viewport
 
 data class Context(
     @JsonProperty("System")
@@ -18,7 +19,9 @@ data class Context(
     @JsonProperty("Display")
     val display: Display? = null,
     @JsonProperty("Geolocation")
-    val geolocation: Geolocation? = null
+    val geolocation: Geolocation? = null,
+    @JsonProperty("Viewport")
+    val viewport: Viewport = Viewport()
 ) {
 
     /**
