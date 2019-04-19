@@ -8,6 +8,7 @@ package com.hp.kalexa.core.handler
 import com.hp.kalexa.core.annotation.CanFulfillIntent
 import com.hp.kalexa.core.annotation.Intent
 import com.hp.kalexa.core.extension.cast
+import com.hp.kalexa.core.extension.hasSuperClassOf
 import com.hp.kalexa.core.handler.SpeechHandler.Companion.INTENT_CONTEXT
 import com.hp.kalexa.core.intent.BaseHandler
 import com.hp.kalexa.core.intent.BuiltInIntent
@@ -348,9 +349,7 @@ open class ConcreteSpeechHandler(instances: List<BaseHandler> = emptyList()) : S
     private inline fun <reified T : Annotation> mapIntentHandlersOf(kClass: KClass<out BaseHandler>):
         Map<Set<String>, KClass<out BaseHandler>> {
         return intentHandlerClasses.filter {
-            it.simpleName == kClass.simpleName || it.superclasses.find { superclazz ->
-                superclazz.simpleName == kClass.simpleName
-            } != null
+            it.simpleName == kClass.simpleName || it.hasSuperClassOf(kClass)
         }.map { clazz ->
             val annotation = clazz.declaredFunctions.find {
                 it.findAnnotation<T>() != null
@@ -365,19 +364,32 @@ open class ConcreteSpeechHandler(instances: List<BaseHandler> = emptyList()) : S
         }.toMap()
     }
 
+    /**
+     * Looks for the Handler instance in handler instances map using the given class name as key,
+     * if no such instance exists with the given key,
+     * then it looks for the instance again in the handler instances map by iterating over the values
+     * and checking if each value has a super class of the given class.
+     * And still if no such element is found and the given class implements some Handler or has a super class of
+     * the given class, then a new instance is created and added to the Handler Instances map and the instance is returned.
+     * @param clazz of the wanted handler instance.
+     * @return handler instance.
+     */
     private fun getHandler(clazz: KClass<out BaseHandler>): BaseHandler? {
-        return (handlerInstances[clazz.simpleName!!]
+        return handlerInstances[clazz.simpleName!!]
             ?: run {
-                intentHandlerClasses.find {
-                    it == clazz || it.superclasses.find { superclazz ->
-                        superclazz == clazz
-                    } != null
-                }?.createInstance()
+                handlerInstances.values.find { it::class.hasSuperClassOf(clazz) }
                     ?.let { handler ->
-                        handlerInstances[clazz.simpleName!!] = handler
+                        handlerInstances[handler::class.simpleName!!] = handler
                         handler
                     }
-            })
+            } ?: run {
+                intentHandlerClasses.find { it == clazz || it.hasSuperClassOf(clazz) }
+                    ?.createInstance()
+                    ?.let { instance ->
+                        handlerInstances[instance::class.simpleName!!] = instance
+                        instance
+                    }
+            }
     }
 
     /**
