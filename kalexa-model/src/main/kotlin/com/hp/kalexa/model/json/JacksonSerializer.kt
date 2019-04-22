@@ -7,6 +7,7 @@ package com.hp.kalexa.model.json
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.hp.kalexa.model.exception.KalexaSDKException
@@ -17,11 +18,11 @@ import java.io.OutputStream
 
 object JacksonSerializer {
 
-    val OBJECT_MAPPER = jacksonObjectMapper()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .configure(DeserializationFeature.READ_ENUMS_USING_TO_STRING, true)
-            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-            .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
+    val OBJECT_MAPPER: ObjectMapper = jacksonObjectMapper()
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        .configure(DeserializationFeature.READ_ENUMS_USING_TO_STRING, true)
+        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+        .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
 
     fun fromJson(json: String): AlexaRequest<*> {
         return OBJECT_MAPPER.readValue(json, AlexaRequest::class.java)
@@ -47,17 +48,17 @@ object JacksonSerializer {
         }
     }
 
-    fun <T> deserialize(s: String, aClass: Class<T>): T {
+    fun <T> deserialize(s: String, clazz: Class<T>): T {
         try {
-            return OBJECT_MAPPER.readValue(s, aClass)
+            return OBJECT_MAPPER.readValue(s, clazz)
         } catch (e: IOException) {
             throw KalexaSDKException("Something went wrong while deserializing an object", e)
         }
     }
 
-    fun <T> deserialize(input: ByteArray, aClass: Class<T>): T {
+    fun <T> deserialize(input: ByteArray, clazz: Class<T>): T {
         try {
-            return OBJECT_MAPPER.readValue(input, aClass)
+            return OBJECT_MAPPER.readValue(input, clazz)
         } catch (e: IOException) {
             throw KalexaSDKException("Something went wrong while deserializing an object", e)
         }

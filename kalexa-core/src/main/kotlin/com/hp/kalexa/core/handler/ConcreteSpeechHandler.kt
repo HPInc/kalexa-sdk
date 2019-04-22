@@ -370,7 +370,8 @@ open class ConcreteSpeechHandler(instances: List<BaseHandler> = emptyList()) : S
      * then it looks for the instance again in the handler instances map by iterating over the values
      * and checking if each value has a super class of the given class.
      * And still if no such element is found and the given class implements some Handler or has a super class of
-     * the given class, then a new instance is created and added to the Handler Instances map and the instance is returned.
+     * the given class, then a new instance is created and added to the Handler Instances map and the instance is
+     * returned.
      * @param clazz of the wanted handler instance.
      * @return handler instance.
      */

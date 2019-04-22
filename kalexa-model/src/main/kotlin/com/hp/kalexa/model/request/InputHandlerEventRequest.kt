@@ -7,17 +7,16 @@ package com.hp.kalexa.model.request
 
 import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.hp.kalexa.model.DialogState
-import com.hp.kalexa.model.Intent
+import com.hp.kalexa.model.gameengine.InputHandlerEvent
 import com.hp.kalexa.model.json.LocalDateTimeDeserializer
 import java.time.LocalDateTime
 
-@JsonTypeName("IntentRequest")
-class IntentRequest(
+@JsonTypeName("GameEngine.InputHandlerEvent")
+class InputHandlerEventRequest(
     requestId: String,
     locale: String,
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
     timestamp: LocalDateTime,
-    intent: Intent,
-    dialogState: DialogState?
-) : BaseIntentRequest(requestId, locale, timestamp, intent, dialogState)
+    val originatingRequestId: String,
+    val events: List<InputHandlerEvent> = emptyList()
+) : Request(requestId, locale, timestamp)

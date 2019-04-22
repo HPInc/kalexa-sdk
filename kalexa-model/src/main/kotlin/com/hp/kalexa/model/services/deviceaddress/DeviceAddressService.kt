@@ -5,9 +5,10 @@
 
 package com.hp.kalexa.model.services.deviceaddress
 
+import com.hp.kalexa.model.services.BaseService
 import com.hp.kalexa.model.services.ServiceException
 
-interface DeviceAddressService {
+interface DeviceAddressService : BaseService {
     @Throws(ServiceException::class)
     fun getCountryAndPostalCode(deviceId: String, token: String): ShortAddress
 

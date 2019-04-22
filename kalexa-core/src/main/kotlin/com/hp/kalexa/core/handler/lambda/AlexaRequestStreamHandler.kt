@@ -16,7 +16,7 @@ import java.io.OutputStream
 
 open class AlexaRequestStreamHandler(
     skillConfig: SkillConfig = SkillConfig(),
-    val speechRequestHandler: SpeechRequestHandler = SpeechRequestHandler(skillConfig)
+    private val speechRequestHandler: SpeechRequestHandler = SpeechRequestHandler(skillConfig)
 ) : RequestStreamHandler {
     private val logger = LogManager.getLogger(AlexaRequestStreamHandler::class.java)
 

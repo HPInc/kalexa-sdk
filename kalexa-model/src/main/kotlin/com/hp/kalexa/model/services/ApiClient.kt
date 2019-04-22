@@ -54,7 +54,7 @@ class ApiClient {
     private fun writeHeaders(connection: HttpURLConnection, headers: Map<String, String>, method: String) {
         connection.requestMethod = method
         connection.doOutput = true
-        headers.forEach { key, value -> connection.setRequestProperty(key, value) }
+        headers.forEach { (key, value) -> connection.setRequestProperty(key, value) }
     }
 
     @Throws(IOException::class)

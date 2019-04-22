@@ -14,9 +14,10 @@ import com.hp.kalexa.model.request.list.CreateListRequest
 import com.hp.kalexa.model.request.list.ListState
 import com.hp.kalexa.model.request.list.UpdateListItemRequest
 import com.hp.kalexa.model.request.list.UpdateListRequest
+import com.hp.kalexa.model.services.BaseService
 import com.hp.kalexa.model.services.ServiceException
 
-interface ListService {
+interface ListService : BaseService {
 
     @Throws(ServiceException::class)
     fun getListsMetadata(token: String): AlexaListsMetadata

@@ -130,13 +130,6 @@ class ListServiceClient(private val client: ApiClient = ApiClient()) : ListServi
         }
     }
 
-    private fun getRequestHeaders(token: String): Map<String, String> {
-        return mapOf(
-            "Authorization" to "Bearer $token",
-            "Content-Type" to "application/json"
-        )
-    }
-
     companion object {
         internal const val API_ENDPOINT = "https://api.amazonalexa.com"
     }

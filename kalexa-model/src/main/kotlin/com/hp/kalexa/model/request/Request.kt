@@ -23,6 +23,8 @@ import java.time.LocalDateTime
     JsonSubTypes.Type(value = ConnectionsRequest::class, name = "Connections.Request"),
     JsonSubTypes.Type(value = ElementSelectedRequest::class, name = "Display.ElementSelected"),
     JsonSubTypes.Type(value = LaunchRequest::class, name = "LaunchRequest"),
+    JsonSubTypes.Type(value = MessageReceivedRequest::class, name = "Messaging.MessageReceived"),
+    JsonSubTypes.Type(value = InputHandlerEventRequest::class, name = "GameEngine.InputHandlerEvent"),
     // handles all List Events
     JsonSubTypes.Type(value = EventRequest::class),
     // handles IntentRequest and CanFulfillIntentRequest
