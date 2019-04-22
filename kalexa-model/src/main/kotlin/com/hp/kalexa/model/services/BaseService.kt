@@ -13,4 +13,8 @@ interface BaseService {
             "Content-Type" to "application/json"
         )
     }
+
+    companion object {
+        const val API_ENDPOINT = "https://api.amazonalexa.com"
+    }
 }

@@ -6,6 +6,7 @@
 package com.hp.kalexa.model.services.deviceaddress
 
 import com.hp.kalexa.model.services.ApiClient
+import com.hp.kalexa.model.services.BaseService.Companion.API_ENDPOINT
 import com.hp.kalexa.model.services.ServiceException
 import com.hp.kalexa.model.services.toTypedObject
 import java.io.IOException
@@ -30,9 +31,5 @@ class DeviceAddressServiceClient(private val client: ApiClient = ApiClient()) : 
         } catch (e: IOException) {
             throw ServiceException("Encountered an IOException while attempting to retrieve full address", e)
         }
-    }
-
-    companion object {
-        internal const val API_ENDPOINT = "https://api.amazonalexa.com"
     }
 }

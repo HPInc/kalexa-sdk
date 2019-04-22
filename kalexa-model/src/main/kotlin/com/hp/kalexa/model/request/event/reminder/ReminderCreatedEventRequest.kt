@@ -3,18 +3,19 @@
  * SPDX-License-Identifier: MIT
  */
 
-package com.hp.kalexa.model.request
+package com.hp.kalexa.model.request.event.reminder
 
 import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.hp.kalexa.model.json.LocalDateTimeDeserializer
+import com.hp.kalexa.model.request.Request
 import java.time.LocalDateTime
 
-@JsonTypeName("Messaging.MessageReceived")
-class MessageReceivedRequest(
+@JsonTypeName("Reminders.ReminderCreated")
+class ReminderCreatedEventRequest(
     requestId: String,
     locale: String,
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
     timestamp: LocalDateTime,
-    val message: Map<String, Any>
+    var body: Event? = null
 ) : Request(requestId, locale, timestamp)

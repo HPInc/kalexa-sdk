@@ -11,8 +11,10 @@ import com.hp.kalexa.model.request.CanFulfillIntentRequest
 import com.hp.kalexa.model.request.ConnectionsRequest
 import com.hp.kalexa.model.request.ConnectionsResponseRequest
 import com.hp.kalexa.model.request.ElementSelectedRequest
+import com.hp.kalexa.model.request.InputHandlerEventRequest
 import com.hp.kalexa.model.request.IntentRequest
 import com.hp.kalexa.model.request.LaunchRequest
+import com.hp.kalexa.model.request.MessageReceivedRequest
 import com.hp.kalexa.model.request.SessionEndedRequest
 import com.hp.kalexa.model.request.SessionStartedRequest
 import com.hp.kalexa.model.request.event.ListCreatedEventRequest
@@ -21,6 +23,11 @@ import com.hp.kalexa.model.request.event.ListItemsCreatedEventRequest
 import com.hp.kalexa.model.request.event.ListItemsDeletedEventRequest
 import com.hp.kalexa.model.request.event.ListItemsUpdatedEventRequest
 import com.hp.kalexa.model.request.event.ListUpdatedEventRequest
+import com.hp.kalexa.model.request.event.reminder.ReminderCreatedEventRequest
+import com.hp.kalexa.model.request.event.reminder.ReminderDeletedEventRequest
+import com.hp.kalexa.model.request.event.reminder.ReminderStartedEventRequest
+import com.hp.kalexa.model.request.event.reminder.ReminderStatusChangedEventRequest
+import com.hp.kalexa.model.request.event.reminder.ReminderUpdatedEventRequest
 import com.hp.kalexa.model.response.AlexaResponse
 
 interface SpeechHandler {
@@ -52,6 +59,22 @@ interface SpeechHandler {
     fun handleListItemsUpdatedEventRequest(alexaRequest: AlexaRequest<ListItemsUpdatedEventRequest>): AlexaResponse
 
     fun handleListItemsDeletedEventRequest(alexaRequest: AlexaRequest<ListItemsDeletedEventRequest>): AlexaResponse
+
+    fun handleReminderCreatedEventRequest(alexaRequest: AlexaRequest<ReminderCreatedEventRequest>): AlexaResponse
+
+    fun handleReminderDeletedEventRequest(alexaRequest: AlexaRequest<ReminderDeletedEventRequest>): AlexaResponse
+
+    fun handleReminderStartedEventRequest(alexaRequest: AlexaRequest<ReminderStartedEventRequest>): AlexaResponse
+
+    fun handleReminderStatusChangedEventRequest(
+        alexaRequest: AlexaRequest<ReminderStatusChangedEventRequest>
+    ): AlexaResponse
+
+    fun handleReminderUpdatedEventRequest(alexaRequest: AlexaRequest<ReminderUpdatedEventRequest>): AlexaResponse
+
+    fun handleInputHandlerEventRequest(alexaRequest: AlexaRequest<InputHandlerEventRequest>): AlexaResponse
+
+    fun handleMessageReceivedRequest(alexaRequest: AlexaRequest<MessageReceivedRequest>): AlexaResponse
 
     companion object {
         const val INTENT_CONTEXT = "com.hp.kalexa.intentContext"

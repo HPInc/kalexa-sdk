@@ -15,11 +15,14 @@ import com.hp.kalexa.core.intent.BuiltInIntent
 import com.hp.kalexa.core.intent.CanFulfillIntentHandler
 import com.hp.kalexa.core.intent.FallbackIntentHandler
 import com.hp.kalexa.core.intent.HelpIntentHandler
+import com.hp.kalexa.core.intent.InputHandlerEventRequestHandler
 import com.hp.kalexa.core.intent.IntentHandler
 import com.hp.kalexa.core.intent.LaunchRequestHandler
 import com.hp.kalexa.core.intent.ListEventsHandler
+import com.hp.kalexa.core.intent.MessageReceivedRequestHandler
 import com.hp.kalexa.core.intent.ProviderHandler
 import com.hp.kalexa.core.intent.RecoverIntentContextHandler
+import com.hp.kalexa.core.intent.ReminderEventsHandler
 import com.hp.kalexa.core.intent.RequesterHandler
 import com.hp.kalexa.core.util.IntentUtil.defaultBuiltInResponse
 import com.hp.kalexa.core.util.IntentUtil.defaultGreetings
@@ -34,8 +37,10 @@ import com.hp.kalexa.model.request.CanFulfillIntentRequest
 import com.hp.kalexa.model.request.ConnectionsRequest
 import com.hp.kalexa.model.request.ConnectionsResponseRequest
 import com.hp.kalexa.model.request.ElementSelectedRequest
+import com.hp.kalexa.model.request.InputHandlerEventRequest
 import com.hp.kalexa.model.request.IntentRequest
 import com.hp.kalexa.model.request.LaunchRequest
+import com.hp.kalexa.model.request.MessageReceivedRequest
 import com.hp.kalexa.model.request.SessionEndedRequest
 import com.hp.kalexa.model.request.SessionStartedRequest
 import com.hp.kalexa.model.request.event.ListCreatedEventRequest
@@ -44,6 +49,11 @@ import com.hp.kalexa.model.request.event.ListItemsCreatedEventRequest
 import com.hp.kalexa.model.request.event.ListItemsDeletedEventRequest
 import com.hp.kalexa.model.request.event.ListItemsUpdatedEventRequest
 import com.hp.kalexa.model.request.event.ListUpdatedEventRequest
+import com.hp.kalexa.model.request.event.reminder.ReminderCreatedEventRequest
+import com.hp.kalexa.model.request.event.reminder.ReminderDeletedEventRequest
+import com.hp.kalexa.model.request.event.reminder.ReminderStartedEventRequest
+import com.hp.kalexa.model.request.event.reminder.ReminderStatusChangedEventRequest
+import com.hp.kalexa.model.request.event.reminder.ReminderUpdatedEventRequest
 import com.hp.kalexa.model.response.AlexaResponse
 import com.hp.kalexa.model.response.dsl.alexaResponse
 import org.apache.logging.log4j.LogManager
@@ -54,7 +64,6 @@ import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.superclasses
 
 open class ConcreteSpeechHandler(instances: List<BaseHandler> = emptyList()) : SpeechHandler {
-
     private val logger = LogManager.getLogger(ConcreteSpeechHandler::class.java)
 
     private val intentHandlerClasses: Set<KClass<out BaseHandler>> =
@@ -212,6 +221,79 @@ open class ConcreteSpeechHandler(instances: List<BaseHandler> = emptyList()) : S
         return listHandler?.let {
             val alexaResponse = listHandler.onListItemsDeletedEventRequest(alexaRequest)
             return generateResponse(listHandler, alexaRequest, alexaResponse)
+        } ?: unsupportedIntent()
+    }
+
+    override fun handleReminderCreatedEventRequest(
+        alexaRequest: AlexaRequest<ReminderCreatedEventRequest>
+    ): AlexaResponse {
+        logger.info("=========================== ReminderCreatedEventRequest =========================")
+        val reminderHandler: ReminderEventsHandler? = getHandler(ReminderEventsHandler::class)?.cast()
+        return reminderHandler?.let {
+            val alexaResponse = reminderHandler.onReminderCreatedEventRequest(alexaRequest)
+            return generateResponse(reminderHandler, alexaRequest, alexaResponse)
+        } ?: unsupportedIntent()
+    }
+
+    override fun handleReminderDeletedEventRequest(
+        alexaRequest: AlexaRequest<ReminderDeletedEventRequest>
+    ): AlexaResponse {
+        logger.info("=========================== ReminderDeletedEventRequest =========================")
+        val reminderHandler: ReminderEventsHandler? = getHandler(ReminderEventsHandler::class)?.cast()
+        return reminderHandler?.let {
+            val alexaResponse = reminderHandler.onReminderDeletedEventRequest(alexaRequest)
+            return generateResponse(reminderHandler, alexaRequest, alexaResponse)
+        } ?: unsupportedIntent()
+    }
+
+    override fun handleReminderStartedEventRequest(
+        alexaRequest: AlexaRequest<ReminderStartedEventRequest>
+    ): AlexaResponse {
+        logger.info("=========================== ReminderStartedEventRequest =========================")
+        val reminderHandler: ReminderEventsHandler? = getHandler(ReminderEventsHandler::class)?.cast()
+        return reminderHandler?.let {
+            val alexaResponse = reminderHandler.onReminderStartedEventRequest(alexaRequest)
+            return generateResponse(reminderHandler, alexaRequest, alexaResponse)
+        } ?: unsupportedIntent()
+    }
+
+    override fun handleReminderStatusChangedEventRequest(
+        alexaRequest: AlexaRequest<ReminderStatusChangedEventRequest>
+    ): AlexaResponse {
+        logger.info("=========================== ReminderStatusChangedEventRequest =========================")
+        val reminderHandler: ReminderEventsHandler? = getHandler(ReminderEventsHandler::class)?.cast()
+        return reminderHandler?.let {
+            val alexaResponse = reminderHandler.onReminderStatusChangedEventRequest(alexaRequest)
+            return generateResponse(reminderHandler, alexaRequest, alexaResponse)
+        } ?: unsupportedIntent()
+    }
+
+    override fun handleReminderUpdatedEventRequest(
+        alexaRequest: AlexaRequest<ReminderUpdatedEventRequest>
+    ): AlexaResponse {
+        logger.info("=========================== ReminderUpdatedEventRequest =========================")
+        val reminderHandler: ReminderEventsHandler? = getHandler(ReminderEventsHandler::class)?.cast()
+        return reminderHandler?.let {
+            val alexaResponse = reminderHandler.onReminderUpdatedEventRequest(alexaRequest)
+            return generateResponse(reminderHandler, alexaRequest, alexaResponse)
+        } ?: unsupportedIntent()
+    }
+
+    override fun handleInputHandlerEventRequest(alexaRequest: AlexaRequest<InputHandlerEventRequest>): AlexaResponse {
+        logger.info("=========================== InputHandlerEventRequest =========================")
+        val inputHandler: InputHandlerEventRequestHandler? = getHandler(InputHandlerEventRequestHandler::class)?.cast()
+        return inputHandler?.let {
+            val alexaResponse = inputHandler.onInputHandlerEventRequest(alexaRequest)
+            return generateResponse(inputHandler, alexaRequest, alexaResponse)
+        } ?: unsupportedIntent()
+    }
+
+    override fun handleMessageReceivedRequest(alexaRequest: AlexaRequest<MessageReceivedRequest>): AlexaResponse {
+        logger.info("=========================== MessageReceivedRequest =========================")
+        val messageHandler: MessageReceivedRequestHandler? = getHandler(ReminderEventsHandler::class)?.cast()
+        return messageHandler?.let {
+            val alexaResponse = messageHandler.onMessageReceivedRequest(alexaRequest)
+            return generateResponse(messageHandler, alexaRequest, alexaResponse)
         } ?: unsupportedIntent()
     }
 

@@ -16,6 +16,7 @@ import com.hp.kalexa.model.request.list.ListState
 import com.hp.kalexa.model.request.list.UpdateListItemRequest
 import com.hp.kalexa.model.request.list.UpdateListRequest
 import com.hp.kalexa.model.services.ApiClient
+import com.hp.kalexa.model.services.BaseService.Companion.API_ENDPOINT
 import com.hp.kalexa.model.services.ServiceException
 import com.hp.kalexa.model.services.toTypedObject
 import java.io.IOException
@@ -128,9 +129,5 @@ class ListServiceClient(private val client: ApiClient = ApiClient()) : ListServi
         } catch (e: IOException) {
             throw ServiceException("Encountered an IOException while attempting to delete list item", e)
         }
-    }
-
-    companion object {
-        internal const val API_ENDPOINT = "https://api.amazonalexa.com"
     }
 }
