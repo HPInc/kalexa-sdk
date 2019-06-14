@@ -5,8 +5,6 @@
 
 package com.hp.kalexa.model.services.directive
 
-import com.hp.kalexa.model.services.BaseService
-
-interface DirectiveService : BaseService {
-    fun progressiveResponse(requestId: String, speechText: String, token: String)
+interface DirectiveService {
+    fun progressiveResponse(requestId: String, speechText: String)
 }

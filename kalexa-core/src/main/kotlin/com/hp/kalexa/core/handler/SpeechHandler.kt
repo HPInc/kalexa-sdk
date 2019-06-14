@@ -29,6 +29,11 @@ import com.hp.kalexa.model.request.event.reminder.ReminderStartedEventRequest
 import com.hp.kalexa.model.request.event.reminder.ReminderStatusChangedEventRequest
 import com.hp.kalexa.model.request.event.reminder.ReminderUpdatedEventRequest
 import com.hp.kalexa.model.response.AlexaResponse
+import com.hp.kalexa.model.skillevents.AccountLinkedRequest
+import com.hp.kalexa.model.skillevents.PermissionAcceptedRequest
+import com.hp.kalexa.model.skillevents.ProactiveSubscriptionChangedRequest
+import com.hp.kalexa.model.skillevents.SkillDisabledRequest
+import com.hp.kalexa.model.skillevents.SkillEnabledRequest
 
 interface SpeechHandler {
 
@@ -75,6 +80,15 @@ interface SpeechHandler {
     fun handleInputHandlerEventRequest(alexaRequest: AlexaRequest<InputHandlerEventRequest>): AlexaResponse
 
     fun handleMessageReceivedRequest(alexaRequest: AlexaRequest<MessageReceivedRequest>): AlexaResponse
+    fun handleAccountLinkedRequest(alexaRequest: AlexaRequest<AccountLinkedRequest>): AlexaResponse
+
+    fun handlePermissionAcceptedRequest(alexaRequest: AlexaRequest<PermissionAcceptedRequest>): AlexaResponse
+
+    fun handleSubscriptionChangedRequest(alexaRequest: AlexaRequest<ProactiveSubscriptionChangedRequest>): AlexaResponse
+
+    fun handleSkillDisabledRequest(alexaRequest: AlexaRequest<SkillDisabledRequest>): AlexaResponse
+
+    fun handleSkillEnabledRequest(alexaRequest: AlexaRequest<SkillEnabledRequest>): AlexaResponse
 
     companion object {
         const val INTENT_CONTEXT = "com.hp.kalexa.intentContext"

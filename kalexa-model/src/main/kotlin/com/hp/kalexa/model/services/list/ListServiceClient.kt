@@ -16,18 +16,20 @@ import com.hp.kalexa.model.request.list.ListState
 import com.hp.kalexa.model.request.list.UpdateListItemRequest
 import com.hp.kalexa.model.request.list.UpdateListRequest
 import com.hp.kalexa.model.services.ApiClient
-import com.hp.kalexa.model.services.BaseService.Companion.API_ENDPOINT
+import com.hp.kalexa.model.services.ApiConfiguration
+import com.hp.kalexa.model.services.BaseService
 import com.hp.kalexa.model.services.ServiceException
 import com.hp.kalexa.model.services.toTypedObject
 import java.io.IOException
 
-class ListServiceClient(private val client: ApiClient = ApiClient()) : ListService {
+class ListServiceClient(private val apiConfiguration: ApiConfiguration) : ListService,
+    BaseService(apiConfiguration.apiClient) {
 
     @Throws(ServiceException::class)
-    override fun getListsMetadata(token: String): AlexaListsMetadata {
-        val uri = "$API_ENDPOINT/v2/householdlists/"
+    override fun getListsMetadata(): AlexaListsMetadata {
+        val uri = "${apiConfiguration.apiEndpoint}/v2/householdlists/"
         try {
-            val response = client.get(uri, getRequestHeaders(token))
+            val response = get(uri, getRequestHeaders(apiConfiguration.apiAccessToken))
             return response.toTypedObject()
         } catch (e: IOException) {
             throw ServiceException("Encountered an IOException while attempting to retrieve lists metadata", e)
@@ -35,10 +37,10 @@ class ListServiceClient(private val client: ApiClient = ApiClient()) : ListServi
     }
 
     @Throws(ServiceException::class)
-    override fun getList(listId: String, status: ListState, token: String): AlexaList {
-        val uri = "$API_ENDPOINT/v2/householdlists/$listId/$status"
+    override fun getList(listId: String, status: ListState): AlexaList {
+        val uri = "${apiConfiguration.apiEndpoint}/v2/householdlists/$listId/$status"
         try {
-            val response = client.get(uri, getRequestHeaders(token))
+            val response = get(uri, getRequestHeaders(apiConfiguration.apiAccessToken))
             return response.toTypedObject()
         } catch (e: IOException) {
             throw ServiceException("Encountered an IOException while attempting to retrieve list", e)
@@ -46,10 +48,14 @@ class ListServiceClient(private val client: ApiClient = ApiClient()) : ListServi
     }
 
     @Throws(ServiceException::class)
-    override fun createList(request: CreateListRequest, token: String): AlexaListMetadata {
-        val uri = "$API_ENDPOINT/v2/householdlists/"
+    override fun createList(request: CreateListRequest): AlexaListMetadata {
+        val uri = "${apiConfiguration.apiEndpoint}/v2/householdlists/"
         try {
-            val response = client.post(uri, getRequestHeaders(token), JacksonSerializer.serialize(request))
+            val response = post(
+                uri,
+                getRequestHeaders(apiConfiguration.apiAccessToken),
+                JacksonSerializer.serialize(request)
+            )
             return response.toTypedObject()
         } catch (e: IOException) {
             throw ServiceException("Encountered an IOException while attempting to create list", e)
@@ -57,10 +63,14 @@ class ListServiceClient(private val client: ApiClient = ApiClient()) : ListServi
     }
 
     @Throws(ServiceException::class)
-    override fun updateList(listId: String, request: UpdateListRequest, token: String): AlexaListMetadata {
-        val uri = "$API_ENDPOINT/v2/householdlists/$listId"
+    override fun updateList(listId: String, request: UpdateListRequest): AlexaListMetadata {
+        val uri = "${apiConfiguration.apiEndpoint}/v2/householdlists/$listId"
         try {
-            val response = client.put(uri, getRequestHeaders(token), JacksonSerializer.serialize(request))
+            val response = put(
+                uri,
+                getRequestHeaders(apiConfiguration.apiAccessToken),
+                JacksonSerializer.serialize(request)
+            )
             return response.toTypedObject()
         } catch (e: IOException) {
             throw ServiceException("Encountered an IOException while attempting to update list", e)
@@ -68,10 +78,10 @@ class ListServiceClient(private val client: ApiClient = ApiClient()) : ListServi
     }
 
     @Throws(ServiceException::class)
-    override fun deleteList(listId: String, token: String) {
-        val uri = "$API_ENDPOINT/v2/householdlists/$listId"
+    override fun deleteList(listId: String) {
+        val uri = "${apiConfiguration.apiEndpoint}/v2/householdlists/$listId"
         try {
-            val response = client.delete(uri, getRequestHeaders(token))
+            val response = delete(uri, getRequestHeaders(apiConfiguration.apiAccessToken))
             if (response.responseCode !in ApiClient.SUCCESS_CODE_RANGE) {
                 throw ServiceException(response.responseBody)
             }
@@ -81,10 +91,10 @@ class ListServiceClient(private val client: ApiClient = ApiClient()) : ListServi
     }
 
     @Throws(ServiceException::class)
-    override fun getListItem(listId: String, itemId: String, token: String): AlexaListItem {
-        val uri = "$API_ENDPOINT/v2/householdlists/$listId/items/$itemId"
+    override fun getListItem(listId: String, itemId: String): AlexaListItem {
+        val uri = "${apiConfiguration.apiEndpoint}/v2/householdlists/$listId/items/$itemId"
         try {
-            val response = client.get(uri, getRequestHeaders(token))
+            val response = get(uri, getRequestHeaders(apiConfiguration.apiAccessToken))
             return response.toTypedObject()
         } catch (e: IOException) {
             throw ServiceException("Encountered an IOException while attempting to retrieve list item", e)
@@ -92,10 +102,14 @@ class ListServiceClient(private val client: ApiClient = ApiClient()) : ListServi
     }
 
     @Throws(ServiceException::class)
-    override fun createListItem(listId: String, request: CreateListItemRequest, token: String): AlexaListItem {
-        val uri = "$API_ENDPOINT/v2/householdlists/$listId/items"
+    override fun createListItem(listId: String, request: CreateListItemRequest): AlexaListItem {
+        val uri = "${apiConfiguration.apiEndpoint}/v2/householdlists/$listId/items"
         try {
-            val response = client.post(uri, getRequestHeaders(token), JacksonSerializer.serialize(request))
+            val response = post(
+                uri,
+                getRequestHeaders(apiConfiguration.apiAccessToken),
+                JacksonSerializer.serialize(request)
+            )
             return response.toTypedObject()
         } catch (e: IOException) {
             throw ServiceException("Encountered an IOException while attempting to create list item", e)
@@ -106,12 +120,15 @@ class ListServiceClient(private val client: ApiClient = ApiClient()) : ListServi
     override fun updateListItem(
         listId: String,
         itemId: String,
-        request: UpdateListItemRequest,
-        token: String
+        request: UpdateListItemRequest
     ): AlexaListItem {
-        val uri = "$API_ENDPOINT/v2/householdlists/$listId/items/$itemId"
+        val uri = "${apiConfiguration.apiEndpoint}/v2/householdlists/$listId/items/$itemId"
         try {
-            val response = client.put(uri, getRequestHeaders(token), JacksonSerializer.serialize(request))
+            val response = put(
+                uri,
+                getRequestHeaders(apiConfiguration.apiAccessToken),
+                JacksonSerializer.serialize(request)
+            )
             return response.toTypedObject()
         } catch (e: IOException) {
             throw ServiceException("Encountered an IOException while attempting to update list item", e)
@@ -119,10 +136,10 @@ class ListServiceClient(private val client: ApiClient = ApiClient()) : ListServi
     }
 
     @Throws(ServiceException::class)
-    override fun deleteListItem(listId: String, itemId: String, token: String) {
-        val uri = "$API_ENDPOINT/v2/householdlists/$listId/items/$itemId"
+    override fun deleteListItem(listId: String, itemId: String) {
+        val uri = "${apiConfiguration.apiEndpoint}/v2/householdlists/$listId/items/$itemId"
         try {
-            val response = client.delete(uri, getRequestHeaders(token))
+            val response = delete(uri, getRequestHeaders(apiConfiguration.apiAccessToken))
             if (response.responseCode !in ApiClient.SUCCESS_CODE_RANGE) {
                 throw ServiceException(response.responseBody)
             }

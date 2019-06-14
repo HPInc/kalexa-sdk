@@ -5,28 +5,27 @@
 
 package com.hp.kalexa.model.services.ups
 
-import com.hp.kalexa.model.services.BaseService
 import com.hp.kalexa.model.services.ServiceException
 
-interface UpsService : BaseService {
+interface UpsService {
     @Throws(ServiceException::class)
-    fun getProfileEmail(token: String): String
+    fun getProfileEmail(): String
 
     @Throws(ServiceException::class)
-    fun getProfileGivenName(token: String): String
+    fun getProfileGivenName(): String
 
     @Throws(ServiceException::class)
-    fun getProfileMobileNumber(token: String): PhoneNumber
+    fun getProfileMobileNumber(): PhoneNumber
 
     @Throws(ServiceException::class)
-    fun getProfileName(token: String): String
+    fun getProfileName(): String
 
     @Throws(ServiceException::class)
-    fun getSystemDistanceUnits(deviceId: String, token: String): DistanceUnit
+    fun getSystemDistanceUnits(deviceId: String): DistanceUnit
 
     @Throws(ServiceException::class)
-    fun getSystemTemperatureUnit(deviceId: String, token: String): TemperatureUnit
+    fun getSystemTemperatureUnit(deviceId: String): TemperatureUnit
 
     @Throws(ServiceException::class)
-    fun getSystemTimeZone(deviceId: String, token: String): String
+    fun getSystemTimeZone(deviceId: String): String
 }

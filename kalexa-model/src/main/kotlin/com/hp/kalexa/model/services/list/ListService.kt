@@ -14,35 +14,34 @@ import com.hp.kalexa.model.request.list.CreateListRequest
 import com.hp.kalexa.model.request.list.ListState
 import com.hp.kalexa.model.request.list.UpdateListItemRequest
 import com.hp.kalexa.model.request.list.UpdateListRequest
-import com.hp.kalexa.model.services.BaseService
 import com.hp.kalexa.model.services.ServiceException
 
-interface ListService : BaseService {
+interface ListService {
 
     @Throws(ServiceException::class)
-    fun getListsMetadata(token: String): AlexaListsMetadata
+    fun getListsMetadata(): AlexaListsMetadata
 
     @Throws(ServiceException::class)
-    fun getList(listId: String, status: ListState, token: String): AlexaList
+    fun getList(listId: String, status: ListState): AlexaList
 
     @Throws(ServiceException::class)
-    fun createList(request: CreateListRequest, token: String): AlexaListMetadata
+    fun createList(request: CreateListRequest): AlexaListMetadata
 
     @Throws(ServiceException::class)
-    fun updateList(listId: String, request: UpdateListRequest, token: String): AlexaListMetadata
+    fun updateList(listId: String, request: UpdateListRequest): AlexaListMetadata
 
     @Throws(ServiceException::class)
-    fun deleteList(listId: String, token: String)
+    fun deleteList(listId: String)
 
     @Throws(ServiceException::class)
-    fun getListItem(listId: String, itemId: String, token: String): AlexaListItem
+    fun getListItem(listId: String, itemId: String): AlexaListItem
 
     @Throws(ServiceException::class)
-    fun createListItem(listId: String, request: CreateListItemRequest, token: String): AlexaListItem
+    fun createListItem(listId: String, request: CreateListItemRequest): AlexaListItem
 
     @Throws(ServiceException::class)
-    fun updateListItem(listId: String, itemId: String, request: UpdateListItemRequest, token: String): AlexaListItem
+    fun updateListItem(listId: String, itemId: String, request: UpdateListItemRequest): AlexaListItem
 
     @Throws(ServiceException::class)
-    fun deleteListItem(listId: String, itemId: String, token: String)
+    fun deleteListItem(listId: String, itemId: String)
 }

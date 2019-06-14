@@ -31,6 +31,11 @@ import com.hp.kalexa.model.request.event.reminder.ReminderStartedEventRequest
 import com.hp.kalexa.model.request.event.reminder.ReminderStatusChangedEventRequest
 import com.hp.kalexa.model.request.event.reminder.ReminderUpdatedEventRequest
 import com.hp.kalexa.model.response.AlexaResponse
+import com.hp.kalexa.model.skillevents.AccountLinkedRequest
+import com.hp.kalexa.model.skillevents.PermissionAcceptedRequest
+import com.hp.kalexa.model.skillevents.ProactiveSubscriptionChangedRequest
+import com.hp.kalexa.model.skillevents.SkillDisabledRequest
+import com.hp.kalexa.model.skillevents.SkillEnabledRequest
 import org.apache.logging.log4j.LogManager
 
 class SpeechRequestHandler(
@@ -112,6 +117,16 @@ class SpeechRequestHandler(
                 speechHandler.handleInputHandlerEventRequest(alexaRequest.cast())
             is MessageReceivedRequest ->
                 speechHandler.handleMessageReceivedRequest(alexaRequest.cast())
+            is AccountLinkedRequest ->
+                speechHandler.handleAccountLinkedRequest(alexaRequest.cast())
+            is PermissionAcceptedRequest ->
+                speechHandler.handlePermissionAcceptedRequest(alexaRequest.cast())
+            is ProactiveSubscriptionChangedRequest ->
+                speechHandler.handleSubscriptionChangedRequest(alexaRequest.cast())
+            is SkillDisabledRequest ->
+                speechHandler.handleSkillDisabledRequest(alexaRequest.cast())
+            is SkillEnabledRequest ->
+                speechHandler.handleSkillEnabledRequest(alexaRequest.cast())
             else -> AlexaResponse.emptyResponse()
         }
         return alexaResponse.toJson()

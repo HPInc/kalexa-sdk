@@ -10,33 +10,34 @@ import com.hp.kalexa.model.request.event.reminder.GetReminderResponse
 import com.hp.kalexa.model.request.event.reminder.GetRemindersResponse
 import com.hp.kalexa.model.request.event.reminder.ReminderRequest
 import com.hp.kalexa.model.request.event.reminder.ReminderResponse
-import com.hp.kalexa.model.services.ApiClient
-import com.hp.kalexa.model.services.BaseService.Companion.API_ENDPOINT
+import com.hp.kalexa.model.services.ApiConfiguration
+import com.hp.kalexa.model.services.BaseService
 import com.hp.kalexa.model.services.ServiceException
 import com.hp.kalexa.model.services.toTypedObject
 import java.io.IOException
 
-class ReminderServiceClient(private val client: ApiClient = ApiClient()) : ReminderService {
+class ReminderServiceClient(private val apiConfig: ApiConfiguration) : ReminderService,
+    BaseService(apiConfig.apiClient) {
 
-    override fun deleteReminder(alertToken: String, accessToken: String) {
-        val uri = "$API_ENDPOINT/v1/alerts/reminders/$alertToken"
-        client.delete(uri, getRequestHeaders(accessToken))
+    override fun deleteReminder(alertToken: String) {
+        val uri = "${apiConfig.apiEndpoint}/v1/alerts/reminders/$alertToken"
+        delete(uri, getRequestHeaders(apiConfig.apiAccessToken))
     }
 
-    override fun getReminders(accessToken: String): GetRemindersResponse {
-        val uri = "$API_ENDPOINT/v1/alerts/reminders/"
+    override fun getReminders(): GetRemindersResponse {
+        val uri = "${apiConfig.apiEndpoint}/v1/alerts/reminders/"
         try {
-            val response = client.get(uri, getRequestHeaders(accessToken))
+            val response = get(uri, getRequestHeaders(apiConfig.apiAccessToken))
             return response.toTypedObject()
         } catch (e: IOException) {
             throw ServiceException("Encountered an IOException while attempting to get reminders", e)
         }
     }
 
-    override fun getReminder(alertToken: String, accessToken: String): GetReminderResponse {
-        val uri = "$API_ENDPOINT/v1/alerts/reminders/$alertToken"
+    override fun getReminder(alertToken: String): GetReminderResponse {
+        val uri = "${apiConfig.apiEndpoint}/v1/alerts/reminders/$alertToken"
         try {
-            val response = client.get(uri, getRequestHeaders(accessToken))
+            val response = get(uri, getRequestHeaders(apiConfig.apiAccessToken))
             return response.toTypedObject()
         } catch (e: IOException) {
             throw ServiceException("Encountered an IOException while attempting to get reminder", e)
@@ -45,22 +46,21 @@ class ReminderServiceClient(private val client: ApiClient = ApiClient()) : Remin
 
     override fun updateReminder(
         alertToken: String,
-        accessToken: String,
         reminderRequest: ReminderRequest
     ): ReminderResponse {
-        val uri = "$API_ENDPOINT/v1/alerts/reminders/$alertToken"
+        val uri = "${apiConfig.apiEndpoint}/v1/alerts/reminders/$alertToken"
         try {
-            val response = client.put(uri, getRequestHeaders(accessToken), reminderRequest.toJson())
+            val response = put(uri, getRequestHeaders(apiConfig.apiAccessToken), reminderRequest.toJson())
             return response.toTypedObject()
         } catch (e: IOException) {
             throw ServiceException("Encountered an IOException while attempting to update reminder", e)
         }
     }
 
-    override fun createReminder(accessToken: String, reminderRequest: ReminderRequest): ReminderResponse {
-        val uri = "$API_ENDPOINT/v1/alerts/reminders/"
+    override fun createReminder(reminderRequest: ReminderRequest): ReminderResponse {
+        val uri = "${apiConfig.apiEndpoint}/v1/alerts/reminders/"
         try {
-            val response = client.post(uri, getRequestHeaders(accessToken), reminderRequest.toJson())
+            val response = post(uri, getRequestHeaders(apiConfig.apiAccessToken), reminderRequest.toJson())
             return response.toTypedObject()
         } catch (e: IOException) {
             throw ServiceException("Encountered an IOException while attempting to create reminder", e)

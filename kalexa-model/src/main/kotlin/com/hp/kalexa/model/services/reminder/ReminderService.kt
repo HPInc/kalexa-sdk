@@ -9,23 +9,22 @@ import com.hp.kalexa.model.request.event.reminder.GetReminderResponse
 import com.hp.kalexa.model.request.event.reminder.GetRemindersResponse
 import com.hp.kalexa.model.request.event.reminder.ReminderRequest
 import com.hp.kalexa.model.request.event.reminder.ReminderResponse
-import com.hp.kalexa.model.services.BaseService
 import com.hp.kalexa.model.services.ServiceException
 
-interface ReminderService : BaseService {
+interface ReminderService {
 
     @Throws(ServiceException::class)
-    fun deleteReminder(alertToken: String, accessToken: String)
+    fun deleteReminder(alertToken: String)
 
     @Throws(ServiceException::class)
-    fun getReminder(alertToken: String, accessToken: String): GetReminderResponse
+    fun getReminder(alertToken: String): GetReminderResponse
 
     @Throws(ServiceException::class)
-    fun updateReminder(alertToken: String, accessToken: String, reminderRequest: ReminderRequest): ReminderResponse
+    fun updateReminder(alertToken: String, reminderRequest: ReminderRequest): ReminderResponse
 
     @Throws(ServiceException::class)
-    fun createReminder(accessToken: String, reminderRequest: ReminderRequest): ReminderResponse
+    fun createReminder(reminderRequest: ReminderRequest): ReminderResponse
 
     @Throws(ServiceException::class)
-    fun getReminders(accessToken: String): GetRemindersResponse
+    fun getReminders(): GetRemindersResponse
 }
