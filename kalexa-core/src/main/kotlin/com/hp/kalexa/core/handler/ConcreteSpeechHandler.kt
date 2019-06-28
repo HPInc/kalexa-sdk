@@ -10,17 +10,25 @@ import com.hp.kalexa.core.annotation.Intent
 import com.hp.kalexa.core.extension.cast
 import com.hp.kalexa.core.extension.hasSuperClassOf
 import com.hp.kalexa.core.handler.SpeechHandler.Companion.INTENT_CONTEXT
+import com.hp.kalexa.core.intent.AccountLinkedRequestHandler
 import com.hp.kalexa.core.intent.BaseHandler
 import com.hp.kalexa.core.intent.BuiltInIntent
 import com.hp.kalexa.core.intent.CanFulfillIntentHandler
 import com.hp.kalexa.core.intent.FallbackIntentHandler
 import com.hp.kalexa.core.intent.HelpIntentHandler
+import com.hp.kalexa.core.intent.InputHandlerEventRequestHandler
 import com.hp.kalexa.core.intent.IntentHandler
 import com.hp.kalexa.core.intent.LaunchRequestHandler
 import com.hp.kalexa.core.intent.ListEventsHandler
+import com.hp.kalexa.core.intent.MessageReceivedRequestHandler
+import com.hp.kalexa.core.intent.PermissionAcceptedRequestHandler
+import com.hp.kalexa.core.intent.ProactiveSubscriptionRequestHandler
 import com.hp.kalexa.core.intent.ProviderHandler
 import com.hp.kalexa.core.intent.RecoverIntentContextHandler
+import com.hp.kalexa.core.intent.ReminderEventsHandler
 import com.hp.kalexa.core.intent.RequesterHandler
+import com.hp.kalexa.core.intent.SkillDisabledRequestHandler
+import com.hp.kalexa.core.intent.SkillEnabledRequestHandler
 import com.hp.kalexa.core.util.IntentUtil.defaultBuiltInResponse
 import com.hp.kalexa.core.util.IntentUtil.defaultGreetings
 import com.hp.kalexa.core.util.IntentUtil.helpIntent
@@ -34,8 +42,10 @@ import com.hp.kalexa.model.request.CanFulfillIntentRequest
 import com.hp.kalexa.model.request.ConnectionsRequest
 import com.hp.kalexa.model.request.ConnectionsResponseRequest
 import com.hp.kalexa.model.request.ElementSelectedRequest
+import com.hp.kalexa.model.request.InputHandlerEventRequest
 import com.hp.kalexa.model.request.IntentRequest
 import com.hp.kalexa.model.request.LaunchRequest
+import com.hp.kalexa.model.request.MessageReceivedRequest
 import com.hp.kalexa.model.request.SessionEndedRequest
 import com.hp.kalexa.model.request.SessionStartedRequest
 import com.hp.kalexa.model.request.event.ListCreatedEventRequest
@@ -44,8 +54,18 @@ import com.hp.kalexa.model.request.event.ListItemsCreatedEventRequest
 import com.hp.kalexa.model.request.event.ListItemsDeletedEventRequest
 import com.hp.kalexa.model.request.event.ListItemsUpdatedEventRequest
 import com.hp.kalexa.model.request.event.ListUpdatedEventRequest
+import com.hp.kalexa.model.request.event.reminder.ReminderCreatedEventRequest
+import com.hp.kalexa.model.request.event.reminder.ReminderDeletedEventRequest
+import com.hp.kalexa.model.request.event.reminder.ReminderStartedEventRequest
+import com.hp.kalexa.model.request.event.reminder.ReminderStatusChangedEventRequest
+import com.hp.kalexa.model.request.event.reminder.ReminderUpdatedEventRequest
 import com.hp.kalexa.model.response.AlexaResponse
 import com.hp.kalexa.model.response.dsl.alexaResponse
+import com.hp.kalexa.model.skillevents.AccountLinkedRequest
+import com.hp.kalexa.model.skillevents.PermissionAcceptedRequest
+import com.hp.kalexa.model.skillevents.ProactiveSubscriptionChangedRequest
+import com.hp.kalexa.model.skillevents.SkillDisabledRequest
+import com.hp.kalexa.model.skillevents.SkillEnabledRequest
 import org.apache.logging.log4j.LogManager
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
@@ -54,10 +74,9 @@ import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.superclasses
 
 open class ConcreteSpeechHandler(instances: List<BaseHandler> = emptyList()) : SpeechHandler {
-
     private val logger = LogManager.getLogger(ConcreteSpeechHandler::class.java)
 
-    private val intentHandlerClasses: Set<KClass<out BaseHandler>> =
+    private val handlerClasses: Set<KClass<out BaseHandler>> =
         getClassesFrom(instances) + loadIntentHandlerClasses()
     private val intentMap: Map<Set<String>, KClass<out BaseHandler>> = mapIntentHandlersOf<Intent>(IntentHandler::class)
     private val canFulfillMap: Map<Set<String>, KClass<out BaseHandler>> = mapIntentHandlersOf<CanFulfillIntent>(
@@ -215,6 +234,128 @@ open class ConcreteSpeechHandler(instances: List<BaseHandler> = emptyList()) : S
         } ?: unsupportedIntent()
     }
 
+    override fun handleReminderCreatedEventRequest(
+        alexaRequest: AlexaRequest<ReminderCreatedEventRequest>
+    ): AlexaResponse {
+        logger.info("=========================== ReminderCreatedEventRequest =========================")
+        val reminderHandler: ReminderEventsHandler? = getHandler(ReminderEventsHandler::class)?.cast()
+        return reminderHandler?.let {
+            val alexaResponse = reminderHandler.onReminderCreatedEventRequest(alexaRequest)
+            return generateResponse(reminderHandler, alexaRequest, alexaResponse)
+        } ?: unsupportedIntent()
+    }
+
+    override fun handleReminderDeletedEventRequest(
+        alexaRequest: AlexaRequest<ReminderDeletedEventRequest>
+    ): AlexaResponse {
+        logger.info("=========================== ReminderDeletedEventRequest =========================")
+        val reminderHandler: ReminderEventsHandler? = getHandler(ReminderEventsHandler::class)?.cast()
+        return reminderHandler?.let {
+            val alexaResponse = reminderHandler.onReminderDeletedEventRequest(alexaRequest)
+            return generateResponse(reminderHandler, alexaRequest, alexaResponse)
+        } ?: unsupportedIntent()
+    }
+
+    override fun handleReminderStartedEventRequest(
+        alexaRequest: AlexaRequest<ReminderStartedEventRequest>
+    ): AlexaResponse {
+        logger.info("=========================== ReminderStartedEventRequest =========================")
+        val reminderHandler: ReminderEventsHandler? = getHandler(ReminderEventsHandler::class)?.cast()
+        return reminderHandler?.let {
+            val alexaResponse = reminderHandler.onReminderStartedEventRequest(alexaRequest)
+            return generateResponse(reminderHandler, alexaRequest, alexaResponse)
+        } ?: unsupportedIntent()
+    }
+
+    override fun handleReminderStatusChangedEventRequest(
+        alexaRequest: AlexaRequest<ReminderStatusChangedEventRequest>
+    ): AlexaResponse {
+        logger.info("=========================== ReminderStatusChangedEventRequest =========================")
+        val reminderHandler: ReminderEventsHandler? = getHandler(ReminderEventsHandler::class)?.cast()
+        return reminderHandler?.let {
+            val alexaResponse = reminderHandler.onReminderStatusChangedEventRequest(alexaRequest)
+            return generateResponse(reminderHandler, alexaRequest, alexaResponse)
+        } ?: unsupportedIntent()
+    }
+
+    override fun handleReminderUpdatedEventRequest(
+        alexaRequest: AlexaRequest<ReminderUpdatedEventRequest>
+    ): AlexaResponse {
+        logger.info("=========================== ReminderUpdatedEventRequest =========================")
+        val reminderHandler: ReminderEventsHandler? = getHandler(ReminderEventsHandler::class)?.cast()
+        return reminderHandler?.let {
+            val alexaResponse = reminderHandler.onReminderUpdatedEventRequest(alexaRequest)
+            return generateResponse(reminderHandler, alexaRequest, alexaResponse)
+        } ?: unsupportedIntent()
+    }
+
+    override fun handleInputHandlerEventRequest(alexaRequest: AlexaRequest<InputHandlerEventRequest>): AlexaResponse {
+        logger.info("=========================== InputHandlerEventRequest =========================")
+        val inputHandler: InputHandlerEventRequestHandler? = getHandler(InputHandlerEventRequestHandler::class)?.cast()
+        return inputHandler?.let {
+            val alexaResponse = inputHandler.onInputHandlerEventRequest(alexaRequest)
+            return generateResponse(inputHandler, alexaRequest, alexaResponse)
+        } ?: unsupportedIntent()
+    }
+
+    override fun handleAccountLinkedRequest(alexaRequest: AlexaRequest<AccountLinkedRequest>): AlexaResponse {
+        logger.info("=========================== AccountLinkedRequest =========================")
+        val inputHandler: AccountLinkedRequestHandler? = getHandler(AccountLinkedRequestHandler::class)?.cast()
+        return inputHandler?.let {
+            val alexaResponse = inputHandler.onAccountLinkedRequest(alexaRequest)
+            return generateResponse(inputHandler, alexaRequest, alexaResponse)
+        } ?: unsupportedIntent()
+    }
+
+    override fun handlePermissionAcceptedRequest(alexaRequest: AlexaRequest<PermissionAcceptedRequest>): AlexaResponse {
+        logger.info("=========================== PermissionAcceptedRequest =========================")
+        val inputHandler: PermissionAcceptedRequestHandler? =
+            getHandler(PermissionAcceptedRequestHandler::class)?.cast()
+        return inputHandler?.let {
+            val alexaResponse = inputHandler.onPermissionAcceptedRequest(alexaRequest)
+            return generateResponse(inputHandler, alexaRequest, alexaResponse)
+        } ?: unsupportedIntent()
+    }
+
+    override fun handleSubscriptionChangedRequest(
+        alexaRequest: AlexaRequest<ProactiveSubscriptionChangedRequest>
+    ): AlexaResponse {
+        logger.info("=========================== ProactiveSubscriptionChangedRequest =========================")
+        val inputHandler: ProactiveSubscriptionRequestHandler? =
+            getHandler(ProactiveSubscriptionRequestHandler::class)?.cast()
+        return inputHandler?.let {
+            val alexaResponse = inputHandler.onProactiveSubscriptionRequest(alexaRequest)
+            return generateResponse(inputHandler, alexaRequest, alexaResponse)
+        } ?: unsupportedIntent()
+    }
+
+    override fun handleSkillDisabledRequest(alexaRequest: AlexaRequest<SkillDisabledRequest>): AlexaResponse {
+        logger.info("=========================== SkillDisabledRequest =========================")
+        val inputHandler: SkillDisabledRequestHandler? = getHandler(SkillDisabledRequestHandler::class)?.cast()
+        return inputHandler?.let {
+            val alexaResponse = inputHandler.onSkillDisabledRequest(alexaRequest)
+            return generateResponse(inputHandler, alexaRequest, alexaResponse)
+        } ?: unsupportedIntent()
+    }
+
+    override fun handleSkillEnabledRequest(alexaRequest: AlexaRequest<SkillEnabledRequest>): AlexaResponse {
+        logger.info("=========================== SkillEnabledRequest =========================")
+        val inputHandler: SkillEnabledRequestHandler? = getHandler(SkillEnabledRequestHandler::class)?.cast()
+        return inputHandler?.let {
+            val alexaResponse = inputHandler.onSkillEnabledRequest(alexaRequest)
+            return generateResponse(inputHandler, alexaRequest, alexaResponse)
+        } ?: unsupportedIntent()
+    }
+
+    override fun handleMessageReceivedRequest(alexaRequest: AlexaRequest<MessageReceivedRequest>): AlexaResponse {
+        logger.info("=========================== MessageReceivedRequest =========================")
+        val messageHandler: MessageReceivedRequestHandler? = getHandler(ReminderEventsHandler::class)?.cast()
+        return messageHandler?.let {
+            val alexaResponse = messageHandler.onMessageReceivedRequest(alexaRequest)
+            return generateResponse(messageHandler, alexaRequest, alexaResponse)
+        } ?: unsupportedIntent()
+    }
+
     private fun handleBaseIntentRequest(
         alexaRequest: AlexaRequest<BaseIntentRequest>,
         classes: Map<Set<String>, KClass<out BaseHandler>> = intentMap,
@@ -348,7 +489,7 @@ open class ConcreteSpeechHandler(instances: List<BaseHandler> = emptyList()) : S
      */
     private inline fun <reified T : Annotation> mapIntentHandlersOf(kClass: KClass<out BaseHandler>):
         Map<Set<String>, KClass<out BaseHandler>> {
-        return intentHandlerClasses.filter {
+        return handlerClasses.filter {
             it.simpleName == kClass.simpleName || it.hasSuperClassOf(kClass)
         }.map { clazz ->
             val annotation = clazz.declaredFunctions.find {
@@ -370,7 +511,8 @@ open class ConcreteSpeechHandler(instances: List<BaseHandler> = emptyList()) : S
      * then it looks for the instance again in the handler instances map by iterating over the values
      * and checking if each value has a super class of the given class.
      * And still if no such element is found and the given class implements some Handler or has a super class of
-     * the given class, then a new instance is created and added to the Handler Instances map and the instance is returned.
+     * the given class, then a new instance is created and added to the Handler Instances map and the instance is
+     * returned.
      * @param clazz of the wanted handler instance.
      * @return handler instance.
      */
@@ -383,7 +525,7 @@ open class ConcreteSpeechHandler(instances: List<BaseHandler> = emptyList()) : S
                         handler
                     }
             } ?: run {
-                intentHandlerClasses.find { it == clazz || it.hasSuperClassOf(clazz) }
+                handlerClasses.find { it == clazz || it.hasSuperClassOf(clazz) }
                     ?.createInstance()
                     ?.let { instance ->
                         handlerInstances[instance::class.simpleName!!] = instance

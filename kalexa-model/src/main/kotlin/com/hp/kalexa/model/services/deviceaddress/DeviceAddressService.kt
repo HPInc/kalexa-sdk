@@ -9,8 +9,8 @@ import com.hp.kalexa.model.services.ServiceException
 
 interface DeviceAddressService {
     @Throws(ServiceException::class)
-    fun getCountryAndPostalCode(deviceId: String, token: String): ShortAddress
+    fun getCountryAndPostalCode(deviceId: String): ShortAddress
 
     @Throws(ServiceException::class)
-    fun getFullAddress(deviceId: String, token: String): Address
+    fun getFullAddress(deviceId: String): Address
 }

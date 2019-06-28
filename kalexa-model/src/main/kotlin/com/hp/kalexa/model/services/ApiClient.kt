@@ -12,27 +12,7 @@ import java.net.URL
 class ApiClient {
 
     @Throws(IOException::class)
-    fun post(uri: String, headers: Map<String, String>, body: String): ApiClientResponse {
-        return dispatch(uri, headers, body, "POST")
-    }
-
-    @Throws(IOException::class)
-    fun put(uri: String, headers: Map<String, String>, body: String): ApiClientResponse {
-        return dispatch(uri, headers, body, "PUT")
-    }
-
-    @Throws(IOException::class)
-    fun get(uri: String, headers: Map<String, String>): ApiClientResponse {
-        return dispatch(uri, headers, null, "GET")
-    }
-
-    @Throws(IOException::class)
-    fun delete(uri: String, headers: Map<String, String>): ApiClientResponse {
-        return dispatch(uri, headers, null, "DELETE")
-    }
-
-    @Throws(IOException::class)
-    private fun dispatch(uri: String, headers: Map<String, String>, body: String?, method: String): ApiClientResponse {
+    fun dispatch(uri: String, headers: Map<String, String>, body: String?, method: String): ApiClientResponse {
         val connection = getHttpConnection(uri)
         try {
             writeHeaders(connection, headers, method)
@@ -54,7 +34,7 @@ class ApiClient {
     private fun writeHeaders(connection: HttpURLConnection, headers: Map<String, String>, method: String) {
         connection.requestMethod = method
         connection.doOutput = true
-        headers.forEach { key, value -> connection.setRequestProperty(key, value) }
+        headers.forEach { (key, value) -> connection.setRequestProperty(key, value) }
     }
 
     @Throws(IOException::class)

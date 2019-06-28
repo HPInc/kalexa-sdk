@@ -22,6 +22,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
     JsonSubTypes.Type(value = SendRequestDirective::class, name = "Connections.SendRequest"),
     JsonSubTypes.Type(value = SendResponseDirective::class, name = "Connections.SendResponse"),
     JsonSubTypes.Type(value = SetLightDirective::class, name = "GadgetController.SetLight"),
+    JsonSubTypes.Type(value = StartInputHandlerDirective::class, name = "GameEngine.StartInputHandler"),
+    JsonSubTypes.Type(value = StopInputHandlerDirective::class, name = "GameEngine.StopInputHandler"),
+    JsonSubTypes.Type(value = VoicePlayerSpeakDirective::class, name = "VoicePlayer.Speak"),
     JsonSubTypes.Type(value = ConfirmIntentDirective::class, name = "Dialog.ConfirmIntent")
 )
 abstract class Directive
