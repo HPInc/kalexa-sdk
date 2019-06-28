@@ -10,7 +10,7 @@ It's also possible to use Java and add kalexa-sdk as dependency.
 ##### Gradle
 add dependency to build.gradle:
 ```
-compile "com.hp.kalexa:kalexa-sdk:loadClassesFromPackage()"
+compile "com.hp.kalexa:kalexa-sdk:0.3.0"
 ```
 or as separated artifacts:
 ```
@@ -265,7 +265,7 @@ For Kotlin, `Kalexa-SDK` has two types of response `Builder` and `DSL`, for Java
 ##### Java:
 AlexaBuilder builds the response gracefully to send back to Alexa:
 ```java
-String msg = "Hello, what a beautiful day!"
+String msg = "Hello, what a beautiful day!";
 return AlexaResponse.Companion.builder()
     .speech(msg)
     .simpleCard("Title",msg)
