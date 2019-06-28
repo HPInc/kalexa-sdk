@@ -10,12 +10,12 @@ It's also possible to use Java and add kalexa-sdk as dependency.
 ##### Gradle
 add dependency to build.gradle:
 ```
-compile "com.hp.kalexa:kalexa-sdk:0.2.0"
+compile "com.hp.kalexa:kalexa-sdk:loadClassesFromPackage()"
 ```
 or as separated artifacts:
 ```
-compile "com.hp.kalexa:kalexa-core:0.2.0"
-compile "com.hp.kalexa:kalexa-model:0.2.0"
+compile "com.hp.kalexa:kalexa-core:0.3.0"
+compile "com.hp.kalexa:kalexa-model:0.3.0"
 ```
 
 ##### Maven
@@ -24,7 +24,7 @@ add dependency to pom.xml:
 <dependency>
     <groupId>com.hp.kalexa</groupId>
     <artifactId>kalexa-sdk</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
 </dependency>
 ```
 or as separated artifacts:
@@ -32,12 +32,12 @@ or as separated artifacts:
 <dependency>
     <groupId>com.hp.kalexa</groupId>
     <artifactId>kalexa-core</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
 </dependency>
 <dependency>
     <groupId>com.hp.kalexa</groupId>
     <artifactId>kalexa-model</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
 </dependency>
 ```
 
