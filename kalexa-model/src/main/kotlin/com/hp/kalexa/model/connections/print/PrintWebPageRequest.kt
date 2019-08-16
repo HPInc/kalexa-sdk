@@ -7,7 +7,7 @@ package com.hp.kalexa.model.payload.print
 
 import com.fasterxml.jackson.annotation.JsonTypeName
 import com.hp.kalexa.model.payload.Context
-import com.hp.kalexa.model.payload.Payload
+import com.hp.kalexa.model.payload.Input
 
 @JsonTypeName("PrintWebPageRequest")
 class PrintWebPageRequest @JvmOverloads constructor(
@@ -16,4 +16,4 @@ class PrintWebPageRequest @JvmOverloads constructor(
     var title: String,
     var description: String? = null,
     var url: String
-) : Payload(version, context)
+) : Input(version)

@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName
 import com.hp.kalexa.model.payload.NameType
 import com.hp.kalexa.model.payload.Payload
 
-@JsonTypeName("Connections.SendRequest")
+@JsonTypeName("Connections.StartConnection")
 class SendRequestDirective(
     val name: NameType,
     val payload: Payload,

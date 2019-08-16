@@ -7,7 +7,7 @@ package com.hp.kalexa.model.payload.print
 
 import com.fasterxml.jackson.annotation.JsonTypeName
 import com.hp.kalexa.model.payload.Context
-import com.hp.kalexa.model.payload.Payload
+import com.hp.kalexa.model.payload.Input
 
 @JsonTypeName("PrintImageRequest")
 class PrintImageRequest @JvmOverloads constructor(
@@ -17,7 +17,7 @@ class PrintImageRequest @JvmOverloads constructor(
     var description: String? = null,
     var imageType: ImageType,
     var url: String
-) : Payload(version, context) {
+) : Input(version) {
 
     enum class ImageType {
         JPG, JPEG, TIFF, TIF, PNG
