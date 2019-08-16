@@ -6,11 +6,9 @@
 package com.hp.kalexa.model.directive
 
 import com.fasterxml.jackson.annotation.JsonTypeName
-import com.hp.kalexa.model.Cause
-import com.hp.kalexa.model.connections.Cause
+import com.hp.kalexa.model.connections.ConnectionStatus
 
-@JsonTypeName("Connections.SendResponse")
-class SendResponseDirective(
-    val status: Cause,
-    val payload: Map<String, Any>?
+@JsonTypeName("Tasks.CompleteTask")
+class CompleteTaskDirective(
+    val status: ConnectionStatus
 ) : Directive()

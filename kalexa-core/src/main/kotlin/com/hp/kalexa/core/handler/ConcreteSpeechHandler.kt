@@ -23,7 +23,6 @@ import com.hp.kalexa.core.intent.ListEventsHandler
 import com.hp.kalexa.core.intent.MessageReceivedRequestHandler
 import com.hp.kalexa.core.intent.PermissionAcceptedRequestHandler
 import com.hp.kalexa.core.intent.ProactiveSubscriptionRequestHandler
-import com.hp.kalexa.core.intent.ProviderHandler
 import com.hp.kalexa.core.intent.RecoverIntentContextHandler
 import com.hp.kalexa.core.intent.ReminderEventsHandler
 import com.hp.kalexa.core.intent.RequesterHandler
@@ -39,14 +38,13 @@ import com.hp.kalexa.model.extension.attribute
 import com.hp.kalexa.model.request.AlexaRequest
 import com.hp.kalexa.model.request.BaseIntentRequest
 import com.hp.kalexa.model.request.CanFulfillIntentRequest
-import com.hp.kalexa.model.request.ConnectionsRequest
-import com.hp.kalexa.model.request.ConnectionsResponseRequest
 import com.hp.kalexa.model.request.ElementSelectedRequest
 import com.hp.kalexa.model.request.InputHandlerEventRequest
 import com.hp.kalexa.model.request.IntentRequest
 import com.hp.kalexa.model.request.LaunchRequest
 import com.hp.kalexa.model.request.MessageReceivedRequest
 import com.hp.kalexa.model.request.SessionEndedRequest
+import com.hp.kalexa.model.request.SessionResumedRequest
 import com.hp.kalexa.model.request.SessionStartedRequest
 import com.hp.kalexa.model.request.event.ListCreatedEventRequest
 import com.hp.kalexa.model.request.event.ListDeletedEventRequest
@@ -151,26 +149,16 @@ open class ConcreteSpeechHandler(instances: List<BaseHandler> = emptyList()) : S
         }
     }
 
-    override fun handleConnectionsResponseRequest(
-        alexaRequest: AlexaRequest<ConnectionsResponseRequest>
+    override fun handleSessionResumedRequest(
+        alexaRequest: AlexaRequest<SessionResumedRequest>
     ): AlexaResponse {
-        logger.info("=========================== Connections.Response =========================")
+        logger.info("=========================== SessionResumedRequest =========================")
         val requesterHandler: RequesterHandler? = getHandler(RequesterHandler::class)?.cast()
 
         return requesterHandler?.let {
-            val alexaResponse = requesterHandler.onConnectionsResponse(alexaRequest)
+            val alexaResponse = requesterHandler.onSessionResumedRequest(alexaRequest)
             return generateResponse(requesterHandler, alexaRequest, alexaResponse)
         } ?: AlexaResponse.emptyResponse()
-    }
-
-    override fun handleConnectionsRequest(alexaRequest: AlexaRequest<ConnectionsRequest>): AlexaResponse {
-        logger.info("=========================== ConnectionsRequest =========================")
-        val providerHandler: ProviderHandler? = getHandler(ProviderHandler::class)?.cast()
-
-        return providerHandler?.let {
-            val alexaResponse = providerHandler.onConnectionsRequest(alexaRequest)
-            return generateResponse(providerHandler, alexaRequest, alexaResponse)
-        } ?: unsupportedIntent()
     }
 
     override fun handleListCreatedEventRequest(alexaRequest: AlexaRequest<ListCreatedEventRequest>): AlexaResponse {

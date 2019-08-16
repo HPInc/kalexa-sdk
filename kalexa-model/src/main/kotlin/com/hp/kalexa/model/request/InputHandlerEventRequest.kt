@@ -17,6 +17,6 @@ class InputHandlerEventRequest(
     locale: String,
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
     timestamp: LocalDateTime,
-    val originatingRequestId: String,
+    originIpAddress: String? = null,
     val events: List<InputHandlerEvent> = emptyList()
-) : Request(requestId, locale, timestamp)
+) : Request(requestId, locale, timestamp, originIpAddress)

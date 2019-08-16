@@ -6,11 +6,13 @@
 package com.hp.kalexa.model.request
 
 import com.hp.kalexa.model.JsonRequests.CAN_FULFILL_INTENT_REQUEST
+import com.hp.kalexa.model.JsonRequests.CONNECTIONS_REQUEST
 import com.hp.kalexa.model.JsonRequests.DISPLAY_SELECTED_REQUEST
 import com.hp.kalexa.model.JsonRequests.ERROR_LINK_RESULT
 import com.hp.kalexa.model.JsonRequests.INTENT_REQUEST_JSON
 import com.hp.kalexa.model.JsonRequests.LAUNCH_REQUEST_JSON
-import com.hp.kalexa.model.JsonRequests.WEB_PAGE_LINK_RESULT
+import com.hp.kalexa.model.JsonRequests.WEB_PAGE_SESSION_RESUMED_REQUEST
+import com.hp.kalexa.model.connections.print.PrintPDFRequest
 import com.hp.kalexa.model.extension.attribute
 import com.hp.kalexa.model.json.JacksonSerializer
 import org.jetbrains.spek.api.Spek
@@ -18,7 +20,7 @@ import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
+import kotlin.test.assertNotNull
 
 class AlexaRequestEnvelopeTest : Spek({
 
@@ -52,45 +54,61 @@ class AlexaRequestEnvelopeTest : Spek({
                 assertEquals("Internacional Jersey", jersey?.name)
             }
         }
-        on("a Connections.Response request") {
-            val envelope = JacksonSerializer.deserialize(WEB_PAGE_LINK_RESULT, AlexaRequest::class.java)
-            it("should be ConnectionsResponseRequest type") {
-                assert(envelope.request is ConnectionsResponseRequest)
+        on("a SessionResumedRequest") {
+            val envelope = JacksonSerializer.deserialize(WEB_PAGE_SESSION_RESUMED_REQUEST, AlexaRequest::class.java)
+            it("should be SessionResumedRequest type") {
+                assert(envelope.request is SessionResumedRequest)
             }
-            val customLinkResultRequest = envelope.request as ConnectionsResponseRequest
-            it("should be a PrintWebPageRequest payload type") {
-                assert(customLinkResultRequest.payload is Map<String, Any>)
-            }
-            it("should parse title, description and url") {
-                val printWebPageRequest = customLinkResultRequest.payload
-                assertEquals("Mac & Cheese", printWebPageRequest?.get("title"))
-                assertEquals("This is a nice rich mac and cheese. Serve with a salad for a great meatless dinner. Hope you enjoy it", printWebPageRequest?.get("description"))
-                assertEquals("http://allrecipes.com/recipe/11679/homemade-mac-and-cheese/", printWebPageRequest?.get("url"))
+            val customLinkResultRequest = envelope.request as SessionResumedRequest
+            it("should have a ConnectionCompleted payload type") {
+                assertEquals("ConnectionCompleted", customLinkResultRequest.cause.type)
             }
             it("should have a success connectionsStatus") {
-                assertEquals("200", customLinkResultRequest.status.code)
-                assertEquals("OK", customLinkResultRequest.status.message)
+                assertEquals("200", customLinkResultRequest.cause.status.code)
+                assertEquals("OK", customLinkResultRequest.cause.status.message)
             }
-            it("should have Print Name") {
-                assertEquals("Print", customLinkResultRequest.name)
+            it("should have Token") {
+                assertEquals("1234", customLinkResultRequest.cause.token)
             }
         }
         on("a error link result request") {
             val envelope = JacksonSerializer.deserialize(ERROR_LINK_RESULT, AlexaRequest::class.java)
             it("should be CustomLinkResultRequest type") {
-                assert(envelope.request is ConnectionsResponseRequest)
+                assert(envelope.request is SessionResumedRequest)
             }
-            val customLinkResultRequest = envelope.request as ConnectionsResponseRequest
-            it("should have an empty payload type") {
-                assertNull(customLinkResultRequest.payload)
-            }
+            val customLinkResultRequest = envelope.request as SessionResumedRequest
 
             it("should have an Error connectionsStatus") {
-                assertEquals("500", customLinkResultRequest.status.code)
-                assertEquals("INTERNAL ERROR", customLinkResultRequest.status.message)
+                assertEquals("500", customLinkResultRequest.cause.status.code)
+                assertEquals("INTERNAL ERROR", customLinkResultRequest.cause.status.message)
             }
-            it("should have target URI") {
-                assertEquals("Print", customLinkResultRequest.name)
+            it("should have ConnectionError type") {
+                assertEquals("ConnectionError", customLinkResultRequest.cause.type)
+            }
+        }
+        on("Connections Request") {
+            val envelope = JacksonSerializer.deserialize(CONNECTIONS_REQUEST, AlexaRequest::class.java)
+            it("should be a LaunchRequest with task object") {
+                val launchRequest = envelope.request as LaunchRequest
+                assertNotNull(launchRequest.task)
+            }
+            it("should be a AMAZON.PrintPDF name and version 1") {
+                val launchRequest = envelope.request as LaunchRequest
+                assertEquals("AMAZON.PrintPDF", launchRequest.task?.name)
+                assertEquals("1", launchRequest.task?.version)
+            }
+
+            it("should be PrintPDFRequest instance") {
+                val launchRequest = envelope.request as LaunchRequest
+                assert(launchRequest.task?.input is PrintPDFRequest)
+                assertEquals("1", launchRequest.task?.version)
+            }
+            it("should have title, description and url from input") {
+                val launchRequest = envelope.request as LaunchRequest
+                val pdfRequest = launchRequest.task?.input as PrintPDFRequest
+                assertEquals("Mac & Cheese", pdfRequest.title)
+                assertEquals("This is a nice rich mac and cheese. Serve with a salad for a great meatless dinner. Hope you enjoy it", pdfRequest.description)
+                assertEquals("http://allrecipes.com/recipe/11679/homemade-mac-and-cheese/", pdfRequest.url)
             }
         }
         on("a display element element request") {

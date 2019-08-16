@@ -10,7 +10,7 @@ import com.hp.kalexa.model.directive.CompleteTaskDirective
 import com.hp.kalexa.model.response.annotation.AlexaResponseDsl
 
 @AlexaResponseDsl
-class TaskDirectiveBuilder {
+class CompleteTaskDirectiveBuilder {
     lateinit var status: ConnectionStatus
 
     fun status(block: ConnectionStatusBuilder.() -> Unit) {

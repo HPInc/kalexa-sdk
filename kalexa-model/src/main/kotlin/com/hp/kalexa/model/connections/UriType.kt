@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-package com.hp.kalexa.model.payload
+package com.hp.kalexa.model.connections
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue

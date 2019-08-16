@@ -13,13 +13,11 @@ import com.hp.kalexa.core.intent.HelpIntentHandler
 import com.hp.kalexa.core.intent.IntentHandler
 import com.hp.kalexa.core.intent.LaunchRequestHandler
 import com.hp.kalexa.core.intent.ListEventsHandler
-import com.hp.kalexa.core.intent.ProviderHandler
 import com.hp.kalexa.core.intent.RecoverIntentContextHandler
 import com.hp.kalexa.core.intent.RequesterHandler
 import com.hp.kalexa.model.request.AlexaRequest
 import com.hp.kalexa.model.request.CanFulfillIntentRequest
-import com.hp.kalexa.model.request.ConnectionsRequest
-import com.hp.kalexa.model.request.ConnectionsResponseRequest
+import com.hp.kalexa.model.request.SessionResumedRequest
 import com.hp.kalexa.model.request.IntentRequest
 import com.hp.kalexa.model.request.LaunchRequest
 import com.hp.kalexa.model.request.event.ListCreatedEventRequest
@@ -32,7 +30,7 @@ import com.hp.kalexa.model.response.AlexaResponse
 import com.hp.kalexa.model.response.dsl.alexaResponse
 
 class FakeIntent : IntentHandler, LaunchRequestHandler, HelpIntentHandler, FallbackIntentHandler,
-    RecoverIntentContextHandler, ProviderHandler, RequesterHandler, ListEventsHandler, CanFulfillIntentHandler {
+    RecoverIntentContextHandler, RequesterHandler, ListEventsHandler, CanFulfillIntentHandler {
 
     override fun onCanFulfillIntent(alexaRequest: AlexaRequest<CanFulfillIntentRequest>): AlexaResponse {
         return alexaResponse {
@@ -80,15 +78,7 @@ class FakeIntent : IntentHandler, LaunchRequestHandler, HelpIntentHandler, Fallb
         return alexaResponse { response { speech { "This is a unknown intent context response" } } }
     }
 
-    override fun onConnectionsRequest(alexaRequest: AlexaRequest<ConnectionsRequest>): AlexaResponse {
-        return alexaResponse {
-            response {
-                speech { "This is a onConnectionsRequest from FakeIntent" }
-            }
-        }
-    }
-
-    override fun onConnectionsResponse(alexaRequest: AlexaRequest<ConnectionsResponseRequest>): AlexaResponse {
+    override fun onSessionResumedRequest(alexaRequest: AlexaRequest<SessionResumedRequest>): AlexaResponse {
         return alexaResponse {
             response {
                 speech { "This is a onConnectionsResponse from FakeIntent" }

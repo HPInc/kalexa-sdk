@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: MIT
  */
 
-package com.hp.kalexa.model.payload.print
+package com.hp.kalexa.model.connections.print
 
 import com.fasterxml.jackson.annotation.JsonTypeName
-import com.hp.kalexa.model.payload.Context
-import com.hp.kalexa.model.payload.Input
+import com.hp.kalexa.model.connections.Context
+import com.hp.kalexa.model.connections.Input
 
 @JsonTypeName("PrintWebPageRequest")
 class PrintWebPageRequest @JvmOverloads constructor(
@@ -16,4 +16,4 @@ class PrintWebPageRequest @JvmOverloads constructor(
     var title: String,
     var description: String? = null,
     var url: String
-) : Input(version)
+) : Input(version, context)

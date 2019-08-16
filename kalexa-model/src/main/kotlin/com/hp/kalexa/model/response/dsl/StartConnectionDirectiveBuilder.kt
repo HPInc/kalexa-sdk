@@ -6,13 +6,13 @@
 package com.hp.kalexa.model.response.dsl
 
 import com.hp.kalexa.model.directive.StartConnectionDirective
-import com.hp.kalexa.model.payload.NameType
-import com.hp.kalexa.model.payload.Input
+import com.hp.kalexa.model.connections.UriType
+import com.hp.kalexa.model.connections.Input
 import com.hp.kalexa.model.response.annotation.AlexaResponseDsl
 
 @AlexaResponseDsl
-class SendRequestDirectiveBuilder {
-    lateinit var name: NameType
+class StartConnectionDirectiveBuilder {
+    lateinit var uri: UriType
     private lateinit var input: Input
     var token: String = "none"
 
@@ -28,9 +28,5 @@ class SendRequestDirectiveBuilder {
         apply { input = PrintImageRequestBuilder().apply { block() }.build() }
     }
 
-    fun payload(block: SendRequestDirectiveBuilder.() -> Input) {
-        apply { input = block() }
-    }
-
-    fun build(): StartConnectionDirective = StartConnectionDirective(name, input, token)
+    fun build(): StartConnectionDirective = StartConnectionDirective(uri, input, token)
 }

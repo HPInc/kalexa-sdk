@@ -8,8 +8,7 @@ package com.hp.kalexa.core.handler
 import com.hp.kalexa.core.util.Util
 import com.hp.kalexa.model.json.JacksonSerializer
 import com.hp.kalexa.model.request.AlexaRequest
-import com.hp.kalexa.model.request.ConnectionsRequest
-import com.hp.kalexa.model.request.ConnectionsResponseRequest
+import com.hp.kalexa.model.request.SessionResumedRequest
 import com.hp.kalexa.model.request.ElementSelectedRequest
 import com.hp.kalexa.model.request.IntentRequest
 import com.hp.kalexa.model.request.LaunchRequest
@@ -44,8 +43,7 @@ object SpeechRequestHandlerTest : Spek({
                 every { handleSessionStartedRequest(any()) } returns alexaResponse
                 every { handleLaunchRequest(any()) } returns alexaResponse
                 every { handleIntentRequest(any()) } returns alexaResponse
-                every { handleConnectionsResponseRequest(any()) } returns alexaResponse
-                every { handleConnectionsRequest(any()) } returns alexaResponse
+                every { handleSessionResumedRequest(any()) } returns alexaResponse
                 every { handleSessionEndedRequest(any()) } returns alexaResponse
                 every { handleElementSelectedRequest(any()) } returns alexaResponse
                 every { handleListCreatedEventRequest(any()) } returns alexaResponse
@@ -113,8 +111,8 @@ object SpeechRequestHandlerTest : Spek({
                     assertEquals(expected, response)
                 }
                 it("should handle ConnectionsResponseRequest") {
-                    val connectionsResponseEnvelope = mockk<AlexaRequest<ConnectionsResponseRequest>> {
-                        every { request } returns mockk<ConnectionsResponseRequest>()
+                    val connectionsResponseEnvelope = mockk<AlexaRequest<SessionResumedRequest>> {
+                        every { request } returns mockk<SessionResumedRequest>()
                         every { session?.application?.applicationId } returns "123456"
                     }
                     every {
@@ -124,22 +122,6 @@ object SpeechRequestHandlerTest : Spek({
                         )
                     } returns connectionsResponseEnvelope
                     val expected = "ConnectionsResponseRequest"
-                    every { alexaResponse.toJson() } returns expected
-                    val response = speechRequestHandler.process("Lorem ipsum dolor sit amet".toByteArray())
-                    assertEquals(expected, response)
-                }
-                it("should handle ConnectionsRequest") {
-                    val connectionsRequestEnvelope = mockk<AlexaRequest<ConnectionsRequest>> {
-                        every { request } returns mockk<ConnectionsRequest>()
-                        every { session?.application?.applicationId } returns "123456"
-                    }
-                    every {
-                        JacksonSerializer.deserialize(
-                            any<ByteArray>(),
-                            AlexaRequest::class.java
-                        )
-                    } returns connectionsRequestEnvelope
-                    val expected = "ConnectionsRequest"
                     every { alexaResponse.toJson() } returns expected
                     val response = speechRequestHandler.process("Lorem ipsum dolor sit amet".toByteArray())
                     assertEquals(expected, response)

@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: MIT
  */
 
-package com.hp.kalexa.model.payload
+package com.hp.kalexa.model.connections
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.hp.kalexa.model.payload.print.PrintImageRequest
-import com.hp.kalexa.model.payload.print.PrintPDFRequest
-import com.hp.kalexa.model.payload.print.PrintWebPageRequest
+import com.hp.kalexa.model.connections.print.PrintImageRequest
+import com.hp.kalexa.model.connections.print.PrintPDFRequest
+import com.hp.kalexa.model.connections.print.PrintWebPageRequest
 
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
@@ -24,7 +24,9 @@ import com.hp.kalexa.model.payload.print.PrintWebPageRequest
 )
 abstract class Input(
     @field:JsonProperty("@version")
-    val version: String
+    val version: String,
+    @field:JsonProperty("context")
+    val context: Context? = null
 ) {
 
     companion object {

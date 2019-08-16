@@ -50,8 +50,9 @@ abstract class EventRequest(
     locale: String = "",
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
     timestamp: LocalDateTime,
+    originIpAddress: String? = null,
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
     val eventCreationTime: LocalDateTime,
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
     val eventPublishingTime: LocalDateTime
-) : Request(requestId, locale, timestamp)
+) : Request(requestId, locale, timestamp, originIpAddress)
