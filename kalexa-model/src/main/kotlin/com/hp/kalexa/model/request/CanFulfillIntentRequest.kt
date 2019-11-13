@@ -18,6 +18,7 @@ class CanFulfillIntentRequest(
     locale: String,
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
     timestamp: LocalDateTime,
+    originIpAddress: String?,
     intent: Intent,
     dialogState: DialogState?
-) : BaseIntentRequest(requestId, locale, timestamp, intent, dialogState)
+) : BaseIntentRequest(requestId, locale, timestamp, originIpAddress, intent, dialogState)

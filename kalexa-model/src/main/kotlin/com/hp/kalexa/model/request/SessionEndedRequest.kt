@@ -16,6 +16,7 @@ class SessionEndedRequest(
     locale: String,
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
     timestamp: LocalDateTime,
+    originIpAddress: String? = null,
     val reason: SessionEndedReason?,
     val error: SessionEndedError?
-) : Request(requestId, locale, timestamp)
+) : Request(requestId, locale, timestamp, originIpAddress)

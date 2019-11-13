@@ -3,6 +3,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-package com.hp.kalexa.model.payload
+package com.hp.kalexa.model.connections
 
 class Context(var providerId: String? = null)

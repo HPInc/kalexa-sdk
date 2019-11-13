@@ -22,7 +22,7 @@ class ResponseBuilder {
     private var outputSpeech: OutputSpeech? = null
     private var card: Card? = null
     private val directives = mutableListOf<Directive>()
-    var shouldEndSession: Boolean? = true
+    var shouldEndSession: Boolean? = null
     private var reprompt: Reprompt? = null
     var canFulfillIntent: CanFulfillIntent? = null
 

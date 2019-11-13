@@ -5,10 +5,10 @@
 
 package com.hp.kalexa.model.response.dsl
 
-import com.hp.kalexa.model.payload.print.PrintBuilder
-import com.hp.kalexa.model.payload.print.PrintImageRequest
-import com.hp.kalexa.model.payload.print.PrintPDFRequest
-import com.hp.kalexa.model.payload.print.PrintWebPageRequest
+import com.hp.kalexa.model.connections.print.PrintBuilder
+import com.hp.kalexa.model.connections.print.PrintImageRequest
+import com.hp.kalexa.model.connections.print.PrintPDFRequest
+import com.hp.kalexa.model.connections.print.PrintWebPageRequest
 import com.hp.kalexa.model.response.annotation.AlexaResponseDsl
 
 @AlexaResponseDsl

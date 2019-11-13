@@ -55,12 +55,12 @@ class Directives : ArrayList<Directive>() {
         add(hintDirective)
     }
 
-    fun sendRequestDirective(block: SendRequestDirectiveBuilder.() -> Unit) {
-        add(SendRequestDirectiveBuilder().apply { block() }.build())
+    fun startRequestDirective(block: StartConnectionDirectiveBuilder.() -> Unit) {
+        add(StartConnectionDirectiveBuilder().apply { block() }.build())
     }
 
-    fun sendResponseDirective(block: SendResponseDirectiveBuilder.() -> Unit) {
-        add(SendResponseDirectiveBuilder().apply { block() }.build())
+    fun completeTaskDirective(block: CompleteTaskDirectiveBuilder.() -> Unit) {
+        add(CompleteTaskDirectiveBuilder().apply { block() }.build())
     }
 
     fun delegateDirective(block: (DelegateDirective.() -> Unit)) {

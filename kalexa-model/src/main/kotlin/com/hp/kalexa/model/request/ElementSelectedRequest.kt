@@ -16,5 +16,6 @@ class ElementSelectedRequest(
     locale: String,
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
     timestamp: LocalDateTime,
+    originIpAddress: String? = null,
     val token: String
-) : Request(requestId, locale, timestamp)
+) : Request(requestId, locale, timestamp, originIpAddress)

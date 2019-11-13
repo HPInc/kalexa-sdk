@@ -109,7 +109,7 @@ class BaseHandlerTest : Spek({
         on("onElementSelected") {
             it("should return default response") {
                 val response = dummyIntent.onElementSelected(mockk())
-                assertEquals("{\"response\":{\"directives\":[]},\"sessionAttributes\":{},\"version\":\"1.0\"}",
+                assertEquals("""{"response":{},"version":"1.0"}""",
                         response.toJson())
             }
         }

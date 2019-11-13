@@ -15,5 +15,6 @@ class SessionStartedRequest(
     requestId: String,
     locale: String,
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
-    timestamp: LocalDateTime
-) : Request(requestId, locale, timestamp)
+    timestamp: LocalDateTime,
+    originIpAddress: String? = null
+) : Request(requestId, locale, timestamp, originIpAddress)

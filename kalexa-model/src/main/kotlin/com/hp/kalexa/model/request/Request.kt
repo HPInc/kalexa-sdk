@@ -24,8 +24,7 @@ import java.time.LocalDateTime
 @JsonSubTypes(
     JsonSubTypes.Type(value = SessionStartedRequest::class, name = "SessionStartedRequest"),
     JsonSubTypes.Type(value = SessionEndedRequest::class, name = "SessionEndedRequest"),
-    JsonSubTypes.Type(value = ConnectionsResponseRequest::class, name = "Connections.Response"),
-    JsonSubTypes.Type(value = ConnectionsRequest::class, name = "Connections.Request"),
+    JsonSubTypes.Type(value = SessionResumedRequest::class, name = "SessionResumedRequest"),
     JsonSubTypes.Type(value = ElementSelectedRequest::class, name = "Display.ElementSelected"),
     JsonSubTypes.Type(value = LaunchRequest::class, name = "LaunchRequest"),
     JsonSubTypes.Type(value = MessageReceivedRequest::class, name = "Messaging.MessageReceived"),
@@ -44,5 +43,6 @@ abstract class Request(
     val requestId: String,
     val locale: String,
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
-    val timestamp: LocalDateTime
+    val timestamp: LocalDateTime,
+    val originIpAddress: String? = null
 )

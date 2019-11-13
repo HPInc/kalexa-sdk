@@ -132,7 +132,7 @@ object JsonRequests {
                                     "dialogState": "IN_PROGRESS"
                                 }
                             }"""
-    const val WEB_PAGE_LINK_RESULT = """{
+    const val WEB_PAGE_SESSION_RESUMED_REQUEST = """{
                     "version": "1.0",
                     "session": {
                         "new": true,
@@ -170,30 +170,80 @@ object JsonRequests {
                         }
                     },
                     "request": {
-                        "type": "Connections.Response",
+                        "type": "SessionResumedRequest",
                         "requestId": "amzn1.echo-api.request.2c940401-13f2-4224-82a7-c7b2276c1523",
                         "timestamp": "2018-02-22T15:00:37Z",
                         "locale": "en-US",
-                        "target": {
-                            "path": "Print",
-                            "address": "amzn1.ask.skill.5a8a2654-2e1e-444b-98b3-6a4a617ef9b0"
-                        },
-                        "name": "Print",
-                        "token": "none",
-                        "payload": {
-                            "@type" : "PrintWebPageRequest",
-                            "@version": "1",
-                            "@language" : "en-US",
-                            "title" : "Mac & Cheese",
-                            "description" : "This is a nice rich mac and cheese. Serve with a salad for a great meatless dinner. Hope you enjoy it",
-                            "url": "http://allrecipes.com/recipe/11679/homemade-mac-and-cheese/"
-                        },
-                        "status": {
-                            "code": "200",
-                            "message": "OK"
+                        "originIpAddress": "string",
+                        "cause": {
+                            "type": "ConnectionCompleted",
+                            "token": "1234",
+                            "status": {
+                                "code": "200",
+                                "message": "OK"
+                            },
+                            "result": null
                         }
                     }
                 }"""
+
+    const val CONNECTIONS_REQUEST = """{
+                    "version": "1.0",
+                    "session": {
+                        "new": true,
+                        "sessionId": "amzn1.echo-api.session.b6ee4cc0-658a-44de-8126-6a2a2e851437",
+                        "application": {
+                            "applicationId": "amzn1.ask.skill.f400c9e3-37c6-44e5-9e58-3c5b9bd2c74e"
+                        },
+                        "user": {
+                            "userId": "amzn1.ask.account.AH65RHGH2MXZJ5UMTSPZIRJK7BTSDV5MYLPD5CQOMSSD3CVMONORSWYLG3HT3HVLJNPD2KTW626W5K7ZWGJTH6YIG6SSG4WQ2UO2MDTB3LYEUM4P6VPXNYPQJLPIERS354K5X6SBEIUQZP7Y6BOOG4RDJIZB6BN35UER4RWLA2IFIHZWTPFV3FZDBTTRQ6RVNMYL4O2TLPDRWKQ"
+                        }
+                    },
+                    "context": {
+                        "AudioPlayer": {
+                            "playerActivity": "IDLE"
+                        },
+                        "System": {
+                            "application": {
+                                "applicationId": "amzn1.ask.skill.f400c9e3-37c6-44e5-9e58-3c5b9bd2c74e"
+                            },
+                            "user": {
+                                "userId": "amzn1.ask.account.AH65RHGH2MXZJ5UMTSPZIRJK7BTSDV5MYLPD5CQOMSSD3CVMONORSWYLG3HT3HVLJNPD2KTW626W5K7ZWGJTH6YIG6SSG4WQ2UO2MDTB3LYEUM4P6VPXNYPQJLPIERS354K5X6SBEIUQZP7Y6BOOG4RDJIZB6BN35UER4RWLA2IFIHZWTPFV3FZDBTTRQ6RVNMYL4O2TLPDRWKQ"
+                            },
+                            "device": {
+                                "deviceId": "amzn1.ask.device.AF53A3NPQZTFPSJBCPSWRSS3PYJ4EYF2Y3P3TJ5T4U7WSCLRQ3G6JNEGCAAK5YJB6H2PYGM3B65U7XZ7WGOUTIEMN4ER3WU6BRAJRVVPJNVHXDTR75QH5BZF7GKD4TZR3OQ36GSL5JZH67PFC74GM7RIYKOQ",
+                                "supportedInterfaces": {
+                                    "AudioPlayer": {},
+                                    "Display": {
+                                        "templateVersion": "1.0",
+                                        "markupVersion": "1.0"
+                                    }
+                                 }
+                             },
+                            "apiEndpoint": "https://api.amazonalexa.com",
+                            "apiAccessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IjEifQ.eyJhdWQiOiJodHRwczovL2FwaS5hbWF6b25hbGV4YS5jb20iLCJpc3MiOiJBbGV4YVNraWxsS2l0Iiwic3ViIjoiYW16bjEuYXNrLnNraWxsLmY0MDBjOWUzLTM3YzYtNDRlNS05ZTU4LTNjNWI5YmQyYzc0ZSIsImV4cCI6MTUxOTMxNTIzNywiaWF0IjoxNTE5MzExNjM3LCJuYmYiOjE1MTkzMTE2MzcsInByaXZhdGVDbGFpbXMiOnsiY29uc2VudFRva2VuIjpudWxsLCJkZXZpY2VJZCI6ImFtem4xLmFzay5kZXZpY2UuQUY1M0EzTlBRWlRGUFNKQkNQU1dSU1MzUFlKNEVZRjJZM1AzVEo1VDRVN1dTQ0xSUTNHNkpORUdDQUFLNVlKQjZIMlBZR00zQjY1VTdYWjdXR09VVElFTU40RVIzV1U2QlJBSlJWVlBKTlZIWERUUjc1UUg1QlpGN0dLRDRUWlIzT1EzNkdTTDVKWkg2N1BGQzc0R003UklZS09RIiwidXNlcklkIjoiYW16bjEuYXNrLmFjY291bnQuQUg2NVJIR0gyTVhaSjVVTVRTUFpJUkpLN0JUU0RWNU1ZTFBENUNRT01TU0QzQ1ZNT05PUlNXWUxHM0hUM0hWTEpOUEQyS1RXNjI2VzVLN1pXR0pUSDZZSUc2U1NHNFdRMlVPMk1EVEIzTFlFVU00UDZWUFhOWVBRSkxQSUVSUzM1NEs1WDZTQkVJVVFaUDdZNkJPT0c0UkRKSVpCNkJOMzVVRVI0UldMQTJJRklIWldUUEZWM0ZaREJUVFJRNlJWTk1ZTDRPMlRMUERSV0tRIn19.bcroBb51emiLmgyPDnhX120thX22Zp7NgR8IwrgMxWLRJnYwjgtaFxki4jonnHAPzA_Err5AJoYzq242u0elrmkCOFQ6uAeatrgf2Ekw_692dS5P-7LA8YKsdQ2LF5AeW8q5J8hin1GWDH-fDpsmkMHm9JsN1R1eTNFxT2fO3OoFV7KAbarpm_i7-8Of9NDbAjQ7RZdfycrB3-4pxnXx8sEQxS64AftYb5QZh5-ZXVlw6NGam5KQehp6go8bd4gslbVzbFzixs8TYZQqEV-zpsdVO18xKxwwnmDJlvrP1bjxPwjgKajaZwHyxm_kXy_X7PEqOn-MF4aOwcH_Wclw4w"
+                        }
+                    },
+                    "request": {
+                        "type": "LaunchRequest",
+                        "requestId": "amzn1.echo-api.request.2c940401-13f2-4224-82a7-c7b2276c1523",
+                        "timestamp": "2018-02-22T15:00:37Z",
+                        "locale": "en-US",
+                        "originIpAddress": "string",
+                        "task": {
+                            "name": "AMAZON.PrintPDF",
+                            "version": "1",
+                            "input": {
+                                "@type": "PrintPDFRequest",
+                                "@version": "1",
+                                "title" : "Mac & Cheese",
+                                "description" : "This is a nice rich mac and cheese. Serve with a salad for a great meatless dinner. Hope you enjoy it",
+                                "url": "http://allrecipes.com/recipe/11679/homemade-mac-and-cheese/"
+                            }
+                        }
+                    }
+                }"""
+
     const val ERROR_LINK_RESULT = """{
                                     "version": "1.0",
                                     "session": {
@@ -235,16 +285,20 @@ object JsonRequests {
                                         }
                                     },
                                     "request": {
-                                        "type": "Connections.Response",
-                                        "requestId": "amzn1.echo-api.request.f8f7d4dc-e6ca-41f9-840f-0bd7ab1b88af",
-                                        "timestamp": "2018-02-23T19:13:10Z",
-                                        "locale": "en-US",
-                                        "status": {
-                                            "code": "500",
-                                            "message": "INTERNAL ERROR"
-                                        },
-                                        "token": "DayRecipeIntent",
-                                        "name": "Print"
+                                            "type": "SessionResumedRequest",
+                                            "requestId": "amzn1.echo-api.request.2c940401-13f2-4224-82a7-c7b2276c1523",
+                                            "timestamp": "2018-02-22T15:00:37Z",
+                                            "locale": "en-US",
+                                            "originIpAddress": "string",
+                                            "cause": {
+                                                "type": "ConnectionError",
+                                                "token": "1234",
+                                                "status": {
+                                                    "code": "500",
+                                                    "message": "INTERNAL ERROR"
+                                                },
+                                                "result": null
+                                            }
                                     }
                                 }"""
     const val DISPLAY_SELECTED_REQUEST = """{

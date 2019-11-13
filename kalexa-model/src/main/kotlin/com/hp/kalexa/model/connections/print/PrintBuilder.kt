@@ -2,10 +2,9 @@
  * Copyright 2018 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
+package com.hp.kalexa.model.connections.print
 
-package com.hp.kalexa.model.payload.print
-
-import com.hp.kalexa.model.payload.Context
+import com.hp.kalexa.model.connections.Context
 
 abstract class PrintBuilder<T> {
     protected lateinit var title: String

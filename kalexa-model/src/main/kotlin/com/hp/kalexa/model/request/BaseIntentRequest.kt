@@ -27,6 +27,7 @@ abstract class BaseIntentRequest(
     locale: String,
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
     timestamp: LocalDateTime,
+    originIpAddress: String?,
     val intent: Intent,
     val dialogState: DialogState? = null
-) : Request(requestId, locale, timestamp)
+) : Request(requestId, locale, timestamp, originIpAddress)

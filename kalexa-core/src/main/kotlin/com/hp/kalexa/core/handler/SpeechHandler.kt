@@ -8,14 +8,13 @@ package com.hp.kalexa.core.handler
 import com.hp.kalexa.core.intent.BaseHandler
 import com.hp.kalexa.model.request.AlexaRequest
 import com.hp.kalexa.model.request.CanFulfillIntentRequest
-import com.hp.kalexa.model.request.ConnectionsRequest
-import com.hp.kalexa.model.request.ConnectionsResponseRequest
 import com.hp.kalexa.model.request.ElementSelectedRequest
 import com.hp.kalexa.model.request.InputHandlerEventRequest
 import com.hp.kalexa.model.request.IntentRequest
 import com.hp.kalexa.model.request.LaunchRequest
 import com.hp.kalexa.model.request.MessageReceivedRequest
 import com.hp.kalexa.model.request.SessionEndedRequest
+import com.hp.kalexa.model.request.SessionResumedRequest
 import com.hp.kalexa.model.request.SessionStartedRequest
 import com.hp.kalexa.model.request.event.ListCreatedEventRequest
 import com.hp.kalexa.model.request.event.ListDeletedEventRequest
@@ -49,9 +48,7 @@ interface SpeechHandler {
 
     fun handleCanFulfillIntentRequest(alexaRequest: AlexaRequest<CanFulfillIntentRequest>): AlexaResponse
 
-    fun handleConnectionsResponseRequest(alexaRequest: AlexaRequest<ConnectionsResponseRequest>): AlexaResponse
-
-    fun handleConnectionsRequest(alexaRequest: AlexaRequest<ConnectionsRequest>): AlexaResponse
+    fun handleSessionResumedRequest(alexaRequest: AlexaRequest<SessionResumedRequest>): AlexaResponse
 
     fun handleListCreatedEventRequest(alexaRequest: AlexaRequest<ListCreatedEventRequest>): AlexaResponse
 

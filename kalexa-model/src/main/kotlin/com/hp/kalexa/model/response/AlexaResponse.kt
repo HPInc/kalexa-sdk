@@ -38,6 +38,7 @@ data class AlexaResponse(
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(DeserializationFeature.READ_ENUMS_USING_TO_STRING, true)
             .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+            .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
 
         @JvmStatic
         fun builder() = Builder()

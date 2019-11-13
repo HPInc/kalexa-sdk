@@ -18,9 +18,10 @@ class ListItemsUpdatedEventRequest(
     locale: String = "",
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
     timestamp: LocalDateTime,
+    originIpAddress: String? = null,
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
     eventCreationTime: LocalDateTime,
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
     eventPublishingTime: LocalDateTime,
     var body: ListItemBody
-) : EventRequest(requestId, locale, timestamp, eventCreationTime, eventPublishingTime)
+) : EventRequest(requestId, locale, timestamp, originIpAddress, eventCreationTime, eventPublishingTime)
