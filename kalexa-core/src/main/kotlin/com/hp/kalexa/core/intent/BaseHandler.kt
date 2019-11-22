@@ -78,8 +78,8 @@ interface BaseHandler {
     /**
      * Locks the context on the intent caller.
      */
-    fun lockIntentContext(alexaRequest: AlexaRequest<*>) {
-        alexaRequest.session?.attributes?.set(INTENT_CONTEXT, this::class.java.simpleName)
+    fun lockIntentContext(alexaRequest: AlexaRequest<*>, intentName: String = "") {
+        alexaRequest.session?.attributes?.set(INTENT_CONTEXT, intentName.ifEmpty { this::class.java.simpleName })
     }
 
     /**

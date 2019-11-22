@@ -14,6 +14,7 @@ import com.hp.kalexa.core.intent.AccountLinkedRequestHandler
 import com.hp.kalexa.core.intent.BaseHandler
 import com.hp.kalexa.core.intent.BuiltInIntent
 import com.hp.kalexa.core.intent.CanFulfillIntentHandler
+import com.hp.kalexa.core.intent.CancelIntentHandler
 import com.hp.kalexa.core.intent.FallbackIntentHandler
 import com.hp.kalexa.core.intent.HelpIntentHandler
 import com.hp.kalexa.core.intent.InputHandlerEventRequestHandler
@@ -28,6 +29,7 @@ import com.hp.kalexa.core.intent.ReminderEventsHandler
 import com.hp.kalexa.core.intent.RequesterHandler
 import com.hp.kalexa.core.intent.SkillDisabledRequestHandler
 import com.hp.kalexa.core.intent.SkillEnabledRequestHandler
+import com.hp.kalexa.core.intent.StopIntentHandler
 import com.hp.kalexa.core.util.IntentUtil.defaultBuiltInResponse
 import com.hp.kalexa.core.util.IntentUtil.defaultGreetings
 import com.hp.kalexa.core.util.IntentUtil.helpIntent
@@ -105,6 +107,8 @@ open class ConcreteSpeechHandler(instances: List<BaseHandler> = emptyList()) : S
             builtInIntent == null -> customIntent(intentName, alexaRequest)
             intentName == BuiltInIntent.FALLBACK_INTENT.rawValue -> fallbackIntent(alexaRequest)
             intentName == BuiltInIntent.HELP_INTENT.rawValue -> helpIntent(alexaRequest)
+            intentName == BuiltInIntent.CANCEL_INTENT.rawValue -> cancelIntent(alexaRequest)
+            intentName == BuiltInIntent.STOP_INTENT.rawValue -> stopIntent(alexaRequest)
             intentName == builtInIntent.rawValue -> unknownIntentContext(builtInIntent, alexaRequest)
             else -> builtInIntent(intentName, builtInIntent, alexaRequest)
         }
@@ -381,6 +385,26 @@ open class ConcreteSpeechHandler(instances: List<BaseHandler> = emptyList()) : S
             val alexaResponse = helpHandler.onHelpIntent(alexaRequest)
             return generateResponse(helpHandler, alexaRequest, alexaResponse)
         } ?: helpIntent()
+    }
+
+    private fun cancelIntent(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
+        logger.info("=========================== Cancel Intent =========================")
+        val cancelHandler: CancelIntentHandler? = getHandler(CancelIntentHandler::class)?.cast()
+
+        return cancelHandler?.let {
+            val alexaResponse = cancelHandler.onCancelIntent(alexaRequest)
+            return generateResponse(cancelHandler, alexaRequest, alexaResponse)
+        } ?: unsupportedIntent()
+    }
+
+    private fun stopIntent(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
+        logger.info("=========================== Stop Intent =========================")
+        val stopHandler: StopIntentHandler? = getHandler(StopIntentHandler::class)?.cast()
+
+        return stopHandler?.let {
+            val alexaResponse = stopHandler.onStopIntent(alexaRequest)
+            return generateResponse(stopHandler, alexaRequest, alexaResponse)
+        } ?: unsupportedIntent()
     }
 
     private fun unknownIntentContext(

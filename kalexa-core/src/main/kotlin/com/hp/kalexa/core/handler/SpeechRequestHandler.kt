@@ -6,6 +6,7 @@
 package com.hp.kalexa.core.handler
 
 import com.hp.kalexa.core.extension.cast
+import com.hp.kalexa.core.interceptor.InterceptorException
 import com.hp.kalexa.core.util.Util
 import com.hp.kalexa.model.json.JacksonSerializer
 import com.hp.kalexa.model.request.AlexaRequest
@@ -50,7 +51,12 @@ class SpeechRequestHandler(
         if (isApplicationIdValid(requestEnvelope).not()) {
             throw IllegalArgumentException("Request application ID doesn't match with given Application ID")
         }
-        interceptorHandler.process(requestEnvelope)
+        try {
+            interceptorHandler.process(requestEnvelope)
+        } catch (ex: InterceptorException) {
+            logger.error(ex.message)
+            return ex.responseCallback().toJson()
+        }
         return handleRequestType(requestEnvelope)
     }
 

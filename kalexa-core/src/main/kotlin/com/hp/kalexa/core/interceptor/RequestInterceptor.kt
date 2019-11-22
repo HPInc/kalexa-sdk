@@ -9,5 +9,6 @@ import com.hp.kalexa.model.request.AlexaRequest
 
 interface RequestInterceptor {
 
+    @Throws(InterceptorException::class)
     fun intercept(alexaRequest: AlexaRequest<*>)
 }
