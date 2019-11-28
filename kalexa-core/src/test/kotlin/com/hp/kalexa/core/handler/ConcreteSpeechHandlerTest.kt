@@ -5,6 +5,10 @@
 
 package com.hp.kalexa.core.handler
 
+import com.hp.kalexa.core.handler.requesthandler.BasicHandler
+import com.hp.kalexa.core.handler.requesthandler.DefaultBasicHandler
+import com.hp.kalexa.core.handler.requesthandler.DefaultListHandler
+import com.hp.kalexa.core.handler.requesthandler.ListHandler
 import com.hp.kalexa.core.intent.BaseHandler
 import com.hp.kalexa.core.intent.BuiltInIntent
 import com.hp.kalexa.core.model.FakeIntent
@@ -42,7 +46,7 @@ import kotlin.test.assertFailsWith
 object ConcreteSpeechHandlerTest : Spek({
 
     describe("a Concrete Speech Handler class") {
-        lateinit var concreteSpeechHandler: ConcreteSpeechHandler
+        lateinit var defaultSpeechHandler: DefaultBasicHandler
         beforeEachTest {
             mockkObject(Util)
         }
@@ -54,9 +58,9 @@ object ConcreteSpeechHandlerTest : Spek({
             val envelope = mockk<AlexaRequest<SessionStartedRequest>>()
             every { Util.getScanPackage() } returns "com.hp.kalexa.core.model"
 
-            concreteSpeechHandler = ConcreteSpeechHandler()
+            defaultSpeechHandler = DefaultBasicHandler(BaseHandlerRepository())
             it("should return an empty response") {
-                val alexaResponse = concreteSpeechHandler.handleSessionStartedRequest(envelope)
+                val alexaResponse = defaultSpeechHandler.handleSessionStartedRequest(envelope)
                 assertEquals(AlexaResponse.emptyResponse().toJson(), alexaResponse.toJson())
             }
         }
@@ -75,19 +79,19 @@ object ConcreteSpeechHandlerTest : Spek({
             }
             on("Without implementing LaunchIntentHandler") {
                 every { Util.loadClassesFromPackage() } returns emptySet()
-                concreteSpeechHandler = ConcreteSpeechHandler()
+                defaultSpeechHandler = DefaultBasicHandler(BaseHandlerRepository())
 
                 it("should return the default Launch response") {
-                    val alexaResponse = concreteSpeechHandler.handleLaunchRequest(customLaunchRequestEnvelope)
+                    val alexaResponse = defaultSpeechHandler.handleLaunchRequest(customLaunchRequestEnvelope)
                     assertEquals(IntentUtil.defaultGreetings().toJson(), alexaResponse.toJson())
                 }
             }
             on("With LaunchIntentHandler implemented ") {
                 val fakeIntent = mockk<FakeIntent>()
                 every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
-                concreteSpeechHandler = ConcreteSpeechHandler()
+                defaultSpeechHandler = DefaultBasicHandler(BaseHandlerRepository())
                 it("should return the onLaunchIntent response from the class implementing LaunchIntentHandler") {
-                    val alexaResponse = concreteSpeechHandler.handleLaunchRequest(customLaunchRequestEnvelope)
+                    val alexaResponse = defaultSpeechHandler.handleLaunchRequest(customLaunchRequestEnvelope)
                     assertEquals(
                         """{"response":{"outputSpeech":{"type":"PlainText","text":"This is a hello from FakeIntent@onLaunchIntent"}},"version":"1.0"}""",
                         alexaResponse.toJson()
@@ -120,9 +124,10 @@ object ConcreteSpeechHandlerTest : Spek({
             context("Custom Intent") {
                 on("Existent Custom Intent") {
                     every { intentRequestEnvelope.request.intent.name } returns "FakeIntent"
-                    concreteSpeechHandler = ConcreteSpeechHandler()
+                    defaultSpeechHandler =
+                        DefaultBasicHandler(BaseHandlerRepository())
                     it("should call onIntentRequest method") {
-                        val response = concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                        val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                         assertEquals(
                             """{"response":{"outputSpeech":{"type":"PlainText","text":"This is a hello from FakeIntent"},"card":{"type":"Simple","title":"Hello world","content":"This is a content coming from FakeIntent"}},"version":"1.0"}""",
                             response.toJson()
@@ -133,7 +138,7 @@ object ConcreteSpeechHandlerTest : Spek({
                     every { intentRequestEnvelope.request.intent.name } returns "UnknownIntent"
                     it("should throw IllegalArgumentException") {
                         assertFailsWith(exceptionClass = IllegalArgumentException::class) {
-                            concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                            defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                         }
                     }
                 }
@@ -141,9 +146,10 @@ object ConcreteSpeechHandlerTest : Spek({
             context("Amazon FallbackIntent") {
                 on("with FallbackIntentHandler implemented") {
                     every { intentRequestEnvelope.request.intent.name } returns "AMAZON.FallbackIntent"
-                    concreteSpeechHandler = ConcreteSpeechHandler()
+                    defaultSpeechHandler =
+                        DefaultBasicHandler(BaseHandlerRepository())
                     it("should call FakeIntent fallback method") {
-                        val response = concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                        val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                         assertEquals(
                             """{"response":{"outputSpeech":{"type":"PlainText","text":"This is a fallback response"}},"version":"1.0"}""",
                             response.toJson()
@@ -153,9 +159,10 @@ object ConcreteSpeechHandlerTest : Spek({
                 on("without FallbackIntentHandler implemented") {
                     every { intentRequestEnvelope.request.intent.name } returns "AMAZON.FallbackIntent"
                     every { Util.loadClassesFromPackage() } returns emptySet()
-                    concreteSpeechHandler = ConcreteSpeechHandler()
+                    defaultSpeechHandler =
+                        DefaultBasicHandler(BaseHandlerRepository())
                     it("should call default fallback method") {
-                        val response = concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                        val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                         assertEquals(
                             IntentUtil.unsupportedIntent().toJson(),
                             response.toJson()
@@ -167,9 +174,10 @@ object ConcreteSpeechHandlerTest : Spek({
 
                 on("with HelpIntentHandler implemented") {
                     every { intentRequestEnvelope.request.intent.name } returns "AMAZON.HelpIntent"
-                    concreteSpeechHandler = ConcreteSpeechHandler()
+                    defaultSpeechHandler =
+                        DefaultBasicHandler(BaseHandlerRepository())
                     it("should call FakeIntent onHelpIntent method") {
-                        val response = concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                        val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                         assertEquals(
                             """{"response":{"outputSpeech":{"type":"PlainText","text":"This is a help response"}},"version":"1.0"}""",
                             response.toJson()
@@ -179,9 +187,10 @@ object ConcreteSpeechHandlerTest : Spek({
                 on("without HelpIntentHandler implemented") {
                     every { intentRequestEnvelope.request.intent.name } returns "AMAZON.HelpIntent"
                     every { Util.loadClassesFromPackage() } returns emptySet()
-                    concreteSpeechHandler = ConcreteSpeechHandler()
+                    defaultSpeechHandler =
+                        DefaultBasicHandler(BaseHandlerRepository())
                     it("should call default helpIntent method") {
-                        val response = concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                        val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                         assertEquals(
                             IntentUtil.helpIntent().toJson(),
                             response.toJson()
@@ -192,10 +201,11 @@ object ConcreteSpeechHandlerTest : Spek({
             context("On Built In Intent") {
                 on("Yes Built in Intent with intent context locked") {
                     every { intentRequestEnvelope.request.intent.name } returns BuiltInIntent.YES_INTENT.rawValue
-                    attributesSession[SpeechHandler.INTENT_CONTEXT] = "FakeIntent"
-                    concreteSpeechHandler = ConcreteSpeechHandler()
+                    attributesSession[BasicHandler.INTENT_CONTEXT] = "FakeIntent"
+                    defaultSpeechHandler =
+                        DefaultBasicHandler(BaseHandlerRepository())
                     it("should call onBuiltInIntent method") {
-                        val response = concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                        val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                         assertEquals(
                             """{"response":{"outputSpeech":{"type":"PlainText","text":"I'm sorry, I couldn't understand what you have said. Could you say it again?"},"shouldEndSession":false},"sessionAttributes":{"com.hp.kalexa.intentContext":"FakeIntent","retry":1},"version":"1.0"}""",
                             response.toJson()
@@ -203,21 +213,23 @@ object ConcreteSpeechHandlerTest : Spek({
                     }
                 }
                 on("Unknown Intent Context locked to Yes Built in intent") {
-                    attributesSession[SpeechHandler.INTENT_CONTEXT] = "UnknownIntent"
+                    attributesSession[BasicHandler.INTENT_CONTEXT] = "UnknownIntent"
                     every { intentRequestEnvelope.request.intent.name } returns BuiltInIntent.YES_INTENT.rawValue
-                    concreteSpeechHandler = ConcreteSpeechHandler()
+                    defaultSpeechHandler =
+                        DefaultBasicHandler(BaseHandlerRepository())
                     it("should throw IllegalArgumentException") {
                         assertFailsWith(exceptionClass = IllegalArgumentException::class) {
-                            concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                            defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                         }
                     }
                 }
                 context("Yes Built in Intent without context locked") {
                     on("with RecoverIntentContextHandler implemented") {
                         every { intentRequestEnvelope.request.intent.name } returns BuiltInIntent.YES_INTENT.rawValue
-                        concreteSpeechHandler = ConcreteSpeechHandler()
+                        defaultSpeechHandler =
+                            DefaultBasicHandler(BaseHandlerRepository())
                         it("should should call unknownIntentContext") {
-                            val response = concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                            val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                             assertEquals(
                                 """{"response":{"outputSpeech":{"type":"PlainText","text":"This is a unknown intent context response"}},"version":"1.0"}""",
                                 response.toJson()
@@ -227,9 +239,10 @@ object ConcreteSpeechHandlerTest : Spek({
                     on("without RecoverIntentContextHandler implemented") {
                         every { intentRequestEnvelope.request.intent.name } returns BuiltInIntent.YES_INTENT.rawValue
                         every { Util.loadClassesFromPackage() } returns emptySet()
-                        concreteSpeechHandler = ConcreteSpeechHandler()
+                        defaultSpeechHandler =
+                            DefaultBasicHandler(BaseHandlerRepository())
                         it("should should call default unknownIntentContext response") {
-                            val response = concreteSpeechHandler.handleIntentRequest(intentRequestEnvelope)
+                            val response = defaultSpeechHandler.handleIntentRequest(intentRequestEnvelope)
                             assertEquals(
                                 """{"response":{"outputSpeech":{"type":"PlainText","text":"I'm sorry, I couldn't understand what you have said. Could you say it again?"},"shouldEndSession":false},"sessionAttributes":{"retry":1},"version":"1.0"}""",
                                 response.toJson()
@@ -264,9 +277,9 @@ object ConcreteSpeechHandlerTest : Spek({
                 every { elementSelectedRequest.version } returns "1.0"
             }
             on("Element Selected with intent context locked") {
-                attributesSession[SpeechHandler.INTENT_CONTEXT] = "FakeIntent"
-                concreteSpeechHandler = ConcreteSpeechHandler()
-                val response = concreteSpeechHandler.handleElementSelectedRequest(elementSelectedRequest)
+                attributesSession[BasicHandler.INTENT_CONTEXT] = "FakeIntent"
+                defaultSpeechHandler = DefaultBasicHandler(BaseHandlerRepository())
+                val response = defaultSpeechHandler.handleElementSelectedRequest(elementSelectedRequest)
                 it("should use value of Intent Context to call FakeIntent.onElementSelected and return an empty response") {
                     assertEquals(
                         """{"response":{},"sessionAttributes":{"com.hp.kalexa.intentContext":"FakeIntent"},"version":"1.0"}""",
@@ -275,16 +288,16 @@ object ConcreteSpeechHandlerTest : Spek({
                 }
             }
             on("Element Selected with intent context locked and map to an unknown intent") {
-                attributesSession[SpeechHandler.INTENT_CONTEXT] = "UnknownIntent"
+                attributesSession[BasicHandler.INTENT_CONTEXT] = "UnknownIntent"
                 it("should throw IllegalArgumentException") {
                     assertFailsWith(exceptionClass = IllegalArgumentException::class) {
-                        concreteSpeechHandler.handleElementSelectedRequest(elementSelectedRequest)
+                        defaultSpeechHandler.handleElementSelectedRequest(elementSelectedRequest)
                     }
                 }
             }
             on("Element Selected with intent context UNLOCKED") {
-                concreteSpeechHandler = ConcreteSpeechHandler()
-                val response = concreteSpeechHandler.handleElementSelectedRequest(elementSelectedRequest)
+                defaultSpeechHandler = DefaultBasicHandler(BaseHandlerRepository())
+                val response = defaultSpeechHandler.handleElementSelectedRequest(elementSelectedRequest)
                 it("should use value of token to call FakeIntent.onElementSelected and return an empty response") {
                     assertEquals(
                         """{"response":{},"version":"1.0"}""",
@@ -317,9 +330,9 @@ object ConcreteSpeechHandlerTest : Spek({
             }
 
             on("with RequesterHandler implemented") {
-                concreteSpeechHandler = ConcreteSpeechHandler()
+                defaultSpeechHandler = DefaultBasicHandler(BaseHandlerRepository())
                 it("should call onConnectionsResponse method") {
-                    val response = concreteSpeechHandler.handleSessionResumedRequest(sessionResumedRequest)
+                    val response = defaultSpeechHandler.handleSessionResumedRequest(sessionResumedRequest)
                     assertEquals(
                         """{"response":{"outputSpeech":{"type":"PlainText","text":"This is a onConnectionsResponse from FakeIntent"}},"version":"1.0"}""",
                         response.toJson()
@@ -328,9 +341,9 @@ object ConcreteSpeechHandlerTest : Spek({
             }
             on("without RequesterHandler implemented") {
                 every { Util.loadClassesFromPackage() } returns emptySet()
-                concreteSpeechHandler = ConcreteSpeechHandler()
+                defaultSpeechHandler = DefaultBasicHandler(BaseHandlerRepository())
                 it("should call default onConnectionsResponse method") {
-                    val response = concreteSpeechHandler.handleSessionResumedRequest(sessionResumedRequest)
+                    val response = defaultSpeechHandler.handleSessionResumedRequest(sessionResumedRequest)
                     assertEquals(
                         AlexaResponse.emptyResponse().toJson(),
                         response.toJson()
@@ -344,6 +357,7 @@ object ConcreteSpeechHandlerTest : Spek({
             lateinit var context: Context
             lateinit var request: ListCreatedEventRequest
             lateinit var session: Session
+            lateinit var listHandler: ListHandler
             val attributesSession = mutableMapOf<String, Any>()
             beforeEachTest {
                 fakeIntent = mockk<FakeIntent>()
@@ -364,18 +378,18 @@ object ConcreteSpeechHandlerTest : Spek({
             on("without ListEventsHandler implemented") {
                 every { Util.loadClassesFromPackage() } returns emptySet()
                 every { Util.getScanPackage() } returns "package.with.no.intent"
-                concreteSpeechHandler = ConcreteSpeechHandler()
+                listHandler = DefaultListHandler(BaseHandlerRepository())
                 it("should return a default ListEvents response") {
-                    val alexaResponse = concreteSpeechHandler.handleListCreatedEventRequest(listCreatedEventRequest)
+                    val alexaResponse = listHandler.handleListCreatedEventRequest(listCreatedEventRequest)
                     assertEquals(IntentUtil.unsupportedIntent().toJson(), alexaResponse.toJson())
                 }
             }
             on("with ListEventsHandler implemented") {
                 every { Util.getScanPackage() } returns "package.with.intent"
                 every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
-                concreteSpeechHandler = ConcreteSpeechHandler()
+                listHandler = DefaultListHandler(BaseHandlerRepository())
                 it("should call onListCreatedEventRequest method") {
-                    val alexaResponse = concreteSpeechHandler.handleListCreatedEventRequest(listCreatedEventRequest)
+                    val alexaResponse = listHandler.handleListCreatedEventRequest(listCreatedEventRequest)
                     assertEquals(
                         """{"response":{"outputSpeech":{"type":"PlainText","text":"This is a ListCreatedEventRequest response"}},"version":"1.0"}""",
                         alexaResponse.toJson()
@@ -390,6 +404,7 @@ object ConcreteSpeechHandlerTest : Spek({
             lateinit var request: ListUpdatedEventRequest
             lateinit var session: Session
             val attributesSession = mutableMapOf<String, Any>()
+            lateinit var listHandler: ListHandler
             beforeEachTest {
                 fakeIntent = mockk<FakeIntent>()
                 attributesSession.clear()
@@ -409,18 +424,18 @@ object ConcreteSpeechHandlerTest : Spek({
             on("without ListEventsHandler implemented") {
                 every { Util.loadClassesFromPackage() } returns emptySet()
                 every { Util.getScanPackage() } returns "package.with.no.intent"
-                concreteSpeechHandler = ConcreteSpeechHandler()
+                listHandler = DefaultListHandler(BaseHandlerRepository())
                 it("should return a default ListEvents response") {
-                    val alexaResponse = concreteSpeechHandler.handleListUpdatedEventRequest(listUpdatedEventRequest)
+                    val alexaResponse = listHandler.handleListUpdatedEventRequest(listUpdatedEventRequest)
                     assertEquals(IntentUtil.unsupportedIntent().toJson(), alexaResponse.toJson())
                 }
             }
             on("with ListEventsHandler implemented") {
                 every { Util.getScanPackage() } returns "package.with.intent"
                 every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
-                concreteSpeechHandler = ConcreteSpeechHandler()
+                listHandler = DefaultListHandler(BaseHandlerRepository())
                 it("should call onListUpdatedEventRequest method") {
-                    val alexaResponse = concreteSpeechHandler.handleListUpdatedEventRequest(listUpdatedEventRequest)
+                    val alexaResponse = listHandler.handleListUpdatedEventRequest(listUpdatedEventRequest)
                     assertEquals(
                         """{"response":{"outputSpeech":{"type":"PlainText","text":"This is a ListUpdatedEventRequest response"}},"version":"1.0"}""",
                         alexaResponse.toJson()
@@ -434,6 +449,7 @@ object ConcreteSpeechHandlerTest : Spek({
             lateinit var context: Context
             lateinit var request: ListDeletedEventRequest
             lateinit var session: Session
+            lateinit var listHandler: ListHandler
             val attributesSession = mutableMapOf<String, Any>()
             beforeEachTest {
                 fakeIntent = mockk<FakeIntent>()
@@ -454,18 +470,18 @@ object ConcreteSpeechHandlerTest : Spek({
             on("without ListEventsHandler implemented") {
                 every { Util.loadClassesFromPackage() } returns emptySet()
                 every { Util.getScanPackage() } returns "package.with.no.intent"
-                concreteSpeechHandler = ConcreteSpeechHandler()
+                listHandler = DefaultListHandler(BaseHandlerRepository())
                 it("should return a default ListEvents response") {
-                    val alexaResponse = concreteSpeechHandler.handleListDeletedEventRequest(listDeletedEventRequest)
+                    val alexaResponse = listHandler.handleListDeletedEventRequest(listDeletedEventRequest)
                     assertEquals(IntentUtil.unsupportedIntent().toJson(), alexaResponse.toJson())
                 }
             }
             on("with ListEventsHandler implemented") {
                 every { Util.getScanPackage() } returns "package.with.intent"
                 every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
-                concreteSpeechHandler = ConcreteSpeechHandler()
+                listHandler = DefaultListHandler(BaseHandlerRepository())
                 it("should call onListDeletedEventRequest method") {
-                    val alexaResponse = concreteSpeechHandler.handleListDeletedEventRequest(listDeletedEventRequest)
+                    val alexaResponse = listHandler.handleListDeletedEventRequest(listDeletedEventRequest)
                     assertEquals(
                         """{"response":{"outputSpeech":{"type":"PlainText","text":"This is a ListDeletedEventRequest response"}},"version":"1.0"}""",
                         alexaResponse.toJson()
@@ -479,6 +495,7 @@ object ConcreteSpeechHandlerTest : Spek({
             lateinit var context: Context
             lateinit var request: ListItemsCreatedEventRequest
             lateinit var session: Session
+            lateinit var listHandler: ListHandler
             val attributesSession = mutableMapOf<String, Any>()
             beforeEachTest {
                 fakeIntent = mockk<FakeIntent>()
@@ -499,20 +516,20 @@ object ConcreteSpeechHandlerTest : Spek({
             on("without ListEventsHandler implemented") {
                 every { Util.loadClassesFromPackage() } returns emptySet()
                 every { Util.getScanPackage() } returns "package.with.no.intent"
-                concreteSpeechHandler = ConcreteSpeechHandler()
+                listHandler = DefaultListHandler(BaseHandlerRepository())
                 it("should return a default ListEvents response") {
                     val alexaResponse =
-                        concreteSpeechHandler.handleListItemsCreatedEventRequest(listItemsCreatedEventRequest)
+                        listHandler.handleListItemsCreatedEventRequest(listItemsCreatedEventRequest)
                     assertEquals(IntentUtil.unsupportedIntent().toJson(), alexaResponse.toJson())
                 }
             }
             on("with ListEventsHandler implemented") {
                 every { Util.getScanPackage() } returns "package.with.intent"
                 every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
-                concreteSpeechHandler = ConcreteSpeechHandler()
+                listHandler = DefaultListHandler(BaseHandlerRepository())
                 it("should call onListItemsCreatedEventRequest method ") {
                     val alexaResponse =
-                        concreteSpeechHandler.handleListItemsCreatedEventRequest(listItemsCreatedEventRequest)
+                        listHandler.handleListItemsCreatedEventRequest(listItemsCreatedEventRequest)
                     assertEquals(
                         """{"response":{"outputSpeech":{"type":"PlainText","text":"This is a ListItemsCreatedEventRequest response"}},"version":"1.0"}""",
                         alexaResponse.toJson()
@@ -526,6 +543,7 @@ object ConcreteSpeechHandlerTest : Spek({
             lateinit var context: Context
             lateinit var request: ListItemsUpdatedEventRequest
             lateinit var session: Session
+            lateinit var listHandler: ListHandler
             val attributesSession = mutableMapOf<String, Any>()
             beforeEachTest {
                 fakeIntent = mockk<FakeIntent>()
@@ -546,20 +564,20 @@ object ConcreteSpeechHandlerTest : Spek({
             on("without ListEventsHandler implemented") {
                 every { Util.loadClassesFromPackage() } returns emptySet()
                 every { Util.getScanPackage() } returns "package.with.no.intent"
-                concreteSpeechHandler = ConcreteSpeechHandler()
+                listHandler = DefaultListHandler(BaseHandlerRepository())
                 it("should return a default ListEvents response") {
                     val alexaResponse =
-                        concreteSpeechHandler.handleListItemsUpdatedEventRequest(listItemsUpdatedEventRequest)
+                        listHandler.handleListItemsUpdatedEventRequest(listItemsUpdatedEventRequest)
                     assertEquals(IntentUtil.unsupportedIntent().toJson(), alexaResponse.toJson())
                 }
             }
             on("with ListEventsHandler implemented") {
                 every { Util.getScanPackage() } returns "package.with.intent"
                 every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
-                concreteSpeechHandler = ConcreteSpeechHandler()
+                listHandler = DefaultListHandler(BaseHandlerRepository())
                 it("should call onListItemsUpdatedEventRequest method") {
                     val alexaResponse =
-                        concreteSpeechHandler.handleListItemsUpdatedEventRequest(listItemsUpdatedEventRequest)
+                        listHandler.handleListItemsUpdatedEventRequest(listItemsUpdatedEventRequest)
                     assertEquals(
                         """{"response":{"outputSpeech":{"type":"PlainText","text":"This is a ListItemsUpdatedEventRequest response"}},"version":"1.0"}""",
                         alexaResponse.toJson()
@@ -573,6 +591,7 @@ object ConcreteSpeechHandlerTest : Spek({
             lateinit var context: Context
             lateinit var request: ListItemsDeletedEventRequest
             lateinit var session: Session
+            lateinit var listHandler: ListHandler
             val attributesSession = mutableMapOf<String, Any>()
             beforeEachTest {
                 fakeIntent = mockk<FakeIntent>()
@@ -593,20 +612,20 @@ object ConcreteSpeechHandlerTest : Spek({
             on("without ListEventsHandler implemented") {
                 every { Util.loadClassesFromPackage() } returns emptySet()
                 every { Util.getScanPackage() } returns "package.with.no.intent"
-                concreteSpeechHandler = ConcreteSpeechHandler()
+                listHandler = DefaultListHandler(BaseHandlerRepository())
                 it("should return a default ListEvents response") {
                     val alexaResponse =
-                        concreteSpeechHandler.handleListItemsDeletedEventRequest(listItemsDeletedEventRequest)
+                        listHandler.handleListItemsDeletedEventRequest(listItemsDeletedEventRequest)
                     assertEquals(IntentUtil.unsupportedIntent().toJson(), alexaResponse.toJson())
                 }
             }
             on("with ListEventsHandler implemented") {
                 every { Util.getScanPackage() } returns "package.with.intent"
                 every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
-                concreteSpeechHandler = ConcreteSpeechHandler()
+                listHandler = DefaultListHandler(BaseHandlerRepository())
                 it("should return a call onListItemsDeletedEventRequest method from the intent annotated with ListEvents") {
                     val alexaResponse =
-                        concreteSpeechHandler.handleListItemsDeletedEventRequest(listItemsDeletedEventRequest)
+                        listHandler.handleListItemsDeletedEventRequest(listItemsDeletedEventRequest)
                     assertEquals(
                         """{"response":{"outputSpeech":{"type":"PlainText","text":"This is a ListItemsDeletedEventRequest response"}},"version":"1.0"}""",
                         alexaResponse.toJson()
@@ -644,20 +663,20 @@ object ConcreteSpeechHandlerTest : Spek({
             on("without CanFulfillIntentRequest implemented") {
                 every { Util.loadClassesFromPackage() } returns emptySet()
                 every { Util.getScanPackage() } returns "package.with.no.intent"
-                concreteSpeechHandler = ConcreteSpeechHandler()
+                defaultSpeechHandler = DefaultBasicHandler(BaseHandlerRepository())
                 it("should throw IllegalArgumentException") {
                     assertFailsWith(exceptionClass = IllegalArgumentException::class) {
-                        concreteSpeechHandler.handleCanFulfillIntentRequest(canFulfillIntentRequest)
+                        defaultSpeechHandler.handleCanFulfillIntentRequest(canFulfillIntentRequest)
                     }
                 }
             }
             on("with CanFulfillIntentRequest implemented") {
                 every { Util.getScanPackage() } returns "package.with.intent"
                 every { Util.loadClassesFromPackage() } returns setOf(fakeIntent::class)
-                concreteSpeechHandler = ConcreteSpeechHandler()
+                defaultSpeechHandler = DefaultBasicHandler(BaseHandlerRepository())
                 it("should return a response from the onCanFulfillIntent method ") {
                     val alexaResponse =
-                        concreteSpeechHandler.handleCanFulfillIntentRequest(canFulfillIntentRequest)
+                        defaultSpeechHandler.handleCanFulfillIntentRequest(canFulfillIntentRequest)
                     assertEquals(
                         """{"response":{"outputSpeech":{"type":"PlainText","text":"This is a hello from FakeIntent@onCanFulfillIntent"}},"version":"1.0"}""",
                         alexaResponse.toJson()

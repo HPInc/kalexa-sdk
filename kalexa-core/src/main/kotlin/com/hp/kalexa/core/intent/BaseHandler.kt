@@ -5,7 +5,7 @@
 
 package com.hp.kalexa.core.intent
 
-import com.hp.kalexa.core.handler.SpeechHandler.Companion.INTENT_CONTEXT
+import com.hp.kalexa.core.handler.requesthandler.BasicHandler.Companion.INTENT_CONTEXT
 import com.hp.kalexa.core.util.IntentUtil.finish
 import com.hp.kalexa.core.util.IntentUtil.goodbye
 import com.hp.kalexa.core.util.IntentUtil.retryIntent

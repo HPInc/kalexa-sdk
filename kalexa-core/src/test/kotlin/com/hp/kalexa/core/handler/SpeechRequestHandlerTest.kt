@@ -8,11 +8,11 @@ package com.hp.kalexa.core.handler
 import com.hp.kalexa.core.util.Util
 import com.hp.kalexa.model.json.JacksonSerializer
 import com.hp.kalexa.model.request.AlexaRequest
-import com.hp.kalexa.model.request.SessionResumedRequest
 import com.hp.kalexa.model.request.ElementSelectedRequest
 import com.hp.kalexa.model.request.IntentRequest
 import com.hp.kalexa.model.request.LaunchRequest
 import com.hp.kalexa.model.request.SessionEndedRequest
+import com.hp.kalexa.model.request.SessionResumedRequest
 import com.hp.kalexa.model.request.SessionStartedRequest
 import com.hp.kalexa.model.request.event.ListCreatedEventRequest
 import com.hp.kalexa.model.request.event.ListDeletedEventRequest
@@ -39,25 +39,26 @@ object SpeechRequestHandlerTest : Spek({
     describe("Test Speech Request Handler with a mocked SpeechHandler implementation") {
         context("When handleRequestType is called by process method") {
             val alexaResponse = mockk<AlexaResponse>()
-            val speechHandler = mockk<SpeechHandler> {
-                every { handleSessionStartedRequest(any()) } returns alexaResponse
-                every { handleLaunchRequest(any()) } returns alexaResponse
-                every { handleIntentRequest(any()) } returns alexaResponse
-                every { handleSessionResumedRequest(any()) } returns alexaResponse
-                every { handleSessionEndedRequest(any()) } returns alexaResponse
-                every { handleElementSelectedRequest(any()) } returns alexaResponse
-                every { handleListCreatedEventRequest(any()) } returns alexaResponse
-                every { handleListUpdatedEventRequest(any()) } returns alexaResponse
-                every { handleListDeletedEventRequest(any()) } returns alexaResponse
-                every { handleListItemsCreatedEventRequest(any()) } returns alexaResponse
-                every { handleListItemsUpdatedEventRequest(any()) } returns alexaResponse
-                every { handleListItemsDeletedEventRequest(any()) } returns alexaResponse
+            val delegator = mockk<RequestTypeDelegator> {
+                every { delegate(any()) } returns alexaResponse
+                // every { handleSessionStartedRequest(any()) } returns alexaResponse
+                // every { handleLaunchRequest(any()) } returns alexaResponse
+                // every { handleIntentRequest(any()) } returns alexaResponse
+                // every { handleSessionResumedRequest(any()) } returns alexaResponse
+                // every { handleSessionEndedRequest(any()) } returns alexaResponse
+                // every { handleElementSelectedRequest(any()) } returns alexaResponse
+                // every { handleListCreatedEventRequest(any()) } returns alexaResponse
+                // every { handleListUpdatedEventRequest(any()) } returns alexaResponse
+                // every { handleListDeletedEventRequest(any()) } returns alexaResponse
+                // every { handleListItemsCreatedEventRequest(any()) } returns alexaResponse
+                // every { handleListItemsUpdatedEventRequest(any()) } returns alexaResponse
+                // every { handleListItemsDeletedEventRequest(any()) } returns alexaResponse
             }
             mockkObject(JacksonSerializer)
             mockkObject(Util)
             lateinit var speechRequestHandler: SpeechRequestHandler
             beforeEachTest {
-                speechRequestHandler = SpeechRequestHandler(SkillConfig(), speechHandler)
+                speechRequestHandler = SpeechRequestHandler(SkillConfig(), delegator)
             }
 
             on("HandleRequestType") {
@@ -245,12 +246,12 @@ object SpeechRequestHandlerTest : Spek({
                 every { request } returns launchRequest
                 every { session?.application?.applicationId } returns "123456"
             }
-            val handler = mockk<SpeechHandler> {
-                every { handleLaunchRequest(requestEnvelope) } returns response
+            val handler = mockk<RequestTypeDelegator> {
+                every { delegate(any()) } returns response
             }
             mockkObject(JacksonSerializer)
             mockkObject(Util)
-            val speechRequestHandler = SpeechRequestHandler(speechHandler = handler)
+            val speechRequestHandler = SpeechRequestHandler(requestTypeDelegator = handler)
 
             on("Application Id in not defined in environment variable") {
                 every { Util.getApplicationID() } returns null

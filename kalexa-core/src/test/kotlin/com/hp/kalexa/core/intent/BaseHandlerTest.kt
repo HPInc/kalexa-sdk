@@ -5,7 +5,7 @@
 
 package com.hp.kalexa.core.intent
 
-import com.hp.kalexa.core.handler.SpeechHandler
+import com.hp.kalexa.core.handler.requesthandler.BasicHandler
 import com.hp.kalexa.core.model.DummyIntent
 import com.hp.kalexa.core.util.IntentUtil
 import com.hp.kalexa.model.Context
@@ -120,7 +120,7 @@ class BaseHandlerTest : Spek({
                 every { envelope.session } returns session
                 every { envelope.session?.attributes } returns response
                 dummyIntent.lockIntentContext(envelope)
-                assertEquals(response[SpeechHandler.INTENT_CONTEXT], "DummyIntent")
+                assertEquals(response[BasicHandler.INTENT_CONTEXT], "DummyIntent")
             }
         }
 
@@ -130,7 +130,7 @@ class BaseHandlerTest : Spek({
                 every { envelope.session } returns session
                 every { envelope.session?.attributes } returns response
                 dummyIntent.unlockIntentContext(envelope)
-                assertNull(response[SpeechHandler.INTENT_CONTEXT])
+                assertNull(response[BasicHandler.INTENT_CONTEXT])
             }
         }
 

@@ -51,7 +51,8 @@ class LwaClient(
     private fun generateAccessToken(request: AccessTokenRequest): AccessTokenResponse {
         val uri = "${apiConfig.apiEndpoint}/auth/o2/token"
         val payload =
-            "grant_type=client_credentials&client_id=${request.clientId}&client_secret=${request.clientSecret}&scope=${request.scope}"
+            "grant_type=client_credentials&client_id=${request.clientId}" +
+                "&client_secret=${request.clientSecret}&scope=${request.scope}"
         try {
             val response = post(uri, getRequestHeaders(), payload)
             when (response.responseCode) {
