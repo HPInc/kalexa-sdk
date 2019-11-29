@@ -1,4 +1,4 @@
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.3.21-blue.svg)](https://kotlinlang.org/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-1.3.60-blue.svg)](https://kotlinlang.org/)
 [![ktlint](https://img.shields.io/badge/code%20style-%E2%9D%A4-FF4081.svg)](https://ktlint.github.io/)
 
 # kalexa-sdk
@@ -6,16 +6,19 @@ The Kalexa SDK is a very simple library that makes easier for developers to work
 This library aims to simplify the skill creation without writing boiler-plate code.
 It's also possible to use Java and add kalexa-sdk as dependency.
 
+Please note that this SDK is an ongoing work. So, expect new features to be added anytime, or feel free to contact us to ask 
+any feature.
+
 ## Usage:
 ##### Gradle
 add dependency to build.gradle:
 ```
-compile "com.hp.kalexa:kalexa-sdk:0.4.0"
+compile "com.hp.kalexa:kalexa-sdk:0.5.0"
 ```
 or as separated artifacts:
 ```
-compile "com.hp.kalexa:kalexa-core:0.4.0"
-compile "com.hp.kalexa:kalexa-model:0.4.0"
+compile "com.hp.kalexa:kalexa-core:0.5.0"
+compile "com.hp.kalexa:kalexa-model:0.5.0"
 ```
 
 ##### Maven
@@ -24,7 +27,7 @@ add dependency to pom.xml:
 <dependency>
     <groupId>com.hp.kalexa</groupId>
     <artifactId>kalexa-sdk</artifactId>
-    <version>0.4.0</version>
+    <version>0.5.0</version>
 </dependency>
 ```
 or as separated artifacts:
@@ -32,12 +35,12 @@ or as separated artifacts:
 <dependency>
     <groupId>com.hp.kalexa</groupId>
     <artifactId>kalexa-core</artifactId>
-    <version>0.4.0</version>
+    <version>0.5.0</version>
 </dependency>
 <dependency>
     <groupId>com.hp.kalexa</groupId>
     <artifactId>kalexa-model</artifactId>
-    <version>0.4.0</version>
+    <version>0.5.0</version>
 </dependency>
 ```
 
@@ -89,9 +92,62 @@ And then pass the interceptors instances to the `SkillConfig` object the same wa
 
 ```kotlin
 val interceptors = listOf(CustomInterceptor())
-val skillConfig = SkillConfig(interceptors = interceptors)
+val skillConfig = SkillConfig(requestInterceptors = interceptors)
 val alexaWebApplication = AlexaWebApplication(skillConfig)
 ```
+
+###### Handling `InterceptorException`:
+Since `RequestInterceptor` returns `Unit`, it's not possible to return an instance of AlexaResponse. However there one
+way to interrupt and exit the interaction graciously. An `InterceptorException` can be throw by an instance of interceptor.
+This exception allows you not only stop the interaction but with a properly response.
+The `InterceptorException` receives a callback method that returns an `AlexaResponse` object. It means that if anything go
+wrong in the interceptor's logic, you can throw this exception and stop the whole interaction.
+
+```kotlin
+class AccessTokenInterceptor : RequestInterceptor {
+
+    override fun intercept(alexaRequest: AlexaRequest<*>) {
+            val accessToken = session?.user?.accessToken ?: throw InterceptorException("No access token found") {
+                return alexaResponse {
+                    response {
+                        shouldEndSession = true
+                        speech { "I see you're not logged yet. I've sent a card with more linking information." }
+                        card { LinkAccountCard() }
+                    }
+                }
+            }
+       }
+    }
+```
+
+##### Add Response Interceptors.
+The same way you can use `RequestInterceptor` to centralize the logic in one place, you can also do the same thing for 
+Responses. The only difference is that ResponseInterceptors are executed after the intents have been processed.
+and each `ResponseInterceptor` must return an instance of `AlexaResponse`. This way, you can add/modify any kind of value 
+in the final response.
+
+```kotlin
+class CustomResponseInterceptor : ResponseInterceptor {
+
+    override fun intercept(alexaResponse: AlexaResponse): AlexaResponse
+        // logic goes here.
+        return alexaResponse
+    }
+}
+```  
+To pass response interceptors is similar to `request interceptors`:
+
+```kotlin
+val responseInterceptors = listOf(CustomResponseInterceptor())
+val skillConfig = SkillConfig(responseInterceptors = responseInterceptors)
+val alexaWebApplication = AlexaWebApplication(skillConfig)
+```
+
+It's possible to work with both interceptors, as long as you add it in the skillConfig instance:
+```kotlin
+val skillConfig = SkillConfig(requestInterceptors=requestInterceptors, responseInterceptors = responseInterceptors)
+```
+
 
 #### Create Intent:
 There are different interfaces for each type of request that you may want to handle. They are:
@@ -195,29 +251,52 @@ Your skill can act as a `Provider` or as a `Requester`
 Currently, it only supports *PRINT* connection type. 
 
 ##### Provider:
-If your skill acts as a Provider, you need to implement `ProviderHandler` interface and override `onConnectionsRequest` 
-method. In this case, after processing the request, you have to answer back to Alexa using the `SendResponseDirective` directive.
+If your skill acts as a Provider, you need to implement `LaunchRequestHandler` interface and override `onLaunchIntent` 
+method. This interface is the same that handles incoming `LaunchRequest`. So, basically you should handle the common 'welcome'
+and incoming jobs from another skill. The `LaunchRequest` object has a properly called `task` of type `Task`. This is what differs from a
+common LaunchRequest. When it's a job request coming from another skill, this object will be populated. This object has all the information
+needed to perform the job. 
+ After processing the request, you have to answer back to Alexa using the `completeTaskDirective` directive.
 
 `Kotlin Code:`
 ```kotlin
-    override fun onConnectionsRequest(alexaRequest: AlexaRequest<ConnectionsRequest>): AlexaResponse {
+class Launcher : LaunchRequestHandler {
+
+    override fun onLaunchIntent(alexaRequest: AlexaRequest<LaunchRequest>): AlexaResponse {
+        if (alexaRequest.request.task != null) {
+            return processRequesterJob(alexaRequest)
+        }
+        return alexaResponse {
+                   response {
+                       speech {
+                           "Hello there, my friend. What can I help you?"
+                       }
+                       shouldEndSession = false
+                   }
+               }
+    }
+
+    private fun processRequesterJob(alexaRequest: AlexaRequest<LaunchRequest>): AlexaResponse {
         return alexaResponse {
             response {
+                shouldEndSession = true
+                speech { "Your Print job is confirmed!" }
                 directives {
-                    sendResponseDirective {
-                        status { ConnectionsStatus("200", "Success") }
-                        payload {
-                            mapOf("url" to "http://<PDF location>.pdf")
+                    completeTaskDirective {
+                        status {
+                            code = "200"
+                            message = "All Done."
                         }
                     }
                 }
             }
         }
     }
+}
 ```
 
 ##### Requester:
-If your skill acts as a Requester, just return to Alexa a `SendRequestDirective` with the type of the Entity-Pair object and the Payload:
+If your skill acts as a Requester, just return to Alexa a `startRequestDirective` with the type of the Entity-Pair object and the Payload:
 
 `Kotlin Code:`
 ```kotlin
@@ -225,39 +304,37 @@ If your skill acts as a Requester, just return to Alexa a `SendRequestDirective`
         return alexaResponse {
             response {
                 directives {
-                    sendRequestDirective {
-                        name = NameType.PRINT
+                    startRequestDirective {
+                        uri = UriType.PRINT_IMAGE_VERSION_1
+                        token = "PrintSomethingIntent"
                         printPDFRequest {
-                            version { "1" }
-                            title {  "Document title" }
-                            description { "This is a PDF" }
+                            title { "Title" }
+                            description { "Description" }
                             url { "http://<PDF location>.pdf" }
-                            context {
-                                providerId = ""
-                            }
                         }
                     }
                 }
-                speech { "This is a onConnectionsRequest from FakeIntent" }
+                speech { "Requester sending Skill Connections request to print PDF" }
             }
         }
     }
 
 ```
-And then expect the response to be on `onConnectionsResponse` method
+And then expect the response to be on `onSessionResumedRequest` method
 
 ```kotlin
-    override fun onConnectionsResponse(alexaRequest: AlexaRequest<ConnectionsResponseRequest>): AlexaResponse {
-        val msg = if (alexaRequest.request.status.isSuccess()) "Your request was successfull!" else "Sorry, something went wrong."
+    override fun onSessionResumedRequest(alexaRequest: AlexaRequest<SessionResumedRequest>): AlexaResponse {
+        val sessionAttributes = alexaRequest.session?.attributes!!
+        println("Session attributes are $sessionAttributes")
         return alexaResponse {
             response {
-                speech { msg }
+                speech { "Status code is ${alexaRequest.request.cause.status.code}, message is ${alexaRequest.request.cause.status.message}" }
             }
         }
     }
 
  ```
-Note that you must implement `RequesterHandler` interface and override `onConnectionsResponse` method in order to be called properly. 
+Note that you must implement `RequesterHandler` interface and override `onSessionResumedRequest` method in order to be called properly. 
  
 #### Response:
 For Kotlin, `Kalexa-SDK` has two types of response `Builder` and `DSL`, for Java you can respond using `Builder`.
@@ -288,21 +365,24 @@ return alexaResponse {
 
 #### Directives
 `Kalexa-SDK` supports the follow directives:
-* AudioPlayer.ClearQueue
-* AudioPlayer.Stop"
-* AudioPlayer.Play"
-* Connections.SendResponse
-* Connections.SendRequest
-* Display.RenderTemplate
-* GadgetController.SetLight
-* Hint
-* VideoApp.Launch
+* AudioPlayer.ClearQueue -> `ClearQueueDirective`
+* AudioPlayer.Stop" -> `StopDirective`
+* AudioPlayer.Play" -> `PlayDirective`
+* Display.RenderTemplate -> `RenderTemplateDirective`
+* GadgetController.SetLight -> `SetLightDirective`
+* Hint -> `HintDirective`
+* VideoApp.Launch -> `LaunchDirective`
+* Connections.StartConnection -> `StartConnectionDirective`
+* Tasks.CompleteTask -> `CompleteTaskDirective`
+* GameEngine.StartInputHandler -> `StartInputHandlerDirective`
+* GameEngine.StopInputHandler -> `StopInputHandlerDirective`
+* VoicePlayer.Speak -> `VoicePlayerSpeakDirective`
 
 Also the Dialog directives:
-* Dialog.ConfirmIntent
-* Dialog.ConfirmSlot
-* Dialog.Delegate
-* Dialog.ElicitSlot
+* Dialog.ConfirmIntent -> `ConfirmIntentDirective`
+* Dialog.ConfirmSlot -> `ConfirmSlotDirective`
+* Dialog.Delegate -> `DelegateDirective`
+* Dialog.ElicitSlot -> `ElicitSlotDirective`
 
 UI directives: `RenderTemplateDirective` and populate with its Templates.  
 With Kotlin, using DSL, it's possible to iterate over a list of items and generate a list item for each element:

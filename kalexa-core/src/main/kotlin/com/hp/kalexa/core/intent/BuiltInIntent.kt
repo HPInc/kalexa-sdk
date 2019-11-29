@@ -30,7 +30,7 @@ enum class BuiltInIntent(val rawValue: String) {
 
     companion object {
         fun getBuiltInIntent(intent: String): BuiltInIntent? {
-            return BuiltInIntent.values().find { it.toString() == intent }
+            return values().find { it.toString() == intent }
         }
     }
 }

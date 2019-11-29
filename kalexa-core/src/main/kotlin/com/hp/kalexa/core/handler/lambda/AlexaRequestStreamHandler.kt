@@ -27,6 +27,6 @@ open class AlexaRequestStreamHandler(
 
         val response = speechRequestHandler.process(inputBytes)
         logger.info("<<<<<< Outgoing json $response")
-        output.write(response.toByteArray())
+        output.write(response.toByteArray(charset = Charsets.UTF_8))
     }
 }

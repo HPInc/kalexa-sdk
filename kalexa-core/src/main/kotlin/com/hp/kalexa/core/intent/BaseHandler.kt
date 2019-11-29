@@ -5,7 +5,7 @@
 
 package com.hp.kalexa.core.intent
 
-import com.hp.kalexa.core.handler.SpeechHandler.Companion.INTENT_CONTEXT
+import com.hp.kalexa.core.handler.requesthandler.BasicHandler.Companion.INTENT_CONTEXT
 import com.hp.kalexa.core.util.IntentUtil.finish
 import com.hp.kalexa.core.util.IntentUtil.goodbye
 import com.hp.kalexa.core.util.IntentUtil.retryIntent
@@ -78,8 +78,8 @@ interface BaseHandler {
     /**
      * Locks the context on the intent caller.
      */
-    fun lockIntentContext(alexaRequest: AlexaRequest<*>) {
-        alexaRequest.session?.attributes?.set(INTENT_CONTEXT, this::class.java.simpleName)
+    fun lockIntentContext(alexaRequest: AlexaRequest<*>, intentName: String = "") {
+        alexaRequest.session?.attributes?.set(INTENT_CONTEXT, intentName.ifEmpty { this::class.java.simpleName })
     }
 
     /**

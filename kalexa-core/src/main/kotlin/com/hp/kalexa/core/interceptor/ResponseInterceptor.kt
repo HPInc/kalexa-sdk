@@ -5,10 +5,10 @@
 
 package com.hp.kalexa.core.interceptor
 
-import com.hp.kalexa.model.request.AlexaRequest
+import com.hp.kalexa.model.response.AlexaResponse
 
-interface RequestInterceptor {
+interface ResponseInterceptor {
 
     @Throws(InterceptorException::class)
-    fun intercept(alexaRequest: AlexaRequest<*>)
+    fun intercept(alexaResponse: AlexaResponse): AlexaResponse
 }
