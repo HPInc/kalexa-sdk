@@ -41,18 +41,6 @@ object SpeechRequestHandlerTest : Spek({
             val alexaResponse = mockk<AlexaResponse>()
             val delegator = mockk<RequestTypeDelegator> {
                 every { delegate(any()) } returns alexaResponse
-                // every { handleSessionStartedRequest(any()) } returns alexaResponse
-                // every { handleLaunchRequest(any()) } returns alexaResponse
-                // every { handleIntentRequest(any()) } returns alexaResponse
-                // every { handleSessionResumedRequest(any()) } returns alexaResponse
-                // every { handleSessionEndedRequest(any()) } returns alexaResponse
-                // every { handleElementSelectedRequest(any()) } returns alexaResponse
-                // every { handleListCreatedEventRequest(any()) } returns alexaResponse
-                // every { handleListUpdatedEventRequest(any()) } returns alexaResponse
-                // every { handleListDeletedEventRequest(any()) } returns alexaResponse
-                // every { handleListItemsCreatedEventRequest(any()) } returns alexaResponse
-                // every { handleListItemsUpdatedEventRequest(any()) } returns alexaResponse
-                // every { handleListItemsDeletedEventRequest(any()) } returns alexaResponse
             }
             mockkObject(JacksonSerializer)
             mockkObject(Util)
