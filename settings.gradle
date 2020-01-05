@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: MIT
  */
 
-include 'kalexa-core', 'kalexa-model', 'kalexa-sdk'
+include 'kalexa-core', 'kalexa-model', 'kalexa-persistent-attributes', 'kalexa-sdk'

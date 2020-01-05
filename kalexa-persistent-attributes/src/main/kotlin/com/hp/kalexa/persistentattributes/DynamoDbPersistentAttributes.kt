@@ -31,6 +31,17 @@ class DynamoDbPersistentAttributes(
     private val autoCreateTable: Boolean = DEFAULT_AUTO_CREATE_TABLE,
     private val dynamoDb: AmazonDynamoDB = AmazonDynamoDBClientBuilder.standard().build()
 ) : PersistentAttributes {
+    constructor(
+        tableName: String,
+        partitionKeyName: String? = null,
+        attributesKeyName: String? = null,
+        autoCreateTable: Boolean = DEFAULT_AUTO_CREATE_TABLE
+    ) : this(
+        tableName = tableName,
+        partitionKeyName = partitionKeyName ?: DEFAULT_PARTITION_KEY_NAME,
+        attributesKeyName = attributesKeyName ?: DEFAULT_ATTRIBUTES_KEY_NAME,
+        autoCreateTable = autoCreateTable
+    )
 
     init {
         autoCreateTableIfNotExists()
@@ -116,5 +127,21 @@ class DynamoDbPersistentAttributes(
         private const val DEFAULT_PARTITION_KEY_NAME = "id"
         private const val DEFAULT_ATTRIBUTES_KEY_NAME = "attributes"
         private const val DEFAULT_AUTO_CREATE_TABLE = false
+        lateinit var persistentAttributes: PersistentAttributes
+
+        fun initialize(
+            tableName: String,
+            partitionKeyName: String? = null,
+            attributesKeyName: String? = null,
+            autoCreateTable: Boolean = false
+        ): PersistentAttributes {
+            persistentAttributes = DynamoDbPersistentAttributes(
+                tableName,
+                attributesKeyName,
+                partitionKeyName,
+                autoCreateTable
+            )
+            return persistentAttributes
+        }
     }
 }
