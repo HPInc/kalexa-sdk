@@ -107,8 +107,8 @@ class DynamoDbPersistentAttributes(
                 .withAttributeName(partitionKeyName)
                 .withKeyType(KeyType.HASH)
             val throughput: ProvisionedThroughput = ProvisionedThroughput()
-                .withReadCapacityUnits(5L)
-                .withWriteCapacityUnits(5L)
+                .withReadCapacityUnits(READ_CAPACITY_UNITS)
+                .withWriteCapacityUnits(WRITE_CAPACITY_UNITS)
             try {
                 TableUtils.createTableIfNotExists(
                     dynamoDb, CreateTableRequest()
@@ -124,6 +124,8 @@ class DynamoDbPersistentAttributes(
     }
 
     companion object {
+        private const val READ_CAPACITY_UNITS = 5L
+        private const val WRITE_CAPACITY_UNITS = 5L
         private const val DEFAULT_PARTITION_KEY_NAME = "id"
         private const val DEFAULT_ATTRIBUTES_KEY_NAME = "attributes"
         private const val DEFAULT_AUTO_CREATE_TABLE = false

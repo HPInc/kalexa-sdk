@@ -32,7 +32,9 @@ class PersistentAttributesSkillConfig(
                 autoCreateTable
             )
         } else {
-            throw IllegalArgumentException("Table name must be provided for creating Persistent Attributes Skill Config.")
+            throw IllegalArgumentException(
+                "Table name must be provided for creating Persistent Attributes Skill Config."
+            )
         }
     }
 }
