@@ -22,7 +22,7 @@ fun MutableMap<String, Any>.persist(id: String) {
  * @param shouldMerge flag that allows merging the loaded session attributes from database with the current session
  * attributes. Default is true
  */
-fun MutableMap<String, Any>.load(id: String, shouldMerge: Boolean = true): Map<String, Any> {
+fun MutableMap<String, Any>.load(id: String, shouldMerge: Boolean = true): MutableMap<String, Any> {
     val map = DynamoDbPersistentAttributes.persistentAttributes.getAttributes(id) ?: emptyMap()
     if (shouldMerge) {
         putAll(map)
