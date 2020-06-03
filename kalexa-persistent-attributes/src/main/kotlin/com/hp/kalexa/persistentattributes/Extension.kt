@@ -17,7 +17,7 @@ fun MutableMap<String, Any>.persist(id: String) {
 }
 
 /**
- * Loads all session attributes store in database by a given id
+ * Loads all session attributes stored in database by a given id
  * @param id to retrieve all session attributes
  * @param shouldMerge flag that allows merging the loaded session attributes from database with the current session
  * attributes. Default is true

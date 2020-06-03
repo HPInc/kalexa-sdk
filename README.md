@@ -13,12 +13,12 @@ any feature.
 ##### Gradle
 add dependency to build.gradle:
 ```
-compile "com.hp.kalexa:kalexa-sdk:0.5.0"
+compile "com.hp.kalexa:kalexa-sdk:0.6.0"
 ```
 or as separated artifacts:
 ```
-compile "com.hp.kalexa:kalexa-core:0.5.0"
-compile "com.hp.kalexa:kalexa-model:0.5.0"
+compile "com.hp.kalexa:kalexa-core:0.6.0"
+compile "com.hp.kalexa:kalexa-model:0.6.0"
 ```
 
 ##### Maven
@@ -27,7 +27,7 @@ add dependency to pom.xml:
 <dependency>
     <groupId>com.hp.kalexa</groupId>
     <artifactId>kalexa-sdk</artifactId>
-    <version>0.5.0</version>
+    <version>0.6.0</version>
 </dependency>
 ```
 or as separated artifacts:
@@ -35,12 +35,12 @@ or as separated artifacts:
 <dependency>
     <groupId>com.hp.kalexa</groupId>
     <artifactId>kalexa-core</artifactId>
-    <version>0.5.0</version>
+    <version>0.6.0</version>
 </dependency>
 <dependency>
     <groupId>com.hp.kalexa</groupId>
     <artifactId>kalexa-model</artifactId>
-    <version>0.5.0</version>
+    <version>0.6.0</version>
 </dependency>
 ```
 
@@ -57,15 +57,15 @@ You must export three environment variables on your application before running t
 `APPLICATION_ID`:  Corresponds to the skill id that you created on the Alexa Skills Kit Developer Console.
 
 `APPLICATION_ID_VERIFICATION`: If you want to disable Application ID Verification, just set this environment variable
-as `True`.
+as `false`.
 
-`SCAN_PACKAGE`: Package location where your Intent and Interceptor classes are located.
+`SCAN_PACKAGE`: Package location where your Intents and Interceptors classes are located. It uses reflection to locate it.
 
 `SKILL_NAME`: The name of the skill.
 
 ##### Add Intent Handler manually to Speech Handler:
-If for some reason you need to add Intent Handler instances manually instead of defining the environment 
-variable `INTENT_PACKAGE`, you can do it by adding those instances into `SkillConfig` object
+If for some reason you want to add Intent Handler instances manually instead of defining the environment 
+variable `SCAN_PACKAGE`, you can do it by adding those instances into `SkillConfig` object
 before providing it to `AlexaWebApplication` or `AlexaRequestStreamHandler`.
 
 ```kotlin
@@ -129,7 +129,7 @@ in the final response.
 ```kotlin
 class CustomResponseInterceptor : ResponseInterceptor {
 
-    override fun intercept(alexaResponse: AlexaResponse): AlexaResponse
+    override fun intercept(alexaResponse: AlexaResponse): AlexaResponse {
         // logic goes here.
         return alexaResponse
     }
@@ -186,7 +186,7 @@ class CustomIntent : IntentHandler, CanFulfillIntentHandler {
     }
 
     @CanFulfillIntent(intents = ["FirstIntent", "SecondIntent"])
-    fun onCanFulfillIntent(alexaRequest: AlexaRequest<CanFulfillIntentRequest>): AlexaResponse {
+    override fun onCanFulfillIntent(alexaRequest: AlexaRequest<CanFulfillIntentRequest>): AlexaResponse {
         // logic for CanFulfill Request type goes here.
     }
 }
@@ -196,7 +196,7 @@ the class name. CustomIntent in this case.
 
 ##### Supported Annotations and callback methods:
 These are the interfaces that you may annotate the method to listen to more than one Intent.
- - `@Intent` and `onIntentRequest` - Handles Intent Requests and the annotation gives you the power of map more than one Intent per class using the `mapsTo` annotation property.
+ - `@Intent` and `onIntentRequest` - Handles Intent Requests, and the annotation gives you the power of map more than one Intent per class using the `mapsTo` annotation property.
  - `@CanFulfillIntentRequest` and `onCanFulfillIntent` - Handles the CanFulfill. This request verifies if the skill can understand and fulfill the intent request and slots.
  
 #### Overriding Builtin callbacks:
@@ -213,26 +213,28 @@ In an interaction, you often need to lock the context (force interaction to go b
 For that you can use the method `lockIntentContext()` from `BaseHandler` interface. You may remove the lock calling `unlockIntentContext()`
 For example:
 
-`Java Code:`
-   ```java
-   @Intent
-   class FoodIntent extends IntentHandler {
-         @Override
-         public AlexaResponse onIntentRequest(IntentRequest request) {
-            lockIntentContext();
-            return AlexaResponse.Companion.builder()
-                .speech("Do you like Ice cream?")
-                .build();   
-         }
-         @Override
-         public AlexaResponse onYesIntent(IntentRequest request) {
-            unlockIntentContext();   
-            return AlexaResponse.Companion.builder()
-                            .speech("Oh, that's great. I like it too!")
-                            .build();       
-         }
-   } 
-   ```  
+```kotlin
+class FoodIntent : IntentHandler {
+
+    override fun onIntentRequest(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
+        lockIntentContext(alexaRequest)
+        return alexaResponse {
+            response {
+                speech { "Do you like Ice cream?" }
+            }
+        }
+    }
+
+    override fun onYesIntent(alexaRequest: AlexaRequest<IntentRequest>): AlexaResponse {
+        unlockIntentContext(alexaRequest)
+        return alexaResponse {
+            response {
+                speech { "Oh, that's great. I like it too!" }
+            }
+        }
+    }
+} 
+```  
 #### Display Interface
 If you're working with Display interface, you will probably want to handle touch screen events. To handle it, override the
  `onElementSelected` and handle properly the touch event.
@@ -258,7 +260,6 @@ common LaunchRequest. When it's a job request coming from another skill, this ob
 needed to perform the job. 
  After processing the request, you have to answer back to Alexa using the `completeTaskDirective` directive.
 
-`Kotlin Code:`
 ```kotlin
 class Launcher : LaunchRequestHandler {
 
@@ -387,7 +388,6 @@ Also the Dialog directives:
 UI directives: `RenderTemplateDirective` and populate with its Templates.  
 With Kotlin, using DSL, it's possible to iterate over a list of items and generate a list item for each element:
 
-`Kotlin code`
 ```kotlin
 directives {
     renderTemplateDirective {

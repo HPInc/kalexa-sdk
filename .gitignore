@@ -4,3 +4,5 @@ kalexa-model/build/
 kalexa-sdk/build/
 *.iml
 out
+.gradle
+
