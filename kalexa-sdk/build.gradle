@@ -4,5 +4,5 @@
  */
 
 dependencies {
-    compile project(':kalexa-core'), project(':kalexa-model')
+    compile project(':kalexa-core'), project(':kalexa-model'), project(':kalexa-persistent-attributes')
 }

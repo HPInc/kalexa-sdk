@@ -9,7 +9,7 @@ import com.hp.kalexa.core.intent.BaseHandler
 import com.hp.kalexa.core.interceptor.RequestInterceptor
 import com.hp.kalexa.core.interceptor.ResponseInterceptor
 
-data class SkillConfig(
+open class SkillConfig(
     val intentHandlers: List<BaseHandler> = emptyList(),
     val requestInterceptors: List<RequestInterceptor> = emptyList(),
     val responseInterceptors: List<ResponseInterceptor> = emptyList()

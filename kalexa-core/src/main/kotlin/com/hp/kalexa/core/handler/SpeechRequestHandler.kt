@@ -25,7 +25,7 @@ class SpeechRequestHandler(
     fun process(input: ByteArray): String {
         val requestEnvelope = JacksonSerializer.deserialize(input, AlexaRequest::class.java)
 
-        if (isApplicationIdValid(requestEnvelope).not()) {
+        if (!isApplicationIdValid(requestEnvelope)) {
             throw IllegalArgumentException("Request application ID doesn't match with given Application ID")
         }
         try {
@@ -45,7 +45,7 @@ class SpeechRequestHandler(
     }
 
     private fun isApplicationIdValid(alexaRequest: AlexaRequest<*>): Boolean {
-        if (Util.isApplicationIdVerificationEnabled().not()) {
+        if (!Util.isApplicationIdVerificationEnabled()) {
             // if application id is disabled, bypass validation.
             return true
         }
