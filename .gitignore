@@ -1,6 +1,7 @@
 .idea/
 kalexa-core/build/
 kalexa-model/build/
+kalexa-persistent-attributes/build/
 kalexa-sdk/build/
 *.iml
 out
